@@ -707,7 +707,7 @@ G2L["61"] = Instance.new("TextBox", G2L["d"]);
 G2L["61"]["Name"] = [[MISC_HitboxValue]];
 G2L["61"]["BorderSizePixel"] = 0;
 G2L["61"]["TextSize"] = 14;
-G2L["61"]["TextColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["61"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["61"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["61"]["FontFace"] = Font.new([[rbxasset://fonts/families/Creepster.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["61"]["Size"] = UDim2.new(0, 128, 0, 55);
@@ -2078,16 +2078,16 @@ task.spawn(C_32);
 local function C_36()
 local script = G2L["36"];
 	-- ==========================================
-	-- ESP_Box (ПОДСВЕТКА ИГРОКОВ)
+	-- ESP_Box (ОБВОДКА ИГРОКОВ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local runService = game:GetService("RunService")
 	
 	local isEnabled = false
-	local espEnabled = true
-	local themeColor = Color3.fromRGB(138, 43, 226)  -- фиолетовый
 	local highlightedPlayers = {}
+	
+	_G.ESP_Color = _G.ESP_Color or Color3.fromRGB(138, 43, 226)
 	
 	-- Индикатор
 	local indicator = Instance.new("TextLabel")
@@ -2111,7 +2111,6 @@ local script = G2L["36"];
 		end
 	end
 	
-	-- ===== СОЗДАНИЕ ПОДСВЕТКИ =====
 	local function createHighlight(plr)
 		if plr == player then return end
 		if not plr.Character then return end
@@ -2126,7 +2125,7 @@ local script = G2L["36"];
 	
 		local highlight = Instance.new("Highlight")
 		highlight.Adornee = char
-		highlight.FillColor = themeColor
+		highlight.FillColor = _G.ESP_Color
 		highlight.FillTransparency = 0.5
 		highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
 		highlight.OutlineTransparency = 0.3
@@ -2137,7 +2136,6 @@ local script = G2L["36"];
 		highlightedPlayers[plr] = highlight
 	end
 	
-	-- ===== УДАЛЕНИЕ ПОДСВЕТКИ =====
 	local function removeHighlight(plr)
 		if highlightedPlayers[plr] then
 			highlightedPlayers[plr]:Destroy()
@@ -2145,7 +2143,6 @@ local script = G2L["36"];
 		end
 	end
 	
-	-- ===== ОБНОВЛЕНИЕ ESP =====
 	local function updateESP()
 		if not isEnabled then
 			for _, plr in pairs(game.Players:GetPlayers()) do
@@ -2161,7 +2158,7 @@ local script = G2L["36"];
 				end
 				if highlightedPlayers[plr] then
 					highlightedPlayers[plr].Enabled = true
-					highlightedPlayers[plr].FillColor = themeColor
+					highlightedPlayers[plr].FillColor = _G.ESP_Color
 				end
 			else
 				removeHighlight(plr)
@@ -2169,7 +2166,6 @@ local script = G2L["36"];
 		end
 	end
 	
-	-- ===== ПЕРЕКЛЮЧЕНИЕ =====
 	local function toggleESP()
 		isEnabled = not isEnabled
 		updateState()
@@ -2187,7 +2183,6 @@ local script = G2L["36"];
 	
 	button.MouseButton1Click:Connect(toggleESP)
 	
-	-- ===== АВТООБНОВЛЕНИЕ ПРИ ПОЯВЛЕНИИ ИГРОКОВ =====
 	game.Players.PlayerAdded:Connect(function(plr)
 		if isEnabled then
 			task.wait(0.5)
@@ -2199,7 +2194,6 @@ local script = G2L["36"];
 		removeHighlight(plr)
 	end)
 	
-	-- ===== ОБНОВЛЯЕМ РАЗ В 3 СЕКУНДЫ (ЧТОБЫ НЕ ЛАГАЛО) =====
 	runService.Heartbeat:Connect(function()
 		if isEnabled then
 			updateESP()
@@ -2232,6 +2226,8 @@ local script = G2L["3a"];
 		"Тёмно-синий", Color3.fromRGB(0, 0, 139),
 		"Тёмно-красный", Color3.fromRGB(139, 0, 0),
 		"Тёмно-зелёный", Color3.fromRGB(0, 100, 0),
+		"Неон-зелёный", Color3.fromRGB(0, 255, 100),
+		"Неон-розовый", Color3.fromRGB(255, 0, 255),
 	}
 	
 	local currentIndex = 1
@@ -2239,9 +2235,8 @@ local script = G2L["3a"];
 	
 	-- ===== ОБНОВЛЕНИЕ КНОПКИ =====
 	local function updateButton()
-		local colorIndex = (currentIndex - 1) * 2 + 1
-		local nameIndex = colorIndex
-		local colorIndex = colorIndex + 1
+		local nameIndex = (currentIndex - 1) * 2 + 1
+		local colorIndex = nameIndex + 1
 	
 		local colorName = colors[nameIndex]
 		local colorValue = colors[colorIndex]
@@ -2249,7 +2244,9 @@ local script = G2L["3a"];
 		button.Text = colorName
 		button.BackgroundColor3 = colorValue
 		button.BackgroundTransparency = 0.3
+	
 		_G.ESP_Color = colorValue
+		print("🎨 Выбран цвет: " .. colorName)
 	end
 	
 	-- ===== КЛИК =====
@@ -2259,7 +2256,6 @@ local script = G2L["3a"];
 			currentIndex = 1
 		end
 		updateButton()
-		print("🎨 Выбран цвет: " .. button.Text)
 	end)
 	
 	-- ===== ПЕРВОЕ ОБНОВЛЕНИЕ =====
