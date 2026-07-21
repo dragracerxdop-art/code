@@ -2078,15 +2078,16 @@ task.spawn(C_32);
 local function C_36()
 local script = G2L["36"];
 	-- ==========================================
-	-- ESP_Box (ИЗ ТВОЕГО ХАБА, РАБОЧИЙ)
+	-- ESP_Box (ПОДСВЕТКА ИГРОКОВ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local runService = game:GetService("RunService")
 	
-	local espBoxes = {}
-	local updateLoop = nil
-	local espColor = Color3.fromRGB(255, 0, 0)
+	local isEnabled = false
+	local espEnabled = true
+	local themeColor = Color3.fromRGB(138, 43, 226)  -- фиолетовый
+	local highlightedPlayers = {}
 	
 	-- Индикатор
 	local indicator = Instance.new("TextLabel")
@@ -2101,7 +2102,6 @@ local script = G2L["36"];
 	indicator.Parent = button
 	
 	local function updateState()
-		local isEnabled = _G.ESP and _G.ESP.BoxEnabled or false
 		if isEnabled then
 			indicator.Text = "ВКЛ"
 			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
@@ -2111,201 +2111,232 @@ local script = G2L["36"];
 		end
 	end
 	
-	-- ===== УДАЛЕНИЕ ВСЕХ БОКСОВ =====
-	local function clearESP()
-		for _, obj in pairs(workspace:GetDescendants()) do
-			if obj:IsA("BoxHandleAdornment") and obj.Name == "ESPBox" then
-				obj:Destroy()
-			end
-		end
-		espBoxes = {}
-	end
+	-- ===== СОЗДАНИЕ ПОДСВЕТКИ =====
+	local function createHighlight(plr)
+		if plr == player then return end
+		if not plr.Character then return end
 	
-	-- ===== СОЗДАНИЕ БОКСА =====
-	local function createBox(part)
-		local box = Instance.new("BoxHandleAdornment")
-		box.Size = part.Size + Vector3.new(0.3, 0.3, 0.3)
-		box.Color3 = espColor
-		box.Transparency = 0.3
-		box.AlwaysOnTop = true
-		box.ZIndex = 10
-		box.Adornee = part
-		box.Name = "ESPBox"
-		box.Parent = part
-		return box
-	end
-	
-	-- ===== ОБНОВЛЕНИЕ =====
-	local function updateESP()
-		local isEnabled = _G.ESP and _G.ESP.BoxEnabled or false
-	
-		if not isEnabled then
-			clearESP()
+		local char = plr.Character
+		if not char:FindFirstChild("HumanoidRootPart") then
+			task.delay(0.5, function()
+				createHighlight(plr)
+			end)
 			return
 		end
 	
-		for plr, boxes in pairs(espBoxes) do
-			if not plr.Character or not plr.Parent then
-				for _, box in pairs(boxes) do
-					if box and box.Parent then
-						box:Destroy()
-					end
-				end
-				espBoxes[plr] = nil
+		local highlight = Instance.new("Highlight")
+		highlight.Adornee = char
+		highlight.FillColor = themeColor
+		highlight.FillTransparency = 0.5
+		highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+		highlight.OutlineTransparency = 0.3
+		highlight.Enabled = isEnabled
+		highlight.Name = "ESPBox_Highlight"
+		highlight.Parent = char
+	
+		highlightedPlayers[plr] = highlight
+	end
+	
+	-- ===== УДАЛЕНИЕ ПОДСВЕТКИ =====
+	local function removeHighlight(plr)
+		if highlightedPlayers[plr] then
+			highlightedPlayers[plr]:Destroy()
+			highlightedPlayers[plr] = nil
+		end
+	end
+	
+	-- ===== ОБНОВЛЕНИЕ ESP =====
+	local function updateESP()
+		if not isEnabled then
+			for _, plr in pairs(game.Players:GetPlayers()) do
+				removeHighlight(plr)
 			end
+			return
 		end
 	
 		for _, plr in pairs(game.Players:GetPlayers()) do
-			if plr == player then continue end
-			if not plr.Character then continue end
-	
-			local char = plr.Character
-	
-			if not espBoxes[plr] then
-				espBoxes[plr] = {}
-				for _, part in pairs(char:GetChildren()) do
-					if part:IsA("BasePart") then
-						local box = createBox(part)
-						table.insert(espBoxes[plr], box)
-					end
+			if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+				if not highlightedPlayers[plr] then
+					createHighlight(plr)
 				end
-			end
-	
-			local i = 1
-			for _, part in pairs(char:GetChildren()) do
-				if part:IsA("BasePart") and espBoxes[plr] and espBoxes[plr][i] then
-					local box = espBoxes[plr][i]
-					box.CFrame = part.CFrame
-					box.Size = part.Size + Vector3.new(0.3, 0.3, 0.3)
-					box.Color3 = espColor
-					i = i + 1
+				if highlightedPlayers[plr] then
+					highlightedPlayers[plr].Enabled = true
+					highlightedPlayers[plr].FillColor = themeColor
 				end
+			else
+				removeHighlight(plr)
 			end
 		end
 	end
 	
 	-- ===== ПЕРЕКЛЮЧЕНИЕ =====
-	local function toggle()
-		_G.ESP = _G.ESP or {}
-		_G.ESP.BoxEnabled = not _G.ESP.BoxEnabled
+	local function toggleESP()
+		isEnabled = not isEnabled
 		updateState()
 	
-		if _G.ESP.BoxEnabled then
-			if updateLoop then
-				updateLoop:Disconnect()
-				updateLoop = nil
-			end
-			updateLoop = runService.Heartbeat:Connect(updateESP)
+		if isEnabled then
 			updateESP()
-			print("📦 ESP_Box включён!")
+			print("📦 ESP включён!")
 		else
-			if updateLoop then
-				updateLoop:Disconnect()
-				updateLoop = nil
+			for _, plr in pairs(game.Players:GetPlayers()) do
+				removeHighlight(plr)
 			end
-			clearESP()
-			print("📦 ESP_Box выключен!")
+			print("📦 ESP выключен!")
 		end
 	end
 	
-	button.MouseButton1Click:Connect(toggle)
+	button.MouseButton1Click:Connect(toggleESP)
 	
-	-- ===== ЧИТАЕМ ЦВЕТ =====
-	local function checkColor()
-		if _G.ESP and _G.ESP.BoxColor then
-			espColor = _G.ESP.BoxColor
+	-- ===== АВТООБНОВЛЕНИЕ ПРИ ПОЯВЛЕНИИ ИГРОКОВ =====
+	game.Players.PlayerAdded:Connect(function(plr)
+		if isEnabled then
+			task.wait(0.5)
+			createHighlight(plr)
 		end
-	end
+	end)
 	
-	runService.Heartbeat:Connect(checkColor)
+	game.Players.PlayerRemoving:Connect(function(plr)
+		removeHighlight(plr)
+	end)
+	
+	-- ===== ОБНОВЛЯЕМ РАЗ В 3 СЕКУНДЫ (ЧТОБЫ НЕ ЛАГАЛО) =====
+	runService.Heartbeat:Connect(function()
+		if isEnabled then
+			updateESP()
+		end
+	end)
 	
 	updateState()
-	print("✅ ESP_Box загружен!")
+	print("✅ ESP_Box загружена!")
 end;
 task.spawn(C_36);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.ESP_Box_Color.LocalScript
 local function C_3a()
 local script = G2L["3a"];
+	-- ==========================================
+	-- ESP_Box (С АВТООБНОВЛЕНИЕМ ЦВЕТА)
+	-- ==========================================
 	local button = script.Parent
+	local player = game.Players.LocalPlayer
+	local runService = game:GetService("RunService")
 	
-	local function createColorPalette()
-		local oldPalette = button:FindFirstChild("ColorPalette")
-		if oldPalette then oldPalette:Destroy() end
+	local isEnabled = false
+	local highlightedPlayers = {}
 	
-		local palette = Instance.new("Frame")
-		palette.Name = "ColorPalette"
-		palette.Size = UDim2.new(0, 180, 0, 120)
-		palette.Position = UDim2.new(0, 0, 0, 80)
-		palette.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		palette.BackgroundTransparency = 0.2
-		palette.BorderSizePixel = 0
-		palette.Visible = false
-		palette.Parent = button
+	_G.ESP_Color = _G.ESP_Color or Color3.fromRGB(138, 43, 226)
 	
-		local paletteCorner = Instance.new("UICorner")
-		paletteCorner.CornerRadius = UDim.new(0, 8)
-		paletteCorner.Parent = palette
+	local indicator = Instance.new("TextLabel")
+	indicator.Name = "Indicator"
+	indicator.Size = UDim2.new(1, 0, 0.3, 0)
+	indicator.Position = UDim2.new(0, 0, 0.7, 0)
+	indicator.BackgroundTransparency = 1
+	indicator.Text = "ВЫКЛ"
+	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+	indicator.TextSize = 14
+	indicator.Font = Enum.Font.SourceSansBold
+	indicator.Parent = button
 	
-		local colors = {
-			Color3.fromRGB(255, 0, 0),
-			Color3.fromRGB(0, 255, 0),
-			Color3.fromRGB(0, 0, 255),
-			Color3.fromRGB(255, 255, 0),
-			Color3.fromRGB(255, 0, 255),
-			Color3.fromRGB(0, 255, 255),
-			Color3.fromRGB(255, 165, 0),
-			Color3.fromRGB(255, 255, 255)
-		}
+	local function updateState()
+		if isEnabled then
+			indicator.Text = "ВКЛ"
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+		else
+			indicator.Text = "ВЫКЛ"
+			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+		end
+	end
 	
-		local xOffset = 5
-		local yOffset = 5
+	local function createHighlight(plr)
+		if plr == player then return end
+		if not plr.Character then return end
 	
-		for i, color in ipairs(colors) do
-			local colorBtn = Instance.new("ImageButton")
-			colorBtn.Size = UDim2.new(0, 36, 0, 36)
-			colorBtn.Position = UDim2.new(0, xOffset, 0, yOffset)
-			colorBtn.BackgroundColor3 = color
-			colorBtn.BackgroundTransparency = 0
-			colorBtn.BorderSizePixel = 1
-			colorBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
-			colorBtn.Parent = palette
-	
-			local btnCorner = Instance.new("UICorner")
-			btnCorner.CornerRadius = UDim.new(0, 4)
-			btnCorner.Parent = colorBtn
-	
-			colorBtn.MouseButton1Click:Connect(function()
-				_G.ESP = _G.ESP or {}
-				_G.ESP.BoxColor = color
-				button.BackgroundColor3 = color
-				button.BackgroundTransparency = 0.3
-				print("🎨 Выбран цвет: " .. tostring(color))
-				palette.Visible = false
+		local char = plr.Character
+		if not char:FindFirstChild("HumanoidRootPart") then
+			task.delay(0.5, function()
+				createHighlight(plr)
 			end)
+			return
+		end
 	
-			xOffset = xOffset + 42
-			if xOffset >= 180 then
-				xOffset = 5
-				yOffset = yOffset + 42
+		local highlight = Instance.new("Highlight")
+		highlight.Adornee = char
+		highlight.FillColor = _G.ESP_Color
+		highlight.FillTransparency = 0.5
+		highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+		highlight.OutlineTransparency = 0.3
+		highlight.Enabled = isEnabled
+		highlight.Name = "ESPBox_Highlight"
+		highlight.Parent = char
+	
+		highlightedPlayers[plr] = highlight
+	end
+	
+	local function removeHighlight(plr)
+		if highlightedPlayers[plr] then
+			highlightedPlayers[plr]:Destroy()
+			highlightedPlayers[plr] = nil
+		end
+	end
+	
+	local function updateESP()
+		if not isEnabled then
+			for _, plr in pairs(game.Players:GetPlayers()) do
+				removeHighlight(plr)
+			end
+			return
+		end
+	
+		for _, plr in pairs(game.Players:GetPlayers()) do
+			if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+				if not highlightedPlayers[plr] then
+					createHighlight(plr)
+				end
+				if highlightedPlayers[plr] then
+					highlightedPlayers[plr].Enabled = true
+					highlightedPlayers[plr].FillColor = _G.ESP_Color
+				end
+			else
+				removeHighlight(plr)
 			end
 		end
 	end
 	
-	local paletteOpen = false
-	button.MouseButton1Click:Connect(function()
-		paletteOpen = not paletteOpen
-		local palette = button:FindFirstChild("ColorPalette")
-		if not palette then
-			createColorPalette()
-			palette = button:FindFirstChild("ColorPalette")
+	local function toggleESP()
+		isEnabled = not isEnabled
+		updateState()
+	
+		if isEnabled then
+			updateESP()
+			print("📦 ESP включён!")
+		else
+			for _, plr in pairs(game.Players:GetPlayers()) do
+				removeHighlight(plr)
+			end
+			print("📦 ESP выключен!")
 		end
-		if palette then
-			palette.Visible = paletteOpen
+	end
+	
+	button.MouseButton1Click:Connect(toggleESP)
+	
+	game.Players.PlayerAdded:Connect(function(plr)
+		if isEnabled then
+			task.wait(0.5)
+			createHighlight(plr)
 		end
 	end)
 	
-	createColorPalette()
-	print("🎨 ESP Box Color готов!")
+	game.Players.PlayerRemoving:Connect(function(plr)
+		removeHighlight(plr)
+	end)
+	
+	runService.Heartbeat:Connect(function()
+		if isEnabled then
+			updateESP()
+		end
+	end)
+	
+	updateState()
+	print("✅ ESP_Box загружена!")
 end;
 task.spawn(C_3a);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_OpenPlayerList.LocalScript
