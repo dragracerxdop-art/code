@@ -486,7 +486,6 @@ G2L["42"] = Instance.new("LocalScript", G2L["3f"]);
 G2L["43"] = Instance.new("ScrollingFrame", G2L["d"]);
 G2L["43"]["Active"] = true;
 G2L["43"]["BorderSizePixel"] = 0;
-G2L["43"]["CanvasPosition"] = Vector2.new(0, 300);
 G2L["43"]["Name"] = [[MISC_PlayerList]];
 G2L["43"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["43"]["Size"] = UDim2.new(0, 172, 0, 158);
@@ -594,6 +593,7 @@ G2L["51"] = Instance.new("LocalScript", G2L["4e"]);
 
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_PlayerList
 G2L["52"] = Instance.new("ScrollingFrame", G2L["d"]);
+G2L["52"]["Visible"] = false;
 G2L["52"]["Active"] = true;
 G2L["52"]["BorderSizePixel"] = 0;
 G2L["52"]["Name"] = [[SPECTATE_PlayerList]];
@@ -1189,7 +1189,7 @@ G2L["9f"]["Color"] = Color3.fromRGB(180, 4, 255);
 G2L["9f"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_FullBright
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_FullBright
 G2L["a0"] = Instance.new("ImageButton", G2L["d"]);
 G2L["a0"]["BorderSizePixel"] = 0;
 G2L["a0"]["Visible"] = false;
@@ -1197,23 +1197,23 @@ G2L["a0"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["a0"]["Image"] = [[rbxassetid://139446261097202]];
 G2L["a0"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["a0"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["a0"]["Name"] = [[SPECTATE_FullBright]];
-G2L["a0"]["Position"] = UDim2.new(0.03095, 0, 0.17062, 0);
+G2L["a0"]["Name"] = [[MISC_FullBright]];
+G2L["a0"]["Position"] = UDim2.new(0.048, 0, 0.67, 0);
 
 
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_FullBright.UICorner
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_FullBright.UICorner
 G2L["a1"] = Instance.new("UICorner", G2L["a0"]);
 G2L["a1"]["CornerRadius"] = UDim.new(0, 25);
 
 
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_FullBright.UIStroke
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_FullBright.UIStroke
 G2L["a2"] = Instance.new("UIStroke", G2L["a0"]);
 G2L["a2"]["Thickness"] = 3;
 G2L["a2"]["Color"] = Color3.fromRGB(180, 4, 255);
 G2L["a2"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_FullBright.LocalScript
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_FullBright.LocalScript
 G2L["a3"] = Instance.new("LocalScript", G2L["a0"]);
 
 
@@ -4078,7 +4078,7 @@ local script = G2L["96"];
 	print("✅ TeleportManager загружен!")
 end;
 task.spawn(C_96);
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_FullBright.LocalScript
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_FullBright.LocalScript
 local function C_a3()
 local script = G2L["a3"];
 	-- ==========================================
@@ -4183,7 +4183,7 @@ task.spawn(C_a3);
 local function C_b6()
 local script = G2L["b6"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ФИНАЛЬНАЯ ВЕРСИЯ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -4194,7 +4194,7 @@ local script = G2L["b6"];
 		return
 	end
 	
-	-- ===== ИЩЕМ toggleListBtn И playerList =====
+	-- ===== ИЩЕМ toggleListBtn И playerList ДЛЯ TELEPORT =====
 	local toggleListBtn = nil
 	local playerList = nil
 	
@@ -4218,9 +4218,9 @@ local script = G2L["b6"];
 	local function switchTab(tabName)
 		print("🔘 Переключение на: " .. tabName)
 	
-		-- Скрываем ВСЁ в правой панели
+		-- Скрываем ВСЁ в правой панели (ВКЛЮЧАЯ TextButton)
 		for _, child in pairs(rightFrame:GetChildren()) do
-			if child:IsA("ImageButton") then
+			if child:IsA("ImageButton") or child:IsA("TextButton") then
 				child.Visible = false
 			end
 			if child:IsA("TextBox") then
@@ -4262,7 +4262,7 @@ local script = G2L["b6"];
 			if toggleListBtn then
 				toggleListBtn.Visible = true
 			end
-			print("✅ TELEPORT")
+			print("✅ Показаны кнопки TELEPORT")
 	
 			-- ===== ESP =====
 		elseif tabName == "ESP" then
@@ -4275,15 +4275,14 @@ local script = G2L["b6"];
 					child.Visible = true
 				end
 			end
-			print("✅ ESP")
+			print("✅ Показаны кнопки ESP")
 	
 			-- ===== SPECTATE =====
 		elseif tabName == "SPECTATE" then
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("ImageButton") and (
 					child.Name == "SPECTATE_OpenList" or
-						child.Name == "SPECTATE_Start" or
-						child.Name == "SPECTATE_FullBright"
+						child.Name == "SPECTATE_Start"
 					) then
 					child.Visible = true
 				end
@@ -4296,7 +4295,7 @@ local script = G2L["b6"];
 					child.Visible = true
 				end
 			end
-			print("✅ SPECTATE")
+			print("✅ Показаны кнопки SPECTATE")
 	
 			-- ===== MISC =====
 		elseif tabName == "MISC" then
@@ -4320,7 +4319,7 @@ local script = G2L["b6"];
 					child.Visible = true
 				end
 			end
-			print("✅ MISC")
+			print("✅ Показаны кнопки MISC")
 	
 			-- ===== MM2 =====
 		elseif tabName == "MM2" then
@@ -4338,7 +4337,7 @@ local script = G2L["b6"];
 					child.Visible = false
 				end
 			end
-			print("✅ MM2")
+			print("✅ Показаны кнопки MM2")
 	
 			-- ===== DA HOOD =====
 		elseif tabName == "Da Hood" then
@@ -4350,7 +4349,7 @@ local script = G2L["b6"];
 					child.Visible = true
 				end
 			end
-			print("✅ DA HOOD")
+			print("✅ Показаны кнопки Da Hood")
 	
 			-- ===== INFO =====
 		elseif tabName == "INFO" then
@@ -4359,7 +4358,7 @@ local script = G2L["b6"];
 					child.Visible = false
 				end
 			end
-			print("✅ INFO")
+			print("✅ INFO (пусто)")
 		end
 	end
 	
@@ -4372,6 +4371,7 @@ local script = G2L["b6"];
 		end
 	end
 	
+	-- По умолчанию показываем TELEPORT
 	switchTab("TELEPORT")
 	print("✅ Переключение вкладок загружено!")
 end;
