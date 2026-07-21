@@ -3922,49 +3922,155 @@ task.spawn(C_8f);
 local function C_96()
 local script = G2L["96"];
 	-- ==========================================
-	-- ТЕСТ TeleportManager
+	-- ТЕЛЕПОРТЫ (СКРОЛЛ ВСЕГДА АКТИВЕН)
 	-- ==========================================
-	print("🚀 1. Скрипт запущен!")
-	
 	local player = game.Players.LocalPlayer
 	local rightFrame = script.Parent
 	
-	print("🚀 2. RightFrame найден!")
+	print("🚀 TeleportManager запущен!")
 	
 	local teleportScroll = rightFrame:FindFirstChild("TELEPORT_SCROLL")
-	print("🚀 3. TELEPORT_SCROLL:", teleportScroll)
-	
-	if not teleportScroll then
-		warn("❌ TELEPORT_SCROLL не найден!")
-		return
-	end
-	
 	local inputBox = rightFrame:FindFirstChild("TELEPORT_NAME")
 	local addBtn = rightFrame:FindFirstChild("TELEPORT_ADD")
 	local removeBtn = rightFrame:FindFirstChild("TELEPORT_REMOVE")
-	local template = teleportScroll:FindFirstChild("TELEPORT_TEMPLATE")
+	local template = teleportScroll and teleportScroll:FindFirstChild("TELEPORT_TEMPLATE")
 	
-	print("🚀 4. TELEPORT_NAME:", inputBox)
-	print("🚀 5. TELEPORT_ADD:", addBtn)
-	print("🚀 6. TELEPORT_REMOVE:", removeBtn)
-	print("🚀 7. TELEPORT_TEMPLATE:", template)
-	
-	if not inputBox or not addBtn or not removeBtn or not template then
-		warn("❌ Что-то не найдено!")
+	if not teleportScroll or not inputBox or not addBtn or not removeBtn or not template then
+		warn("❌ Не все элементы найдены!")
 		return
 	end
 	
-	print("✅ Все элементы найдены! Скрипт работает!")
+	print("✅ Все элементы найдены!")
 	
-	-- ===== ПРОСТАЯ КНОПКА ДЛЯ ТЕСТА =====
+	template.Visible = false
+	_G.Teleports = _G.Teleports or {}
+	local selectedName = nil
+	
+	-- ===== ШРИФТ MICROMA (ЧЕРЕЗ FONTFACE) =====
+	local function setMichroma(obj)
+		local success, result = pcall(function()
+			obj.FontFace = Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+		end)
+		if not success then
+			-- Если Michroma не загрузился, ставим запасной
+			obj.Font = Enum.Font.GothamBold
+		end
+	end
+	
+	local function updateList()
+		for _, child in pairs(teleportScroll:GetChildren()) do
+			if child:IsA("TextButton") and child ~= template then
+				child:Destroy()
+			end
+			if child:IsA("TextLabel") then
+				child:Destroy()
+			end
+		end
+	
+		local yOffset = template.Position.Y.Offset
+		local buttonHeight = 45
+	
+		if next(_G.Teleports) == nil then
+			local hint = Instance.new("TextLabel")
+			hint.Size = UDim2.new(0, 300, 0, 40)
+			hint.Position = UDim2.new(template.Position.X.Scale, template.Position.X.Offset, 0, yOffset)
+			hint.BackgroundTransparency = 1
+			hint.Text = "📌 Нет телепортов"
+			hint.TextColor3 = Color3.fromRGB(150, 150, 150)
+			hint.TextSize = 16
+			setMichroma(hint)  -- 👈 СТАВИМ MICROMA
+			hint.Parent = teleportScroll
+			yOffset = yOffset + 50
+		end
+	
+		for name, pos in pairs(_G.Teleports) do
+			local btn = template:Clone()
+			btn.Visible = true
+			btn.Text = name
+			btn.Position = UDim2.new(template.Position.X.Scale, template.Position.X.Offset, 0, yOffset)
+			btn.Parent = teleportScroll
+			yOffset = yOffset + buttonHeight
+	
+			-- 👇 СТАВИМ MICROMA
+			setMichroma(btn)
+			btn.TextSize = 14
+	
+			btn.MouseButton1Click:Connect(function()
+				for _, child in pairs(teleportScroll:GetChildren()) do
+					if child:IsA("TextButton") and child ~= template then
+						child.BackgroundColor3 = template.BackgroundColor3
+						child.BackgroundTransparency = template.BackgroundTransparency
+					end
+				end
+				btn.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+				btn.BackgroundTransparency = 0.3
+				selectedName = name
+				print("✅ Выбран телепорт: " .. name)
+			end)
+	
+			btn.MouseButton2Click:Connect(function()
+				local char = player.Character
+				if char and char:FindFirstChild("HumanoidRootPart") then
+					char.HumanoidRootPart.CFrame = pos
+					print("✅ Телепорт к: " .. name)
+				else
+					print("❌ Персонаж не найден!")
+				end
+			end)
+		end
+	
+		local minCanvasHeight = 400
+		local canvasHeight = math.max(yOffset + 10, minCanvasHeight)
+		teleportScroll.CanvasSize = UDim2.new(0, 0, 0, canvasHeight)
+	
+		print("✅ Список обновлён! CanvasSize: " .. canvasHeight)
+	end
+	
 	addBtn.MouseButton1Click:Connect(function()
-		print("🔥 КНОПКА + НАЖАТА!")
-		game:GetService("StarterGui"):SetCore("SendNotification", {
-			Title = "Тест",
-			Text = "Кнопка + работает!",
-			Duration = 3
-		})
+		local name = inputBox.Text
+		if name == "" then
+			print("❌ Введите название!")
+			return
+		end
+	
+		local char = player.Character
+		if not char then
+			print("❌ Персонаж не найден!")
+			return
+		end
+	
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then
+			print("❌ HumanoidRootPart не найден!")
+			return
+		end
+	
+		_G.Teleports[name] = hrp.CFrame
+		inputBox.Text = ""
+		updateList()
+		print("✅ Сохранён телепорт: " .. name)
 	end)
+	
+	removeBtn.MouseButton1Click:Connect(function()
+		if not selectedName then
+			print("❌ Сначала выбери телепорт (кликни по нему)!")
+			return
+		end
+	
+		if _G.Teleports[selectedName] == nil then
+			print("❌ Телепорт уже удалён!")
+			selectedName = nil
+			return
+		end
+	
+		_G.Teleports[selectedName] = nil
+		selectedName = nil
+		updateList()
+		print("❌ Удалён выбранный телепорт!")
+	end)
+	
+	updateList()
+	print("✅ TeleportManager загружен!")
 end;
 task.spawn(C_96);
 -- StarterGui.Folder.ScreenGui.MainFrame.LeftFrame.SwitchTabs
