@@ -3922,7 +3922,7 @@ task.spawn(C_8f);
 local function C_96()
 local script = G2L["96"];
 	-- ==========================================
-	-- ТЕЛЕПОРТЫ (СКРОЛЛ ВСЕГДА АКТИВЕН)
+	-- ТЕЛЕПОРТЫ (ПРОСТОЕ КЛОНИРОВАНИЕ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local rightFrame = script.Parent
@@ -3946,18 +3946,8 @@ local script = G2L["96"];
 	_G.Teleports = _G.Teleports or {}
 	local selectedName = nil
 	
-	-- ===== ШРИФТ MICROMA (ЧЕРЕЗ FONTFACE) =====
-	local function setMichroma(obj)
-		local success, result = pcall(function()
-			obj.FontFace = Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-		end)
-		if not success then
-			-- Если Michroma не загрузился, ставим запасной
-			obj.Font = Enum.Font.GothamBold
-		end
-	end
-	
 	local function updateList()
+		-- Удаляем старые кнопки (кроме шаблона)
 		for _, child in pairs(teleportScroll:GetChildren()) do
 			if child:IsA("TextButton") and child ~= template then
 				child:Destroy()
@@ -3968,32 +3958,33 @@ local script = G2L["96"];
 		end
 	
 		local yOffset = template.Position.Y.Offset
-		local buttonHeight = 45
+		local buttonHeight = template.Size.Y.Offset + 10  -- 👈 БЕРЁМ ВЫСОТУ ИЗ ШАБЛОНА
 	
+		-- Если телепортов нет — подсказка
 		if next(_G.Teleports) == nil then
 			local hint = Instance.new("TextLabel")
-			hint.Size = UDim2.new(0, 300, 0, 40)
+			hint.Size = template.Size
 			hint.Position = UDim2.new(template.Position.X.Scale, template.Position.X.Offset, 0, yOffset)
 			hint.BackgroundTransparency = 1
 			hint.Text = "📌 Нет телепортов"
 			hint.TextColor3 = Color3.fromRGB(150, 150, 150)
-			hint.TextSize = 16
-			setMichroma(hint)  -- 👈 СТАВИМ MICROMA
+			hint.TextSize = template.TextSize
+			hint.Font = template.Font
+			hint.FontFace = template.FontFace
 			hint.Parent = teleportScroll
-			yOffset = yOffset + 50
+			yOffset = yOffset + buttonHeight
 		end
 	
+		-- Создаём кнопки для телепортов
 		for name, pos in pairs(_G.Teleports) do
-			local btn = template:Clone()
+			local btn = template:Clone()  -- 👈 КЛОНИРУЕМ ШАБЛОН
 			btn.Visible = true
-			btn.Text = name
+			btn.Text = name  -- 👈 ВСТАВЛЯЕМ ИМЯ
 			btn.Position = UDim2.new(template.Position.X.Scale, template.Position.X.Offset, 0, yOffset)
 			btn.Parent = teleportScroll
 			yOffset = yOffset + buttonHeight
 	
-			-- 👇 СТАВИМ MICROMA
-			setMichroma(btn)
-			btn.TextSize = 14
+			-- ВСЕ ОСТАЛЬНЫЕ СВОЙСТВА (шрифт, цвет, размер, скругление) — КОПИРУЮТСЯ ИЗ ШАБЛОНА
 	
 			btn.MouseButton1Click:Connect(function()
 				for _, child in pairs(teleportScroll:GetChildren()) do
@@ -4019,11 +4010,7 @@ local script = G2L["96"];
 			end)
 		end
 	
-		local minCanvasHeight = 400
-		local canvasHeight = math.max(yOffset + 10, minCanvasHeight)
-		teleportScroll.CanvasSize = UDim2.new(0, 0, 0, canvasHeight)
-	
-		print("✅ Список обновлён! CanvasSize: " .. canvasHeight)
+		teleportScroll.CanvasSize = UDim2.new(0, 0, 0, yOffset + 10)
 	end
 	
 	addBtn.MouseButton1Click:Connect(function()
