@@ -99,7 +99,6 @@ G2L["c"] = Instance.new("LocalScript", G2L["2"]);
 G2L["d"] = Instance.new("ScrollingFrame", G2L["2"]);
 G2L["d"]["Active"] = true;
 G2L["d"]["BorderSizePixel"] = 0;
-G2L["d"]["CanvasPosition"] = Vector2.new(0, 342);
 G2L["d"]["Name"] = [[RightFrame]];
 G2L["d"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["d"]["Size"] = UDim2.new(0, 352, 0, 420);
@@ -1191,7 +1190,7 @@ G2L["9f"]["Color"] = Color3.fromRGB(180, 4, 255);
 G2L["9f"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_FullBright
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_FullBright
 G2L["a0"] = Instance.new("ImageButton", G2L["d"]);
 G2L["a0"]["BorderSizePixel"] = 0;
 G2L["a0"]["Visible"] = false;
@@ -1199,23 +1198,23 @@ G2L["a0"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["a0"]["Image"] = [[rbxassetid://139446261097202]];
 G2L["a0"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["a0"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["a0"]["Name"] = [[MISC_FullBright]];
-G2L["a0"]["Position"] = UDim2.new(0.048, 0, 0.67, 0);
+G2L["a0"]["Name"] = [[SPECTATE_FullBright]];
+G2L["a0"]["Position"] = UDim2.new(0.04516, 0, 0.14879, 0);
 
 
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_FullBright.UICorner
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_FullBright.UICorner
 G2L["a1"] = Instance.new("UICorner", G2L["a0"]);
 G2L["a1"]["CornerRadius"] = UDim.new(0, 25);
 
 
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_FullBright.UIStroke
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_FullBright.UIStroke
 G2L["a2"] = Instance.new("UIStroke", G2L["a0"]);
 G2L["a2"]["Thickness"] = 3;
 G2L["a2"]["Color"] = Color3.fromRGB(180, 4, 255);
 G2L["a2"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_FullBright.LocalScript
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_FullBright.LocalScript
 G2L["a3"] = Instance.new("LocalScript", G2L["a0"]);
 
 
@@ -4080,7 +4079,7 @@ local script = G2L["96"];
 	print("✅ TeleportManager загружен!")
 end;
 task.spawn(C_96);
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_FullBright.LocalScript
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_FullBright.LocalScript
 local function C_a3()
 local script = G2L["a3"];
 	-- ==========================================
@@ -4284,7 +4283,8 @@ local script = G2L["b6"];
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("ImageButton") and (
 					child.Name == "SPECTATE_OpenList" or
-						child.Name == "SPECTATE_Start"
+						child.Name == "SPECTATE_Start" or
+						child.Name == "SPECTATE_FullBright"
 					) then
 					child.Visible = true
 				end
@@ -4311,8 +4311,7 @@ local script = G2L["b6"];
 						child.Name == "MISC_CTRL_CLICK" or
 						child.Name == "MISC_WhiteList_Open" or
 						child.Name == "MISC_Fly" or
-						child.Name == "MISC_Rejoin" or
-						child.Name == "MISC_FullBright"
+						child.Name == "MISC_Rejoin"
 					) then
 					child.Visible = true
 				end
