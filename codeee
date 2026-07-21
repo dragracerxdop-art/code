@@ -1867,7 +1867,7 @@ task.spawn(C_1b);
 local function C_22()
 local script = G2L["22"];
 	-- ==========================================
-	-- ТОГГЛ СПИСОК (ДЛЯ ImageButton)
+	-- TELEPORT_ToggleList (ОТКРЫТЬ СПИСОК ИГРОКОВ)
 	-- ==========================================
 	local button = script.Parent
 	local rightFrame = button.Parent
@@ -1883,81 +1883,74 @@ local script = G2L["22"];
 	button.MouseButton1Click:Connect(function()
 		isOpen = not isOpen
 		playerList.Visible = isOpen
-		-- Не трогаем текст, потому что это ImageButton
+		print("📋 Список игроков:", isOpen and "открыт" or "закрыт")
 	end)
 	
 	playerList.Visible = false
+	print("✅ TELEPORT_ToggleList загружена!")
 end;
 task.spawn(C_22);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.PlayerList.LocalScript
 local function C_27()
 local script = G2L["27"];
 	-- ==========================================
-	-- СПИСОК ИГРОКОВ (LocalScript для ScrollingFrame)
+	-- PlayerList (СПИСОК ИГРОКОВ ДЛЯ ТЕЛЕПОРТА)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
-	local scrollingFrame = script.Parent  -- твой ScrollingFrame (PlayerList)
+	local scrollingFrame = script.Parent
 	
-	-- Ищем шаблон (кнопка, которую ты сделал в студии)
 	local template = scrollingFrame:FindFirstChild("PlayerTemplate")
-	
 	if not template then
-		warn("❌ PlayerTemplate не найден в ScrollingFrame!")
+		warn("❌ PlayerTemplate не найден в PlayerList!")
 		return
 	end
 	
 	print("✅ Шаблон PlayerTemplate найден!")
 	
-	-- ===== ФУНКЦИЯ ОБНОВЛЕНИЯ СПИСКА =====
 	local function updatePlayerList()
-		-- Удаляем старые кнопки (но НЕ трогаем шаблон)
+		-- Удаляем старые кнопки
 		for _, child in pairs(scrollingFrame:GetChildren()) do
 			if child:IsA("TextButton") and child ~= template then
 				child:Destroy()
 			end
 		end
 	
-		local yOffset = 5  -- отступ сверху для первой кнопки
+		local yOffset = 5
 	
-		-- Проходим по всем игрокам
 		for _, plr in pairs(game.Players:GetPlayers()) do
-			if plr ~= player then  -- не показываем себя
-				-- Клонируем шаблон
+			if plr ~= player then
 				local btn = template:Clone()
 				btn.Visible = true
-				btn.Text = plr.Name  -- вставляем ник
-	
-				-- Позиционируем кнопку
+				btn.Text = plr.Name
 				btn.Position = UDim2.new(0.05, 0, 0, yOffset)
 				btn.Parent = scrollingFrame
+				yOffset = yOffset + 78
 	
-				yOffset = yOffset + 78  -- 73 (высота) + 5 (отступ)
-	
-				-- ===== ТЕЛЕПОРТ К ИГРОКУ =====
+				-- ТЕЛЕПОРТ К ИГРОКУ
 				btn.MouseButton1Click:Connect(function()
 					if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
 						local char = player.Character
 						if char and char:FindFirstChild("HumanoidRootPart") then
 							char.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame
 							print("✅ Телепорт к " .. plr.Name)
+							-- Закрываем список после телепорта
+							scrollingFrame.Visible = false
 						end
+					else
+						print("❌ Игрок " .. plr.Name .. " не найден!")
 					end
 				end)
 			end
 		end
 	
-		-- Обновляем размер канваса (чтобы можно было скроллить)
 		scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, yOffset + 10)
-		print("✅ Список обновлён, игроков: " .. #game.Players:GetPlayers())
 	end
 	
-	-- ===== ОБНОВЛЯЕМ ПРИ ЗАХОДЕ/ВЫХОДЕ =====
 	game.Players.PlayerAdded:Connect(updatePlayerList)
 	game.Players.PlayerRemoving:Connect(updatePlayerList)
 	
-	-- ===== ПЕРВОЕ ОБНОВЛЕНИЕ =====
 	updatePlayerList()
-	print("🚀 Скрипт списка игроков запущен!")
+	print("✅ PlayerList загружена!")
 end;
 task.spawn(C_27);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_CTRL_DEL.LocalScript
@@ -3922,7 +3915,7 @@ task.spawn(C_8f);
 local function C_96()
 local script = G2L["96"];
 	-- ==========================================
-	-- ТЕЛЕПОРТЫ (ПРОСТОЕ КЛОНИРОВАНИЕ)
+	-- ТЕЛЕПОРТЫ (К СОХРАНЁННЫМ ТОЧКАМ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local rightFrame = script.Parent
@@ -3958,9 +3951,8 @@ local script = G2L["96"];
 		end
 	
 		local yOffset = template.Position.Y.Offset
-		local buttonHeight = template.Size.Y.Offset + 10  -- 👈 БЕРЁМ ВЫСОТУ ИЗ ШАБЛОНА
+		local buttonHeight = template.Size.Y.Offset + 10
 	
-		-- Если телепортов нет — подсказка
 		if next(_G.Teleports) == nil then
 			local hint = Instance.new("TextLabel")
 			hint.Size = template.Size
@@ -3975,16 +3967,13 @@ local script = G2L["96"];
 			yOffset = yOffset + buttonHeight
 		end
 	
-		-- Создаём кнопки для телепортов
 		for name, pos in pairs(_G.Teleports) do
-			local btn = template:Clone()  -- 👈 КЛОНИРУЕМ ШАБЛОН
+			local btn = template:Clone()
 			btn.Visible = true
-			btn.Text = name  -- 👈 ВСТАВЛЯЕМ ИМЯ
+			btn.Text = name
 			btn.Position = UDim2.new(template.Position.X.Scale, template.Position.X.Offset, 0, yOffset)
 			btn.Parent = teleportScroll
 			yOffset = yOffset + buttonHeight
-	
-			-- ВСЕ ОСТАЛЬНЫЕ СВОЙСТВА (шрифт, цвет, размер, скругление) — КОПИРУЮТСЯ ИЗ ШАБЛОНА
 	
 			btn.MouseButton1Click:Connect(function()
 				for _, child in pairs(teleportScroll:GetChildren()) do
