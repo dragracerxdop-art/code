@@ -4185,7 +4185,7 @@ task.spawn(C_a3);
 local function C_b6()
 local script = G2L["b6"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ФИНАЛЬНАЯ ВЕРСИЯ)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -4196,7 +4196,7 @@ local script = G2L["b6"];
 		return
 	end
 	
-	-- ===== ИЩЕМ toggleListBtn И playerList ДЛЯ TELEPORT =====
+	-- ===== ИЩЕМ toggleListBtn И playerList =====
 	local toggleListBtn = nil
 	local playerList = nil
 	
@@ -4220,9 +4220,9 @@ local script = G2L["b6"];
 	local function switchTab(tabName)
 		print("🔘 Переключение на: " .. tabName)
 	
-		-- Скрываем ВСЁ в правой панели (ВКЛЮЧАЯ TextButton)
+		-- Скрываем ВСЁ в правой панели
 		for _, child in pairs(rightFrame:GetChildren()) do
-			if child:IsA("ImageButton") or child:IsA("TextButton") then
+			if child:IsA("ImageButton") then
 				child.Visible = false
 			end
 			if child:IsA("TextBox") then
@@ -4264,7 +4264,7 @@ local script = G2L["b6"];
 			if toggleListBtn then
 				toggleListBtn.Visible = true
 			end
-			print("✅ Показаны кнопки TELEPORT")
+			print("✅ TELEPORT")
 	
 			-- ===== ESP =====
 		elseif tabName == "ESP" then
@@ -4277,7 +4277,7 @@ local script = G2L["b6"];
 					child.Visible = true
 				end
 			end
-			print("✅ Показаны кнопки ESP")
+			print("✅ ESP")
 	
 			-- ===== SPECTATE =====
 		elseif tabName == "SPECTATE" then
@@ -4297,7 +4297,7 @@ local script = G2L["b6"];
 					child.Visible = true
 				end
 			end
-			print("✅ Показаны кнопки SPECTATE")
+			print("✅ SPECTATE")
 	
 			-- ===== MISC =====
 		elseif tabName == "MISC" then
@@ -4311,7 +4311,8 @@ local script = G2L["b6"];
 						child.Name == "MISC_CTRL_CLICK" or
 						child.Name == "MISC_WhiteList_Open" or
 						child.Name == "MISC_Fly" or
-						child.Name == "MISC_Rejoin"
+						child.Name == "MISC_Rejoin" or
+						child.Name == "MISC_FullBright"
 					) then
 					child.Visible = true
 				end
@@ -4321,7 +4322,7 @@ local script = G2L["b6"];
 					child.Visible = true
 				end
 			end
-			print("✅ Показаны кнопки MISC")
+			print("✅ MISC")
 	
 			-- ===== MM2 =====
 		elseif tabName == "MM2" then
@@ -4339,7 +4340,7 @@ local script = G2L["b6"];
 					child.Visible = false
 				end
 			end
-			print("✅ Показаны кнопки MM2")
+			print("✅ MM2")
 	
 			-- ===== DA HOOD =====
 		elseif tabName == "Da Hood" then
@@ -4351,7 +4352,7 @@ local script = G2L["b6"];
 					child.Visible = true
 				end
 			end
-			print("✅ Показаны кнопки Da Hood")
+			print("✅ DA HOOD")
 	
 			-- ===== INFO =====
 		elseif tabName == "INFO" then
@@ -4360,7 +4361,7 @@ local script = G2L["b6"];
 					child.Visible = false
 				end
 			end
-			print("✅ INFO (пусто)")
+			print("✅ INFO")
 		end
 	end
 	
@@ -4373,7 +4374,6 @@ local script = G2L["b6"];
 		end
 	end
 	
-	-- По умолчанию показываем TELEPORT
 	switchTab("TELEPORT")
 	print("✅ Переключение вкладок загружено!")
 end;
