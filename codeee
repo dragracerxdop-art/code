@@ -3915,7 +3915,7 @@ task.spawn(C_8f);
 local function C_96()
 local script = G2L["96"];
 	-- ==========================================
-	-- ТЕЛЕПОРТЫ (К СОХРАНЁННЫМ ТОЧКАМ)
+	-- ТЕЛЕПОРТЫ (СТАБИЛЬНАЯ ВЕРСИЯ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local rightFrame = script.Parent
@@ -3940,7 +3940,6 @@ local script = G2L["96"];
 	local selectedName = nil
 	
 	local function updateList()
-		-- Удаляем старые кнопки (кроме шаблона)
 		for _, child in pairs(teleportScroll:GetChildren()) do
 			if child:IsA("TextButton") and child ~= template then
 				child:Destroy()
@@ -3950,36 +3949,45 @@ local script = G2L["96"];
 			end
 		end
 	
-		local yOffset = template.Position.Y.Offset
-		local buttonHeight = template.Size.Y.Offset + 10
+		local yOffset = 5
+		local buttonHeight = 45
 	
 		if next(_G.Teleports) == nil then
 			local hint = Instance.new("TextLabel")
-			hint.Size = template.Size
-			hint.Position = UDim2.new(template.Position.X.Scale, template.Position.X.Offset, 0, yOffset)
+			hint.Size = UDim2.new(0, 300, 0, 40)
+			hint.Position = UDim2.new(0.05, 0, 0, yOffset)
 			hint.BackgroundTransparency = 1
 			hint.Text = "📌 Нет телепортов"
 			hint.TextColor3 = Color3.fromRGB(150, 150, 150)
-			hint.TextSize = template.TextSize
-			hint.Font = template.Font
-			hint.FontFace = template.FontFace
+			hint.TextSize = 16
+			hint.Font = Enum.Font.GothamBold
 			hint.Parent = teleportScroll
-			yOffset = yOffset + buttonHeight
+			yOffset = yOffset + 50
 		end
 	
 		for name, pos in pairs(_G.Teleports) do
-			local btn = template:Clone()
-			btn.Visible = true
+			local btn = Instance.new("TextButton")
+			btn.Size = UDim2.new(0, 300, 0, 40)
+			btn.Position = UDim2.new(0.05, 0, 0, yOffset)
+			btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+			btn.BackgroundTransparency = 0.2
+			btn.BorderSizePixel = 0
 			btn.Text = name
-			btn.Position = UDim2.new(template.Position.X.Scale, template.Position.X.Offset, 0, yOffset)
+			btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+			btn.TextSize = 16
+			btn.Font = Enum.Font.GothamBold
 			btn.Parent = teleportScroll
 			yOffset = yOffset + buttonHeight
 	
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(0, 8)
+			corner.Parent = btn
+	
 			btn.MouseButton1Click:Connect(function()
 				for _, child in pairs(teleportScroll:GetChildren()) do
-					if child:IsA("TextButton") and child ~= template then
-						child.BackgroundColor3 = template.BackgroundColor3
-						child.BackgroundTransparency = template.BackgroundTransparency
+					if child:IsA("TextButton") then
+						child.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+						child.BackgroundTransparency = 0.2
 					end
 				end
 				btn.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
@@ -4029,7 +4037,7 @@ local script = G2L["96"];
 	
 	removeBtn.MouseButton1Click:Connect(function()
 		if not selectedName then
-			print("❌ Сначала выбери телепорт (кликни по нему)!")
+			print("❌ Сначала выбери телепорт!")
 			return
 		end
 	
