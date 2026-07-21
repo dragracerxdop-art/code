@@ -4184,7 +4184,7 @@ task.spawn(C_a3);
 local function C_b6()
 local script = G2L["b6"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ИСПРАВЛЕННЫЙ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
