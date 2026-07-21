@@ -2576,16 +2576,15 @@ task.spawn(C_46);
 local function C_4b()
 local script = G2L["4b"];
 	-- ==========================================
-	-- РЕЖИМ ПРИЗРАКА (ПОЛНОЕ ОТКЛЮЧЕНИЕ КОЛЛИЗИЙ)
+	-- MISC_AntiFling (ВКЛ/ВЫКЛ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local runService = game:GetService("RunService")
 	
 	local isEnabled = false
-	local ghostLoop = nil
-	local myParts = {}
-	local otherParts = {}
+	local antiFlingLoop = nil
+	local connections = {}
 	
 	-- Индикатор
 	local indicator = Instance.new("TextLabel")
@@ -2609,134 +2608,97 @@ local script = G2L["4b"];
 		end
 	end
 	
-	-- ===== ОТКЛЮЧИТЬ ВСЁ =====
-	local function disableAllCollisions()
-		local char = player.Character
-		if not char then return end
-	
-		-- Отключаем у себя
-		for _, part in pairs(char:GetDescendants()) do
-			if part:IsA("BasePart") and not myParts[part] then
-				myParts[part] = part.CanCollide
+	-- ===== ОТКЛЮЧЕНИЕ КОЛЛИЗИЙ У ВСЕХ ИГРОКОВ =====
+	local function setupCharacterCollision(character)
+		local function disableCollide(part)
+			if isEnabled and part:IsA("BasePart") then
 				part.CanCollide = false
-				part.CanTouch = false
 			end
 		end
 	
-		-- Отключаем у всех игроков
-		for _, plr in pairs(game.Players:GetPlayers()) do
-			if plr ~= player and plr.Character then
-				for _, part in pairs(plr.Character:GetDescendants()) do
-					if part:IsA("BasePart") and not otherParts[part] then
-						otherParts[part] = part.CanCollide
+		for _, part in ipairs(character:GetChildren()) do
+			disableCollide(part)
+		end
+	
+		local childAddedConn = character.ChildAdded:Connect(disableCollide)
+	
+		local steppedConn = runService.Stepped:Connect(function()
+			if isEnabled and character:IsDescendantOf(workspace) then
+				for _, part in ipairs(character:GetChildren()) do
+					if part:IsA("BasePart") and part.CanCollide then
 						part.CanCollide = false
-						part.CanTouch = false
-					end
-				end
-			end
-		end
-	end
-	
-	-- ===== ВКЛЮЧЕНИЕ =====
-	local function enableGhost()
-		disableAllCollisions()
-	
-		if ghostLoop then
-			ghostLoop:Disconnect()
-			ghostLoop = nil
-		end
-	
-		-- Цикл: постоянно отключаем коллизии у всех
-		ghostLoop = runService.Heartbeat:Connect(function()
-			if not isEnabled then
-				return
-			end
-	
-			-- Проверяем новых игроков или новые части
-			local char = player.Character
-			if char then
-				for _, part in pairs(char:GetDescendants()) do
-					if part:IsA("BasePart") and myParts[part] == nil then
-						myParts[part] = part.CanCollide
-						part.CanCollide = false
-						part.CanTouch = false
-					end
-				end
-			end
-	
-			for _, plr in pairs(game.Players:GetPlayers()) do
-				if plr ~= player and plr.Character then
-					for _, part in pairs(plr.Character:GetDescendants()) do
-						if part:IsA("BasePart") and otherParts[part] == nil then
-							otherParts[part] = part.CanCollide
-							part.CanCollide = false
-							part.CanTouch = false
-						end
 					end
 				end
 			end
 		end)
 	
-		print("👻 Режим призрака ВКЛЮЧЕН (коллизии отключены у всех)")
+		character.Destroying:Connect(function()
+			childAddedConn:Disconnect()
+			steppedConn:Disconnect()
+		end)
 	end
 	
-	-- ===== ВЫКЛЮЧЕНИЕ =====
-	local function disableGhost()
-		if ghostLoop then
-			ghostLoop:Disconnect()
-			ghostLoop = nil
+	local function trackPlayer(plr)
+		if plr == player then return end
+		local charAddedConn = plr.CharacterAdded:Connect(setupCharacterCollision)
+		if plr.Character then
+			setupCharacterCollision(plr.Character)
 		end
+		connections[plr] = charAddedConn
+	end
 	
-		-- Возвращаем коллизии себе
-		for part, canCollide in pairs(myParts) do
-			if part and part.Parent then
-				part.CanCollide = canCollide
-				part.CanTouch = true
+	local function untrackPlayer(plr)
+		if connections[plr] then
+			connections[plr]:Disconnect()
+			connections[plr] = nil
+		end
+	end
+	
+	-- ===== ВКЛЮЧЕНИЕ =====
+	local function enableAntiFling()
+		for _, plr in ipairs(game.Players:GetPlayers()) do
+			trackPlayer(plr)
+		end
+		game.Players.PlayerAdded:Connect(trackPlayer)
+		game.Players.PlayerRemoving:Connect(untrackPlayer)
+	end
+	
+	-- ===== ВЫКЛЮЧЕНИЕ (ВОССТАНОВЛЕНИЕ КОЛЛИЗИЙ) =====
+	local function disableAntiFling()
+		for plr, conn in pairs(connections) do
+			conn:Disconnect()
+			connections[plr] = nil
+		end
+		-- Восстанавливаем коллизии у всех игроков
+		for _, plr in pairs(game.Players:GetPlayers()) do
+			if plr ~= player and plr.Character then
+				for _, part in pairs(plr.Character:GetChildren()) do
+					if part:IsA("BasePart") then
+						part.CanCollide = true
+					end
+				end
 			end
 		end
-		myParts = {}
-	
-		-- Возвращаем коллизии другим
-		for part, canCollide in pairs(otherParts) do
-			if part and part.Parent then
-				part.CanCollide = canCollide
-				part.CanTouch = true
-			end
-		end
-		otherParts = {}
-	
-		print("👻 Режим призрака ВЫКЛЮЧЕН")
 	end
 	
 	-- ===== ПЕРЕКЛЮЧЕНИЕ =====
-	local function toggleGhost()
+	local function toggleAntiFling()
 		isEnabled = not isEnabled
 		updateState()
 	
 		if isEnabled then
-			enableGhost()
+			enableAntiFling()
+			print("🛡️ Анти-флинг ВКЛЮЧЕН")
 		else
-			disableGhost()
+			disableAntiFling()
+			print("🛡️ Анти-флинг ВЫКЛЮЧЕН")
 		end
 	end
 	
-	-- ===== КЛИК =====
-	button.MouseButton1Click:Connect(function()
-		toggleGhost()
-	end)
-	
-	-- ===== ПЕРЕРОЖДЕНИЕ =====
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		if isEnabled then
-			myParts = {}
-			otherParts = {}
-			enableGhost()
-		end
-	end)
+	button.MouseButton1Click:Connect(toggleAntiFling)
 	
 	updateState()
-	print("✅ Режим призрака загружен (полное отключение коллизий)")
+	print("✅ MISC_AntiFling загружена!")
 end;
 task.spawn(C_4b);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_OpenList.LocalScript
