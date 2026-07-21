@@ -516,7 +516,7 @@ G2L["47"]["BorderSizePixel"] = 0;
 G2L["47"]["TextSize"] = 14;
 G2L["47"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["47"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["47"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
+G2L["47"]["FontFace"] = Font.new([[rbxasset://fonts/families/Creepster.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["47"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["47"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["47"]["Name"] = [[PlayerTemplate]];
@@ -622,7 +622,7 @@ G2L["55"]["BorderSizePixel"] = 0;
 G2L["55"]["TextSize"] = 14;
 G2L["55"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["55"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["55"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+G2L["55"]["FontFace"] = Font.new([[rbxasset://fonts/families/Creepster.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["55"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["55"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["55"]["Name"] = [[PlayerTemplate]];
@@ -707,7 +707,7 @@ G2L["61"] = Instance.new("TextBox", G2L["d"]);
 G2L["61"]["Name"] = [[MISC_HitboxValue]];
 G2L["61"]["BorderSizePixel"] = 0;
 G2L["61"]["TextSize"] = 14;
-G2L["61"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
+G2L["61"]["TextColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["61"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["61"]["FontFace"] = Font.new([[rbxasset://fonts/families/Creepster.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["61"]["Size"] = UDim2.new(0, 128, 0, 55);
@@ -792,7 +792,7 @@ G2L["6c"]["BorderSizePixel"] = 0;
 G2L["6c"]["TextSize"] = 14;
 G2L["6c"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["6c"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["6c"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+G2L["6c"]["FontFace"] = Font.new([[rbxasset://fonts/families/Creepster.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["6c"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["6c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["6c"]["Name"] = [[PlayerTemplate]];
@@ -894,7 +894,7 @@ G2L["7a"] = Instance.new("TextLabel", G2L["77"]);
 G2L["7a"]["BorderSizePixel"] = 0;
 G2L["7a"]["TextSize"] = 14;
 G2L["7a"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["7a"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+G2L["7a"]["FontFace"] = Font.new([[rbxasset://fonts/families/Creepster.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["7a"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["7a"]["Size"] = UDim2.new(0, 200, 0, 50);
 G2L["7a"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
@@ -919,7 +919,7 @@ G2L["7d"] = Instance.new("TextLabel", G2L["77"]);
 G2L["7d"]["BorderSizePixel"] = 0;
 G2L["7d"]["TextSize"] = 14;
 G2L["7d"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["7d"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+G2L["7d"]["FontFace"] = Font.new([[rbxasset://fonts/families/Creepster.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["7d"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["7d"]["Size"] = UDim2.new(0, 200, 0, 50);
 G2L["7d"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
@@ -1867,7 +1867,7 @@ task.spawn(C_1b);
 local function C_22()
 local script = G2L["22"];
 	-- ==========================================
-	-- TELEPORT_ToggleList (ОТКРЫТЬ СПИСОК ИГРОКОВ)
+	-- ТОГГЛ СПИСОК (ДЛЯ ImageButton)
 	-- ==========================================
 	local button = script.Parent
 	local rightFrame = button.Parent
@@ -1883,73 +1883,81 @@ local script = G2L["22"];
 	button.MouseButton1Click:Connect(function()
 		isOpen = not isOpen
 		playerList.Visible = isOpen
-		print("📋 Список игроков:", isOpen and "открыт" or "закрыт")
+		-- Не трогаем текст, потому что это ImageButton
 	end)
 	
 	playerList.Visible = false
-	print("✅ TELEPORT_ToggleList загружена!")
 end;
 task.spawn(C_22);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.PlayerList.LocalScript
 local function C_27()
 local script = G2L["27"];
 	-- ==========================================
-	-- MISC_PlayerList (СПИСОК ДЛЯ ВЫБОРА)
+	-- СПИСОК ИГРОКОВ (LocalScript для ScrollingFrame)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
-	local scrollingFrame = script.Parent
+	local scrollingFrame = script.Parent  -- твой ScrollingFrame (PlayerList)
 	
+	-- Ищем шаблон (кнопка, которую ты сделал в студии)
 	local template = scrollingFrame:FindFirstChild("PlayerTemplate")
+	
 	if not template then
-		warn("❌ PlayerTemplate не найден!")
+		warn("❌ PlayerTemplate не найден в ScrollingFrame!")
 		return
 	end
 	
-	local previousSelectedBtn = nil
+	print("✅ Шаблон PlayerTemplate найден!")
 	
+	-- ===== ФУНКЦИЯ ОБНОВЛЕНИЯ СПИСКА =====
 	local function updatePlayerList()
+		-- Удаляем старые кнопки (но НЕ трогаем шаблон)
 		for _, child in pairs(scrollingFrame:GetChildren()) do
 			if child:IsA("TextButton") and child ~= template then
 				child:Destroy()
 			end
 		end
 	
-		local yOffset = 5
+		local yOffset = 5  -- отступ сверху для первой кнопки
 	
+		-- Проходим по всем игрокам
 		for _, plr in pairs(game.Players:GetPlayers()) do
-			if plr ~= player then
+			if plr ~= player then  -- не показываем себя
+				-- Клонируем шаблон
 				local btn = template:Clone()
 				btn.Visible = true
-				btn.Text = plr.Name
+				btn.Text = plr.Name  -- вставляем ник
+	
+				-- Позиционируем кнопку
 				btn.Position = UDim2.new(0.05, 0, 0, yOffset)
 				btn.Parent = scrollingFrame
-				yOffset = yOffset + 78
 	
+				yOffset = yOffset + 78  -- 73 (высота) + 5 (отступ)
+	
+				-- ===== ТЕЛЕПОРТ К ИГРОКУ =====
 				btn.MouseButton1Click:Connect(function()
-					if previousSelectedBtn then
-						previousSelectedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+					if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+						local char = player.Character
+						if char and char:FindFirstChild("HumanoidRootPart") then
+							char.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame
+							print("✅ Телепорт к " .. plr.Name)
+						end
 					end
-					btn.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
-					btn.BackgroundTransparency = 0.2
-					previousSelectedBtn = btn
-	
-					_G.Misc = _G.Misc or {}
-					_G.Misc.SelectedPlayer = plr
-					print("🎯 Выбран игрок: " .. plr.Name)
-	
-					scrollingFrame.Visible = false
 				end)
 			end
 		end
 	
+		-- Обновляем размер канваса (чтобы можно было скроллить)
 		scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, yOffset + 10)
+		print("✅ Список обновлён, игроков: " .. #game.Players:GetPlayers())
 	end
 	
+	-- ===== ОБНОВЛЯЕМ ПРИ ЗАХОДЕ/ВЫХОДЕ =====
 	game.Players.PlayerAdded:Connect(updatePlayerList)
 	game.Players.PlayerRemoving:Connect(updatePlayerList)
 	
+	-- ===== ПЕРВОЕ ОБНОВЛЕНИЕ =====
 	updatePlayerList()
-	print("✅ MISC_PlayerList загружен!")
+	print("🚀 Скрипт списка игроков запущен!")
 end;
 task.spawn(C_27);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_CTRL_DEL.LocalScript
@@ -2248,7 +2256,7 @@ task.spawn(C_3a);
 local function C_3e()
 local script = G2L["3e"];
 	-- ==========================================
-	-- MISC_OpenPlayerList (ВЫБОР ИГРОКА)
+	-- ОТКРЫТИЕ/ЗАКРЫТИЕ СПИСКА (ОДНО НАЖАТИЕ)
 	-- ==========================================
 	local button = script.Parent
 	local rightFrame = button.Parent
@@ -2440,18 +2448,18 @@ task.spawn(C_42);
 local function C_46()
 local script = G2L["46"];
 	-- ==========================================
-	-- PlayerList (ТЕЛЕПОРТ К ИГРОКАМ)
+	-- СПИСОК ИГРОКОВ MISC (С ПОДСВЕТКОЙ КНОПКИ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local scrollingFrame = script.Parent
 	
 	local template = scrollingFrame:FindFirstChild("PlayerTemplate")
 	if not template then
-		warn("❌ PlayerTemplate не найден в PlayerList!")
+		warn("❌ PlayerTemplate не найден!")
 		return
 	end
 	
-	print("✅ Шаблон PlayerTemplate найден!")
+	local previousSelectedBtn = nil  -- храним предыдущую выбранную кнопку
 	
 	local function updatePlayerList()
 		-- Удаляем старые кнопки
@@ -2472,18 +2480,27 @@ local script = G2L["46"];
 				btn.Parent = scrollingFrame
 				yOffset = yOffset + 78
 	
-				-- ТЕЛЕПОРТ К ИГРОКУ
+				-- При клике — выбираем игрока и меняем цвет кнопки
 				btn.MouseButton1Click:Connect(function()
-					if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-						local char = player.Character
-						if char and char:FindFirstChild("HumanoidRootPart") then
-							char.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame
-							print("✅ Телепорт к " .. plr.Name)
-							scrollingFrame.Visible = false
-						end
-					else
-						print("❌ Игрок " .. plr.Name .. " не найден!")
+					-- Если была выбрана другая кнопка — возвращаем её цвет обратно
+					if previousSelectedBtn then
+						previousSelectedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- цвет по умолчанию
 					end
+	
+					-- Меняем цвет текущей кнопки на СИНИЙ
+					btn.BackgroundColor3 = Color3.fromRGB(0, 0, 255)  -- синий
+					btn.BackgroundTransparency = 0.2
+	
+					-- Сохраняем как выбранную
+					previousSelectedBtn = btn
+	
+					-- Сохраняем игрока в глобалку
+					_G.Misc = _G.Misc or {}
+					_G.Misc.SelectedPlayer = plr
+					print("🎯 Выбран игрок: " .. plr.Name)
+	
+					-- Закрываем список
+					scrollingFrame.Visible = false
 				end)
 			end
 		end
@@ -2491,26 +2508,28 @@ local script = G2L["46"];
 		scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, yOffset + 10)
 	end
 	
+	-- Обновляем при входе/выходе
 	game.Players.PlayerAdded:Connect(updatePlayerList)
 	game.Players.PlayerRemoving:Connect(updatePlayerList)
 	
 	updatePlayerList()
-	print("✅ PlayerList загружена!")
+	print("✅ MISC_PlayerList загружен!")
 end;
 task.spawn(C_46);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_AntiFling.LocalScript
 local function C_4b()
 local script = G2L["4b"];
 	-- ==========================================
-	-- MISC_AntiFling (ВКЛ/ВЫКЛ)
+	-- РЕЖИМ ПРИЗРАКА (ПОЛНОЕ ОТКЛЮЧЕНИЕ КОЛЛИЗИЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local runService = game:GetService("RunService")
 	
 	local isEnabled = false
-	local antiFlingLoop = nil
-	local connections = {}
+	local ghostLoop = nil
+	local myParts = {}
+	local otherParts = {}
 	
 	-- Индикатор
 	local indicator = Instance.new("TextLabel")
@@ -2534,97 +2553,134 @@ local script = G2L["4b"];
 		end
 	end
 	
-	-- ===== ОТКЛЮЧЕНИЕ КОЛЛИЗИЙ У ВСЕХ ИГРОКОВ =====
-	local function setupCharacterCollision(character)
-		local function disableCollide(part)
-			if isEnabled and part:IsA("BasePart") then
+	-- ===== ОТКЛЮЧИТЬ ВСЁ =====
+	local function disableAllCollisions()
+		local char = player.Character
+		if not char then return end
+	
+		-- Отключаем у себя
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") and not myParts[part] then
+				myParts[part] = part.CanCollide
 				part.CanCollide = false
+				part.CanTouch = false
 			end
 		end
 	
-		for _, part in ipairs(character:GetChildren()) do
-			disableCollide(part)
-		end
-	
-		local childAddedConn = character.ChildAdded:Connect(disableCollide)
-	
-		local steppedConn = runService.Stepped:Connect(function()
-			if isEnabled and character:IsDescendantOf(workspace) then
-				for _, part in ipairs(character:GetChildren()) do
-					if part:IsA("BasePart") and part.CanCollide then
+		-- Отключаем у всех игроков
+		for _, plr in pairs(game.Players:GetPlayers()) do
+			if plr ~= player and plr.Character then
+				for _, part in pairs(plr.Character:GetDescendants()) do
+					if part:IsA("BasePart") and not otherParts[part] then
+						otherParts[part] = part.CanCollide
 						part.CanCollide = false
+						part.CanTouch = false
 					end
 				end
 			end
-		end)
-	
-		character.Destroying:Connect(function()
-			childAddedConn:Disconnect()
-			steppedConn:Disconnect()
-		end)
-	end
-	
-	local function trackPlayer(plr)
-		if plr == player then return end
-		local charAddedConn = plr.CharacterAdded:Connect(setupCharacterCollision)
-		if plr.Character then
-			setupCharacterCollision(plr.Character)
-		end
-		connections[plr] = charAddedConn
-	end
-	
-	local function untrackPlayer(plr)
-		if connections[plr] then
-			connections[plr]:Disconnect()
-			connections[plr] = nil
 		end
 	end
 	
 	-- ===== ВКЛЮЧЕНИЕ =====
-	local function enableAntiFling()
-		for _, plr in ipairs(game.Players:GetPlayers()) do
-			trackPlayer(plr)
-		end
-		game.Players.PlayerAdded:Connect(trackPlayer)
-		game.Players.PlayerRemoving:Connect(untrackPlayer)
-	end
+	local function enableGhost()
+		disableAllCollisions()
 	
-	-- ===== ВЫКЛЮЧЕНИЕ (ВОССТАНОВЛЕНИЕ КОЛЛИЗИЙ) =====
-	local function disableAntiFling()
-		for plr, conn in pairs(connections) do
-			conn:Disconnect()
-			connections[plr] = nil
+		if ghostLoop then
+			ghostLoop:Disconnect()
+			ghostLoop = nil
 		end
-		-- Восстанавливаем коллизии у всех игроков
-		for _, plr in pairs(game.Players:GetPlayers()) do
-			if plr ~= player and plr.Character then
-				for _, part in pairs(plr.Character:GetChildren()) do
-					if part:IsA("BasePart") then
-						part.CanCollide = true
+	
+		-- Цикл: постоянно отключаем коллизии у всех
+		ghostLoop = runService.Heartbeat:Connect(function()
+			if not isEnabled then
+				return
+			end
+	
+			-- Проверяем новых игроков или новые части
+			local char = player.Character
+			if char then
+				for _, part in pairs(char:GetDescendants()) do
+					if part:IsA("BasePart") and myParts[part] == nil then
+						myParts[part] = part.CanCollide
+						part.CanCollide = false
+						part.CanTouch = false
 					end
 				end
 			end
+	
+			for _, plr in pairs(game.Players:GetPlayers()) do
+				if plr ~= player and plr.Character then
+					for _, part in pairs(plr.Character:GetDescendants()) do
+						if part:IsA("BasePart") and otherParts[part] == nil then
+							otherParts[part] = part.CanCollide
+							part.CanCollide = false
+							part.CanTouch = false
+						end
+					end
+				end
+			end
+		end)
+	
+		print("👻 Режим призрака ВКЛЮЧЕН (коллизии отключены у всех)")
+	end
+	
+	-- ===== ВЫКЛЮЧЕНИЕ =====
+	local function disableGhost()
+		if ghostLoop then
+			ghostLoop:Disconnect()
+			ghostLoop = nil
 		end
+	
+		-- Возвращаем коллизии себе
+		for part, canCollide in pairs(myParts) do
+			if part and part.Parent then
+				part.CanCollide = canCollide
+				part.CanTouch = true
+			end
+		end
+		myParts = {}
+	
+		-- Возвращаем коллизии другим
+		for part, canCollide in pairs(otherParts) do
+			if part and part.Parent then
+				part.CanCollide = canCollide
+				part.CanTouch = true
+			end
+		end
+		otherParts = {}
+	
+		print("👻 Режим призрака ВЫКЛЮЧЕН")
 	end
 	
 	-- ===== ПЕРЕКЛЮЧЕНИЕ =====
-	local function toggleAntiFling()
+	local function toggleGhost()
 		isEnabled = not isEnabled
 		updateState()
 	
 		if isEnabled then
-			enableAntiFling()
-			print("🛡️ Анти-флинг ВКЛЮЧЕН")
+			enableGhost()
 		else
-			disableAntiFling()
-			print("🛡️ Анти-флинг ВЫКЛЮЧЕН")
+			disableGhost()
 		end
 	end
 	
-	button.MouseButton1Click:Connect(toggleAntiFling)
+	-- ===== КЛИК =====
+	button.MouseButton1Click:Connect(function()
+		toggleGhost()
+	end)
+	
+	-- ===== ПЕРЕРОЖДЕНИЕ =====
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5)
+		if isEnabled then
+			myParts = {}
+			otherParts = {}
+			enableGhost()
+		end
+	end)
 	
 	updateState()
-	print("✅ MISC_AntiFling загружена!")
+	print("✅ Режим призрака загружен (полное отключение коллизий)")
 end;
 task.spawn(C_4b);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_OpenList.LocalScript
@@ -3904,7 +3960,7 @@ task.spawn(C_8f);
 local function C_96()
 local script = G2L["96"];
 	-- ==========================================
-	-- ТЕЛЕПОРТЫ (БЕЗ НАДПИСИ)
+	-- ТЕЛЕПОРТЫ (СКРОЛЛ ВСЕГДА АКТИВЕН)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local rightFrame = script.Parent
@@ -3929,6 +3985,7 @@ local script = G2L["96"];
 	local selectedName = nil
 	
 	local function updateList()
+		-- Удаляем старые кнопки (кроме шаблона)
 		for _, child in pairs(teleportScroll:GetChildren()) do
 			if child:IsA("TextButton") and child ~= template then
 				child:Destroy()
@@ -3938,34 +3995,23 @@ local script = G2L["96"];
 			end
 		end
 	
-		local yOffset = 5
+		local yOffset = template.Position.Y.Offset
 		local buttonHeight = 45
 	
-		-- НАДПИСЬ УБРАНА!
-	
+		-- Создаём кнопки для телепортов
 		for name, pos in pairs(_G.Teleports) do
-			local btn = Instance.new("TextButton")
-			btn.Size = UDim2.new(0, 300, 0, 40)
-			btn.Position = UDim2.new(0.05, 0, 0, yOffset)
-			btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-			btn.BackgroundTransparency = 0.2
-			btn.BorderSizePixel = 0
+			local btn = template:Clone()
+			btn.Visible = true
 			btn.Text = name
-			btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-			btn.TextSize = 16
-			btn.Font = Enum.Font.GothamBold
+			btn.Position = UDim2.new(template.Position.X.Scale, template.Position.X.Offset, 0, yOffset)
 			btn.Parent = teleportScroll
 			yOffset = yOffset + buttonHeight
 	
-			local corner = Instance.new("UICorner")
-			corner.CornerRadius = UDim.new(0, 8)
-			corner.Parent = btn
-	
 			btn.MouseButton1Click:Connect(function()
 				for _, child in pairs(teleportScroll:GetChildren()) do
-					if child:IsA("TextButton") then
-						child.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-						child.BackgroundTransparency = 0.2
+					if child:IsA("TextButton") and child ~= template then
+						child.BackgroundColor3 = template.BackgroundColor3
+						child.BackgroundTransparency = template.BackgroundTransparency
 					end
 				end
 				btn.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
@@ -3985,7 +4031,12 @@ local script = G2L["96"];
 			end)
 		end
 	
-		teleportScroll.CanvasSize = UDim2.new(0, 0, 0, yOffset + 10)
+		-- 👇 СКРОЛЛ ВСЕГДА АКТИВЕН (минимальная высота 400)
+		local minCanvasHeight = 400
+		local canvasHeight = math.max(yOffset + 10, minCanvasHeight)
+		teleportScroll.CanvasSize = UDim2.new(0, 0, 0, canvasHeight)
+	
+		print("✅ Список обновлён! CanvasSize: " .. canvasHeight)
 	end
 	
 	addBtn.MouseButton1Click:Connect(function()
@@ -4015,7 +4066,7 @@ local script = G2L["96"];
 	
 	removeBtn.MouseButton1Click:Connect(function()
 		if not selectedName then
-			print("❌ Сначала выбери телепорт!")
+			print("❌ Сначала выбери телепорт (кликни по нему)!")
 			return
 		end
 	
