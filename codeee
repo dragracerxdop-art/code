@@ -2248,7 +2248,7 @@ task.spawn(C_3a);
 local function C_3e()
 local script = G2L["3e"];
 	-- ==========================================
-	-- ОТКРЫТИЕ/ЗАКРЫТИЕ СПИСКА (ОДНО НАЖАТИЕ)
+	-- MISC_OpenPlayerList (ВЫБОР ИГРОКА)
 	-- ==========================================
 	local button = script.Parent
 	local rightFrame = button.Parent
