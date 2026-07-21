@@ -1894,21 +1894,20 @@ task.spawn(C_22);
 local function C_27()
 local script = G2L["27"];
 	-- ==========================================
-	-- PlayerList (СПИСОК ИГРОКОВ ДЛЯ ТЕЛЕПОРТА)
+	-- MISC_PlayerList (СПИСОК ДЛЯ ВЫБОРА)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local scrollingFrame = script.Parent
 	
 	local template = scrollingFrame:FindFirstChild("PlayerTemplate")
 	if not template then
-		warn("❌ PlayerTemplate не найден в PlayerList!")
+		warn("❌ PlayerTemplate не найден!")
 		return
 	end
 	
-	print("✅ Шаблон PlayerTemplate найден!")
+	local previousSelectedBtn = nil
 	
 	local function updatePlayerList()
-		-- Удаляем старые кнопки
 		for _, child in pairs(scrollingFrame:GetChildren()) do
 			if child:IsA("TextButton") and child ~= template then
 				child:Destroy()
@@ -1926,19 +1925,19 @@ local script = G2L["27"];
 				btn.Parent = scrollingFrame
 				yOffset = yOffset + 78
 	
-				-- ТЕЛЕПОРТ К ИГРОКУ
 				btn.MouseButton1Click:Connect(function()
-					if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-						local char = player.Character
-						if char and char:FindFirstChild("HumanoidRootPart") then
-							char.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame
-							print("✅ Телепорт к " .. plr.Name)
-							-- Закрываем список после телепорта
-							scrollingFrame.Visible = false
-						end
-					else
-						print("❌ Игрок " .. plr.Name .. " не найден!")
+					if previousSelectedBtn then
+						previousSelectedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 					end
+					btn.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+					btn.BackgroundTransparency = 0.2
+					previousSelectedBtn = btn
+	
+					_G.Misc = _G.Misc or {}
+					_G.Misc.SelectedPlayer = plr
+					print("🎯 Выбран игрок: " .. plr.Name)
+	
+					scrollingFrame.Visible = false
 				end)
 			end
 		end
@@ -1950,7 +1949,7 @@ local script = G2L["27"];
 	game.Players.PlayerRemoving:Connect(updatePlayerList)
 	
 	updatePlayerList()
-	print("✅ PlayerList загружена!")
+	print("✅ MISC_PlayerList загружен!")
 end;
 task.spawn(C_27);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_CTRL_DEL.LocalScript
