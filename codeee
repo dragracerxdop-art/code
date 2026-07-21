@@ -2078,7 +2078,7 @@ task.spawn(C_32);
 local function C_36()
 local script = G2L["36"];
 	-- ==========================================
-	-- ESP_Box (ОБВОДКА ИГРОКОВ)
+	-- ESP_Box (ПОДСВЕТКА ИГРОКОВ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2208,26 +2208,26 @@ task.spawn(C_36);
 local function C_3a()
 local script = G2L["3a"];
 	-- ==========================================
-	-- ESP_Box_Color (ImageButton)
+	-- ESP_Box_Color (ПЕРЕКЛЮЧАТЕЛЬ ЦВЕТОВ)
 	-- ==========================================
 	local button = script.Parent
 	
 	-- ===== СПИСОК ЦВЕТОВ =====
 	local colors = {
-		Color3.fromRGB(138, 43, 226),  -- фиолетовый
-		Color3.fromRGB(255, 0, 0),     -- красный
-		Color3.fromRGB(0, 255, 0),     -- зелёный
-		Color3.fromRGB(0, 0, 255),     -- синий
-		Color3.fromRGB(255, 255, 0),   -- жёлтый
-		Color3.fromRGB(255, 165, 0),   -- оранжевый
-		Color3.fromRGB(0, 255, 255),   -- голубой
-		Color3.fromRGB(255, 105, 180), -- розовый
-		Color3.fromRGB(255, 255, 255), -- белый
-		Color3.fromRGB(0, 0, 139),     -- тёмно-синий
-		Color3.fromRGB(139, 0, 0),     -- тёмно-красный
-		Color3.fromRGB(0, 100, 0),     -- тёмно-зелёный
-		Color3.fromRGB(0, 255, 100),   -- неон-зелёный
-		Color3.fromRGB(255, 0, 255),   -- неон-розовый
+		Color3.fromRGB(138, 43, 226),  -- Фиолетовый
+		Color3.fromRGB(255, 0, 0),     -- Красный
+		Color3.fromRGB(0, 255, 0),     -- Зелёный
+		Color3.fromRGB(0, 0, 255),     -- Синий
+		Color3.fromRGB(255, 255, 0),   -- Жёлтый
+		Color3.fromRGB(255, 165, 0),   -- Оранжевый
+		Color3.fromRGB(0, 255, 255),   -- Голубой
+		Color3.fromRGB(255, 105, 180), -- Розовый
+		Color3.fromRGB(255, 255, 255), -- Белый
+		Color3.fromRGB(0, 0, 139),     -- Тёмно-синий
+		Color3.fromRGB(139, 0, 0),     -- Тёмно-красный
+		Color3.fromRGB(0, 100, 0),     -- Тёмно-зелёный
+		Color3.fromRGB(0, 255, 100),   -- Неон-зелёный
+		Color3.fromRGB(255, 0, 255),   -- Неон-розовый
 	}
 	
 	local currentIndex = 1
