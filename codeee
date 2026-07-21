@@ -516,7 +516,7 @@ G2L["47"]["BorderSizePixel"] = 0;
 G2L["47"]["TextSize"] = 14;
 G2L["47"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["47"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["47"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+G2L["47"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
 G2L["47"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["47"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["47"]["Name"] = [[PlayerTemplate]];
@@ -2441,18 +2441,18 @@ task.spawn(C_42);
 local function C_46()
 local script = G2L["46"];
 	-- ==========================================
-	-- СПИСОК ИГРОКОВ MISC (С ПОДСВЕТКОЙ КНОПКИ)
+	-- PlayerList (ТЕЛЕПОРТ К ИГРОКАМ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local scrollingFrame = script.Parent
 	
 	local template = scrollingFrame:FindFirstChild("PlayerTemplate")
 	if not template then
-		warn("❌ PlayerTemplate не найден!")
+		warn("❌ PlayerTemplate не найден в PlayerList!")
 		return
 	end
 	
-	local previousSelectedBtn = nil  -- храним предыдущую выбранную кнопку
+	print("✅ Шаблон PlayerTemplate найден!")
 	
 	local function updatePlayerList()
 		-- Удаляем старые кнопки
@@ -2473,27 +2473,18 @@ local script = G2L["46"];
 				btn.Parent = scrollingFrame
 				yOffset = yOffset + 78
 	
-				-- При клике — выбираем игрока и меняем цвет кнопки
+				-- ТЕЛЕПОРТ К ИГРОКУ
 				btn.MouseButton1Click:Connect(function()
-					-- Если была выбрана другая кнопка — возвращаем её цвет обратно
-					if previousSelectedBtn then
-						previousSelectedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- цвет по умолчанию
+					if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+						local char = player.Character
+						if char and char:FindFirstChild("HumanoidRootPart") then
+							char.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame
+							print("✅ Телепорт к " .. plr.Name)
+							scrollingFrame.Visible = false
+						end
+					else
+						print("❌ Игрок " .. plr.Name .. " не найден!")
 					end
-	
-					-- Меняем цвет текущей кнопки на СИНИЙ
-					btn.BackgroundColor3 = Color3.fromRGB(0, 0, 255)  -- синий
-					btn.BackgroundTransparency = 0.2
-	
-					-- Сохраняем как выбранную
-					previousSelectedBtn = btn
-	
-					-- Сохраняем игрока в глобалку
-					_G.Misc = _G.Misc or {}
-					_G.Misc.SelectedPlayer = plr
-					print("🎯 Выбран игрок: " .. plr.Name)
-	
-					-- Закрываем список
-					scrollingFrame.Visible = false
 				end)
 			end
 		end
@@ -2501,12 +2492,11 @@ local script = G2L["46"];
 		scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, yOffset + 10)
 	end
 	
-	-- Обновляем при входе/выходе
 	game.Players.PlayerAdded:Connect(updatePlayerList)
 	game.Players.PlayerRemoving:Connect(updatePlayerList)
 	
 	updatePlayerList()
-	print("✅ MISC_PlayerList загружен!")
+	print("✅ PlayerList загружена!")
 end;
 task.spawn(C_46);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_AntiFling.LocalScript
@@ -3915,7 +3905,7 @@ task.spawn(C_8f);
 local function C_96()
 local script = G2L["96"];
 	-- ==========================================
-	-- ТЕЛЕПОРТЫ (СТАБИЛЬНАЯ ВЕРСИЯ)
+	-- ТЕЛЕПОРТЫ (БЕЗ НАДПИСИ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local rightFrame = script.Parent
@@ -3952,18 +3942,7 @@ local script = G2L["96"];
 		local yOffset = 5
 		local buttonHeight = 45
 	
-		if next(_G.Teleports) == nil then
-			local hint = Instance.new("TextLabel")
-			hint.Size = UDim2.new(0, 300, 0, 40)
-			hint.Position = UDim2.new(0.05, 0, 0, yOffset)
-			hint.BackgroundTransparency = 1
-			hint.Text = "📌 Нет телепортов"
-			hint.TextColor3 = Color3.fromRGB(150, 150, 150)
-			hint.TextSize = 16
-			hint.Font = Enum.Font.GothamBold
-			hint.Parent = teleportScroll
-			yOffset = yOffset + 50
-		end
+		-- НАДПИСЬ УБРАНА!
 	
 		for name, pos in pairs(_G.Teleports) do
 			local btn = Instance.new("TextButton")
