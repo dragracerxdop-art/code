@@ -99,7 +99,7 @@ G2L["c"] = Instance.new("LocalScript", G2L["2"]);
 G2L["d"] = Instance.new("ScrollingFrame", G2L["2"]);
 G2L["d"]["Active"] = true;
 G2L["d"]["BorderSizePixel"] = 0;
-G2L["d"]["CanvasPosition"] = Vector2.new(0, 400);
+G2L["d"]["CanvasPosition"] = Vector2.new(0, 442);
 G2L["d"]["Name"] = [[RightFrame]];
 G2L["d"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["d"]["Size"] = UDim2.new(0, 352, 0, 420);
@@ -150,7 +150,6 @@ G2L["13"] = Instance.new("LocalScript", G2L["10"]);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_Rejoin
 G2L["14"] = Instance.new("ImageButton", G2L["d"]);
 G2L["14"]["BorderSizePixel"] = 0;
-G2L["14"]["Visible"] = false;
 G2L["14"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["14"]["Image"] = [[rbxassetid://84658496920287]];
 G2L["14"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -311,7 +310,6 @@ G2L["29"]["Color"] = Color3.fromRGB(180, 4, 255);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_CTRL_DEL
 G2L["2a"] = Instance.new("ImageButton", G2L["d"]);
 G2L["2a"]["BorderSizePixel"] = 0;
-G2L["2a"]["Visible"] = false;
 G2L["2a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["2a"]["Image"] = [[rbxassetid://134682894895611]];
 G2L["2a"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -345,7 +343,6 @@ G2L["2e"] = Instance.new("LocalScript", G2L["2a"]);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_CTRL_CLICK
 G2L["2f"] = Instance.new("ImageButton", G2L["d"]);
 G2L["2f"]["BorderSizePixel"] = 0;
-G2L["2f"]["Visible"] = false;
 G2L["2f"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["2f"]["Image"] = [[rbxassetid://127985833910211]];
 G2L["2f"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -430,7 +427,6 @@ G2L["3a"] = Instance.new("LocalScript", G2L["37"]);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_OpenPlayerList
 G2L["3b"] = Instance.new("ImageButton", G2L["d"]);
 G2L["3b"]["BorderSizePixel"] = 0;
-G2L["3b"]["Visible"] = false;
 G2L["3b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["3b"]["Image"] = [[rbxassetid://113195840604536]];
 G2L["3b"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -458,7 +454,6 @@ G2L["3e"] = Instance.new("LocalScript", G2L["3b"]);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_Fling
 G2L["3f"] = Instance.new("ImageButton", G2L["d"]);
 G2L["3f"]["BorderSizePixel"] = 0;
-G2L["3f"]["Visible"] = false;
 G2L["3f"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["3f"]["Image"] = [[rbxassetid://86617316299707]];
 G2L["3f"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -487,6 +482,7 @@ G2L["42"] = Instance.new("LocalScript", G2L["3f"]);
 G2L["43"] = Instance.new("ScrollingFrame", G2L["d"]);
 G2L["43"]["Active"] = true;
 G2L["43"]["BorderSizePixel"] = 0;
+G2L["43"]["CanvasPosition"] = Vector2.new(0, 100);
 G2L["43"]["Name"] = [[MISC_PlayerList]];
 G2L["43"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["43"]["Size"] = UDim2.new(0, 172, 0, 158);
@@ -539,7 +535,6 @@ G2L["49"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_AntiFling
 G2L["4a"] = Instance.new("ImageButton", G2L["d"]);
 G2L["4a"]["BorderSizePixel"] = 0;
-G2L["4a"]["Visible"] = false;
 G2L["4a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["4a"]["Image"] = [[rbxassetid://97390425817878]];
 G2L["4a"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -678,7 +673,6 @@ G2L["5c"] = Instance.new("LocalScript", G2L["59"]);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_Hitbox
 G2L["5d"] = Instance.new("ImageButton", G2L["d"]);
 G2L["5d"]["BorderSizePixel"] = 0;
-G2L["5d"]["Visible"] = false;
 G2L["5d"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["5d"]["Image"] = [[rbxassetid://105139943642120]];
 G2L["5d"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -732,13 +726,12 @@ G2L["63"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_Fly
 G2L["64"] = Instance.new("ImageButton", G2L["d"]);
 G2L["64"]["BorderSizePixel"] = 0;
-G2L["64"]["Visible"] = false;
 G2L["64"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["64"]["Image"] = [[rbxassetid://122757396244524]];
 G2L["64"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["64"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["64"]["Name"] = [[MISC_Fly]];
-G2L["64"]["Position"] = UDim2.new(0.048, 0, 0.58, 0);
+G2L["64"]["Position"] = UDim2.new(0.025, 0, 0.58, 0);
 
 
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_Fly.UICorner
@@ -1028,13 +1021,12 @@ G2L["8b"] = Instance.new("LocalScript", G2L["88"]);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_WhiteList_Open
 G2L["8c"] = Instance.new("ImageButton", G2L["d"]);
 G2L["8c"]["BorderSizePixel"] = 0;
-G2L["8c"]["Visible"] = false;
 G2L["8c"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["8c"]["Image"] = [[rbxassetid://78292908557666]];
 G2L["8c"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["8c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["8c"]["Name"] = [[MISC_WhiteList_Open]];
-G2L["8c"]["Position"] = UDim2.new(0.048, 0, 0.49, 0);
+G2L["8c"]["Position"] = UDim2.new(0.025, 0, 0.49, 0);
 
 
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_WhiteList_Open.UICorner
@@ -1198,7 +1190,7 @@ G2L["a0"]["Image"] = [[rbxassetid://139446261097202]];
 G2L["a0"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["a0"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["a0"]["Name"] = [[MISC_FullBright]];
-G2L["a0"]["Position"] = UDim2.new(0.048, 0, 0.67, 0);
+G2L["a0"]["Position"] = UDim2.new(0.025, 0, 0.67, 0);
 
 
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_FullBright.UICorner
