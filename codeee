@@ -4236,6 +4236,9 @@ local script = G2L["b6"];
 			if child:IsA("Frame") then
 				child.Visible = false
 			end
+			if child:IsA("TextButton") then
+				child.Visible = false  -- 👈 ТЕПЕРЬ СКРЫВАЕМ ВСЕ TextButton
+			end
 		end
 	
 		-- ===== TELEPORT =====
