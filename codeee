@@ -2212,7 +2212,7 @@ local script = G2L["3a"];
 	-- ==========================================
 	local button = script.Parent
 	
-	-- ===== СПИСОК ЦВЕТОВ (ТОЛЬКО RGB) =====
+	-- ===== СПИСОК ЦВЕТОВ =====
 	local colors = {
 		Color3.fromRGB(138, 43, 226),  -- фиолетовый
 		Color3.fromRGB(255, 0, 0),     -- красный
@@ -2235,17 +2235,11 @@ local script = G2L["3a"];
 	-- ===== ОБНОВЛЕНИЕ КНОПКИ =====
 	local function updateButton()
 		local color = colors[currentIndex]
-	
-		-- Меняем цвет картинки
 		button.ImageColor3 = color
-		button.ImageTransparency = 0.2
-	
-		-- Сохраняем в глобалку для ESP_Box
 		_G.ESP_Color = color
-		print("🎨 Цвет изменён!")
 	end
 	
-	-- ===== КЛИК ПО КНОПКЕ =====
+	-- ===== КЛИК =====
 	button.MouseButton1Click:Connect(function()
 		currentIndex = currentIndex + 1
 		if currentIndex > #colors then
@@ -2254,10 +2248,8 @@ local script = G2L["3a"];
 		updateButton()
 	end)
 	
-	-- ===== ПЕРВОЕ ОБНОВЛЕНИЕ =====
 	updateButton()
-	
-	print("✅ ESP_Box_Color (ImageButton) загружена!")
+	print("✅ ESP_Box_Color загружена!")
 end;
 task.spawn(C_3a);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_OpenPlayerList.LocalScript
