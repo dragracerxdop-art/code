@@ -99,6 +99,7 @@ G2L["c"] = Instance.new("LocalScript", G2L["2"]);
 G2L["d"] = Instance.new("ScrollingFrame", G2L["2"]);
 G2L["d"]["Active"] = true;
 G2L["d"]["BorderSizePixel"] = 0;
+G2L["d"]["CanvasPosition"] = Vector2.new(0, 400);
 G2L["d"]["Name"] = [[RightFrame]];
 G2L["d"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["d"]["Size"] = UDim2.new(0, 352, 0, 420);
@@ -1192,7 +1193,6 @@ G2L["9f"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_FullBright
 G2L["a0"] = Instance.new("ImageButton", G2L["d"]);
 G2L["a0"]["BorderSizePixel"] = 0;
-G2L["a0"]["Visible"] = false;
 G2L["a0"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["a0"]["Image"] = [[rbxassetid://139446261097202]];
 G2L["a0"]["Size"] = UDim2.new(0, 149, 0, 73);
