@@ -516,7 +516,7 @@ G2L["47"]["BorderSizePixel"] = 0;
 G2L["47"]["TextSize"] = 14;
 G2L["47"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["47"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["47"]["FontFace"] = Font.new([[rbxasset://fonts/families/Creepster.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+G2L["47"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["47"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["47"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["47"]["Name"] = [[PlayerTemplate]];
@@ -622,7 +622,7 @@ G2L["55"]["BorderSizePixel"] = 0;
 G2L["55"]["TextSize"] = 14;
 G2L["55"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["55"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["55"]["FontFace"] = Font.new([[rbxasset://fonts/families/Creepster.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+G2L["55"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["55"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["55"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["55"]["Name"] = [[PlayerTemplate]];
@@ -792,7 +792,7 @@ G2L["6c"]["BorderSizePixel"] = 0;
 G2L["6c"]["TextSize"] = 14;
 G2L["6c"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["6c"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["6c"]["FontFace"] = Font.new([[rbxasset://fonts/families/Creepster.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+G2L["6c"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["6c"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["6c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["6c"]["Name"] = [[PlayerTemplate]];
@@ -894,7 +894,7 @@ G2L["7a"] = Instance.new("TextLabel", G2L["77"]);
 G2L["7a"]["BorderSizePixel"] = 0;
 G2L["7a"]["TextSize"] = 14;
 G2L["7a"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["7a"]["FontFace"] = Font.new([[rbxasset://fonts/families/Creepster.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+G2L["7a"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["7a"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["7a"]["Size"] = UDim2.new(0, 200, 0, 50);
 G2L["7a"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
@@ -919,7 +919,7 @@ G2L["7d"] = Instance.new("TextLabel", G2L["77"]);
 G2L["7d"]["BorderSizePixel"] = 0;
 G2L["7d"]["TextSize"] = 14;
 G2L["7d"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["7d"]["FontFace"] = Font.new([[rbxasset://fonts/families/Creepster.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+G2L["7d"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["7d"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["7d"]["Size"] = UDim2.new(0, 200, 0, 50);
 G2L["7d"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
@@ -2212,7 +2212,7 @@ local script = G2L["3a"];
 	-- ==========================================
 	local button = script.Parent
 	
-	-- ===== СПИСОК ЦВЕТОВ (ТОЛЬКО RGB) =====
+	-- ===== СПИСОК ЦВЕТОВ =====
 	local colors = {
 		Color3.fromRGB(138, 43, 226),  -- фиолетовый
 		Color3.fromRGB(255, 0, 0),     -- красный
@@ -2235,17 +2235,11 @@ local script = G2L["3a"];
 	-- ===== ОБНОВЛЕНИЕ КНОПКИ =====
 	local function updateButton()
 		local color = colors[currentIndex]
-	
-		-- Меняем цвет картинки
 		button.ImageColor3 = color
-		button.ImageTransparency = 0.2
-	
-		-- Сохраняем в глобалку для ESP_Box
 		_G.ESP_Color = color
-		print("🎨 Цвет изменён!")
 	end
 	
-	-- ===== КЛИК ПО КНОПКЕ =====
+	-- ===== КЛИК =====
 	button.MouseButton1Click:Connect(function()
 		currentIndex = currentIndex + 1
 		if currentIndex > #colors then
@@ -2254,10 +2248,8 @@ local script = G2L["3a"];
 		updateButton()
 	end)
 	
-	-- ===== ПЕРВОЕ ОБНОВЛЕНИЕ =====
 	updateButton()
-	
-	print("✅ ESP_Box_Color (ImageButton) загружена!")
+	print("✅ ESP_Box_Color загружена!")
 end;
 task.spawn(C_3a);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_OpenPlayerList.LocalScript
@@ -3930,130 +3922,49 @@ task.spawn(C_8f);
 local function C_96()
 local script = G2L["96"];
 	-- ==========================================
-	-- ТЕЛЕПОРТЫ (СКРОЛЛ ВСЕГДА АКТИВЕН)
+	-- ТЕСТ TeleportManager
 	-- ==========================================
+	print("🚀 1. Скрипт запущен!")
+	
 	local player = game.Players.LocalPlayer
 	local rightFrame = script.Parent
 	
-	print("🚀 TeleportManager запущен!")
+	print("🚀 2. RightFrame найден!")
 	
 	local teleportScroll = rightFrame:FindFirstChild("TELEPORT_SCROLL")
-	local inputBox = rightFrame:FindFirstChild("TELEPORT_NAME")
-	local addBtn = rightFrame:FindFirstChild("TELEPORT_ADD")
-	local removeBtn = rightFrame:FindFirstChild("TELEPORT_REMOVE")
-	local template = teleportScroll and teleportScroll:FindFirstChild("TELEPORT_TEMPLATE")
+	print("🚀 3. TELEPORT_SCROLL:", teleportScroll)
 	
-	if not teleportScroll or not inputBox or not addBtn or not removeBtn or not template then
-		warn("❌ Не все элементы найдены!")
+	if not teleportScroll then
+		warn("❌ TELEPORT_SCROLL не найден!")
 		return
 	end
 	
-	print("✅ Все элементы найдены!")
+	local inputBox = rightFrame:FindFirstChild("TELEPORT_NAME")
+	local addBtn = rightFrame:FindFirstChild("TELEPORT_ADD")
+	local removeBtn = rightFrame:FindFirstChild("TELEPORT_REMOVE")
+	local template = teleportScroll:FindFirstChild("TELEPORT_TEMPLATE")
 	
-	template.Visible = false
-	_G.Teleports = _G.Teleports or {}
-	local selectedName = nil
+	print("🚀 4. TELEPORT_NAME:", inputBox)
+	print("🚀 5. TELEPORT_ADD:", addBtn)
+	print("🚀 6. TELEPORT_REMOVE:", removeBtn)
+	print("🚀 7. TELEPORT_TEMPLATE:", template)
 	
-	local function updateList()
-		-- Удаляем старые кнопки (кроме шаблона)
-		for _, child in pairs(teleportScroll:GetChildren()) do
-			if child:IsA("TextButton") and child ~= template then
-				child:Destroy()
-			end
-			if child:IsA("TextLabel") then
-				child:Destroy()
-			end
-		end
-	
-		local yOffset = template.Position.Y.Offset
-		local buttonHeight = 45
-	
-		-- Создаём кнопки для телепортов
-		for name, pos in pairs(_G.Teleports) do
-			local btn = template:Clone()
-			btn.Visible = true
-			btn.Text = name
-			btn.Position = UDim2.new(template.Position.X.Scale, template.Position.X.Offset, 0, yOffset)
-			btn.Parent = teleportScroll
-			yOffset = yOffset + buttonHeight
-	
-			btn.MouseButton1Click:Connect(function()
-				for _, child in pairs(teleportScroll:GetChildren()) do
-					if child:IsA("TextButton") and child ~= template then
-						child.BackgroundColor3 = template.BackgroundColor3
-						child.BackgroundTransparency = template.BackgroundTransparency
-					end
-				end
-				btn.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
-				btn.BackgroundTransparency = 0.3
-				selectedName = name
-				print("✅ Выбран телепорт: " .. name)
-			end)
-	
-			btn.MouseButton2Click:Connect(function()
-				local char = player.Character
-				if char and char:FindFirstChild("HumanoidRootPart") then
-					char.HumanoidRootPart.CFrame = pos
-					print("✅ Телепорт к: " .. name)
-				else
-					print("❌ Персонаж не найден!")
-				end
-			end)
-		end
-	
-		-- 👇 СКРОЛЛ ВСЕГДА АКТИВЕН (минимальная высота 400)
-		local minCanvasHeight = 400
-		local canvasHeight = math.max(yOffset + 10, minCanvasHeight)
-		teleportScroll.CanvasSize = UDim2.new(0, 0, 0, canvasHeight)
-	
-		print("✅ Список обновлён! CanvasSize: " .. canvasHeight)
+	if not inputBox or not addBtn or not removeBtn or not template then
+		warn("❌ Что-то не найдено!")
+		return
 	end
 	
+	print("✅ Все элементы найдены! Скрипт работает!")
+	
+	-- ===== ПРОСТАЯ КНОПКА ДЛЯ ТЕСТА =====
 	addBtn.MouseButton1Click:Connect(function()
-		local name = inputBox.Text
-		if name == "" then
-			print("❌ Введите название!")
-			return
-		end
-	
-		local char = player.Character
-		if not char then
-			print("❌ Персонаж не найден!")
-			return
-		end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then
-			print("❌ HumanoidRootPart не найден!")
-			return
-		end
-	
-		_G.Teleports[name] = hrp.CFrame
-		inputBox.Text = ""
-		updateList()
-		print("✅ Сохранён телепорт: " .. name)
+		print("🔥 КНОПКА + НАЖАТА!")
+		game:GetService("StarterGui"):SetCore("SendNotification", {
+			Title = "Тест",
+			Text = "Кнопка + работает!",
+			Duration = 3
+		})
 	end)
-	
-	removeBtn.MouseButton1Click:Connect(function()
-		if not selectedName then
-			print("❌ Сначала выбери телепорт (кликни по нему)!")
-			return
-		end
-	
-		if _G.Teleports[selectedName] == nil then
-			print("❌ Телепорт уже удалён!")
-			selectedName = nil
-			return
-		end
-	
-		_G.Teleports[selectedName] = nil
-		selectedName = nil
-		updateList()
-		print("❌ Удалён выбранный телепорт!")
-	end)
-	
-	updateList()
-	print("✅ TeleportManager загружен!")
 end;
 task.spawn(C_96);
 -- StarterGui.Folder.ScreenGui.MainFrame.LeftFrame.SwitchTabs
