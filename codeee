@@ -594,7 +594,6 @@ G2L["51"] = Instance.new("LocalScript", G2L["4e"]);
 
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_PlayerList
 G2L["52"] = Instance.new("ScrollingFrame", G2L["d"]);
-G2L["52"]["Visible"] = false;
 G2L["52"]["Active"] = true;
 G2L["52"]["BorderSizePixel"] = 0;
 G2L["52"]["Name"] = [[SPECTATE_PlayerList]];
@@ -1199,7 +1198,7 @@ G2L["a0"]["Image"] = [[rbxassetid://139446261097202]];
 G2L["a0"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["a0"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["a0"]["Name"] = [[SPECTATE_FullBright]];
-G2L["a0"]["Position"] = UDim2.new(0.04516, 0, 0.14879, 0);
+G2L["a0"]["Position"] = UDim2.new(0.03095, 0, 0.17062, 0);
 
 
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_FullBright.UICorner
