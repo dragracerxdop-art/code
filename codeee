@@ -2520,16 +2520,39 @@ task.spawn(C_46);
 local function C_4b()
 local script = G2L["4b"];
 	-- ==========================================
-	-- АНТИ-ФЛИНГ (ТОЛЬКО ЛОГИКА, БЕЗ ИНДИКАТОРА)
+	-- MISC_AntiFling (ВКЛ/ВЫКЛ)
 	-- ==========================================
-	local Players = game:GetService("Players")
-	local RunService = game:GetService("RunService")
+	local button = script.Parent
+	local player = game.Players.LocalPlayer
+	local runService = game:GetService("RunService")
 	
-	local localPlayer = Players.LocalPlayer
+	local isEnabled = false
+	local antiFlingLoop = nil
 	local connections = {}
-	local isEnabled = true
 	
-	-- ===== ОТКЛЮЧЕНИЕ КОЛЛИЗИЙ У ДРУГИХ ИГРОКОВ =====
+	-- Индикатор
+	local indicator = Instance.new("TextLabel")
+	indicator.Name = "Indicator"
+	indicator.Size = UDim2.new(1, 0, 0.3, 0)
+	indicator.Position = UDim2.new(0, 0, 0.7, 0)
+	indicator.BackgroundTransparency = 1
+	indicator.Text = "ВЫКЛ"
+	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+	indicator.TextSize = 14
+	indicator.Font = Enum.Font.SourceSansBold
+	indicator.Parent = button
+	
+	local function updateState()
+		if isEnabled then
+			indicator.Text = "ВКЛ"
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+		else
+			indicator.Text = "ВЫКЛ"
+			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+		end
+	end
+	
+	-- ===== ОТКЛЮЧЕНИЕ КОЛЛИЗИЙ У ВСЕХ ИГРОКОВ =====
 	local function setupCharacterCollision(character)
 		local function disableCollide(part)
 			if isEnabled and part:IsA("BasePart") then
@@ -2543,7 +2566,7 @@ local script = G2L["4b"];
 	
 		local childAddedConn = character.ChildAdded:Connect(disableCollide)
 	
-		local steppedConn = RunService.Stepped:Connect(function()
+		local steppedConn = runService.Stepped:Connect(function()
 			if isEnabled and character:IsDescendantOf(workspace) then
 				for _, part in ipairs(character:GetChildren()) do
 					if part:IsA("BasePart") and part.CanCollide then
@@ -2559,37 +2582,67 @@ local script = G2L["4b"];
 		end)
 	end
 	
-	-- ===== ОТСЛЕЖИВАНИЕ ИГРОКОВ =====
-	local function trackPlayer(player)
-		if player == localPlayer then return end
-		local charAddedConn = player.CharacterAdded:Connect(setupCharacterCollision)
-		if player.Character then
-			setupCharacterCollision(player.Character)
+	local function trackPlayer(plr)
+		if plr == player then return end
+		local charAddedConn = plr.CharacterAdded:Connect(setupCharacterCollision)
+		if plr.Character then
+			setupCharacterCollision(plr.Character)
 		end
-		connections[player] = charAddedConn
+		connections[plr] = charAddedConn
 	end
 	
-	local function untrackPlayer(player)
-		if connections[player] then
-			connections[player]:Disconnect()
-			connections[player] = nil
+	local function untrackPlayer(plr)
+		if connections[plr] then
+			connections[plr]:Disconnect()
+			connections[plr] = nil
 		end
 	end
 	
-	for _, player in ipairs(Players:GetPlayers()) do
-		trackPlayer(player)
+	-- ===== ВКЛЮЧЕНИЕ =====
+	local function enableAntiFling()
+		for _, plr in ipairs(game.Players:GetPlayers()) do
+			trackPlayer(plr)
+		end
+		game.Players.PlayerAdded:Connect(trackPlayer)
+		game.Players.PlayerRemoving:Connect(untrackPlayer)
 	end
 	
-	Players.PlayerAdded:Connect(trackPlayer)
-	Players.PlayerRemoving:Connect(untrackPlayer)
+	-- ===== ВЫКЛЮЧЕНИЕ (ВОССТАНОВЛЕНИЕ КОЛЛИЗИЙ) =====
+	local function disableAntiFling()
+		for plr, conn in pairs(connections) do
+			conn:Disconnect()
+			connections[plr] = nil
+		end
+		-- Восстанавливаем коллизии у всех игроков
+		for _, plr in pairs(game.Players:GetPlayers()) do
+			if plr ~= player and plr.Character then
+				for _, part in pairs(plr.Character:GetChildren()) do
+					if part:IsA("BasePart") then
+						part.CanCollide = true
+					end
+				end
+			end
+		end
+	end
 	
-	-- ===== ВКЛ/ВЫКЛ (ЧЕРЕЗ ГЛОБАЛЬНУЮ ФУНКЦИЮ) =====
-	_G.toggleAntiFling = function()
+	-- ===== ПЕРЕКЛЮЧЕНИЕ =====
+	local function toggleAntiFling()
 		isEnabled = not isEnabled
-		print("🛡️ Анти-флинг:", isEnabled and "ВКЛЮЧЕН" or "ВЫКЛЮЧЕН")
+		updateState()
+	
+		if isEnabled then
+			enableAntiFling()
+			print("🛡️ Анти-флинг ВКЛЮЧЕН")
+		else
+			disableAntiFling()
+			print("🛡️ Анти-флинг ВЫКЛЮЧЕН")
+		end
 	end
 	
-	print("✅ Анти-флинг загружен! Используй _G.toggleAntiFling()")
+	button.MouseButton1Click:Connect(toggleAntiFling)
+	
+	updateState()
+	print("✅ MISC_AntiFling загружена!")
 end;
 task.spawn(C_4b);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.SPECTATE_OpenList.LocalScript
