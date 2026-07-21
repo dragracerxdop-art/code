@@ -516,7 +516,7 @@ G2L["47"]["BorderSizePixel"] = 0;
 G2L["47"]["TextSize"] = 14;
 G2L["47"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["47"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["47"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+G2L["47"]["FontFace"] = Font.new([[rbxasset://fonts/families/Creepster.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["47"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["47"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["47"]["Name"] = [[PlayerTemplate]];
@@ -622,7 +622,7 @@ G2L["55"]["BorderSizePixel"] = 0;
 G2L["55"]["TextSize"] = 14;
 G2L["55"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["55"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["55"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+G2L["55"]["FontFace"] = Font.new([[rbxasset://fonts/families/Creepster.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["55"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["55"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["55"]["Name"] = [[PlayerTemplate]];
@@ -792,7 +792,7 @@ G2L["6c"]["BorderSizePixel"] = 0;
 G2L["6c"]["TextSize"] = 14;
 G2L["6c"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["6c"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["6c"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+G2L["6c"]["FontFace"] = Font.new([[rbxasset://fonts/families/Creepster.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["6c"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["6c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["6c"]["Name"] = [[PlayerTemplate]];
@@ -2212,7 +2212,7 @@ local script = G2L["3a"];
 	-- ==========================================
 	local button = script.Parent
 	
-	-- ===== СПИСОК ЦВЕТОВ =====
+	-- ===== СПИСОК ЦВЕТОВ (ТОЛЬКО RGB) =====
 	local colors = {
 		Color3.fromRGB(138, 43, 226),  -- фиолетовый
 		Color3.fromRGB(255, 0, 0),     -- красный
@@ -2235,11 +2235,17 @@ local script = G2L["3a"];
 	-- ===== ОБНОВЛЕНИЕ КНОПКИ =====
 	local function updateButton()
 		local color = colors[currentIndex]
+	
+		-- Меняем цвет картинки
 		button.ImageColor3 = color
+		button.ImageTransparency = 0.2
+	
+		-- Сохраняем в глобалку для ESP_Box
 		_G.ESP_Color = color
+		print("🎨 Цвет изменён!")
 	end
 	
-	-- ===== КЛИК =====
+	-- ===== КЛИК ПО КНОПКЕ =====
 	button.MouseButton1Click:Connect(function()
 		currentIndex = currentIndex + 1
 		if currentIndex > #colors then
@@ -2248,8 +2254,10 @@ local script = G2L["3a"];
 		updateButton()
 	end)
 	
+	-- ===== ПЕРВОЕ ОБНОВЛЕНИЕ =====
 	updateButton()
-	print("✅ ESP_Box_Color загружена!")
+	
+	print("✅ ESP_Box_Color (ImageButton) загружена!")
 end;
 task.spawn(C_3a);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_OpenPlayerList.LocalScript
