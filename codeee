@@ -3337,100 +3337,209 @@ task.spawn(C_60);
 local function C_67()
 local script = G2L["67"];
 	-- ==========================================
-	-- TROLL_Invisible (С ВИЗУАЛЬНЫМ ИНДИКАТОРОМ)
+	-- MISC_Fly (СТАРАЯ ЛОГИКА, БЕЗ ИНЕРЦИИ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
+	local runService = game:GetService("RunService")
+	local uis = game:GetService("UserInputService")
 	
-	local isInvisible = false
+	local isEnabled = false
+	local flyLoop = nil
+	local bg = nil
+	local bv = nil
+	local maxspeed = 50
+	local ctrl = {f = 0, b = 0, l = 0, r = 0}
 	
-	-- ===== СОЗДАЕМ ИНДИКАТОР =====
+	-- Находим поле для ввода скорости
+	local rightFrame = button.Parent
+	local speedBox = rightFrame:FindFirstChild("MISC_FlySpeed")
+	
+	if not speedBox then
+		warn("❌ MISC_FlySpeed не найден!")
+	end
+	
+	-- Индикатор
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
-	indicator.Size = UDim2.new(1, 0, 0.4, 0)
-	indicator.Position = UDim2.new(0, 0, 0.6, 0)
+	indicator.Size = UDim2.new(1, 0, 0.3, 0)
+	indicator.Position = UDim2.new(0, 0, 0.7, 0)
 	indicator.BackgroundTransparency = 1
-	indicator.Text = "👀 ВИДИМ"
-	indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-	indicator.TextSize = 18
+	indicator.Text = "ВЫКЛ"
+	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+	indicator.TextSize = 14
 	indicator.Font = Enum.Font.SourceSansBold
-	indicator.TextStrokeTransparency = 0.5
-	indicator.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 	indicator.Parent = button
 	
-	-- ===== ФУНКЦИЯ ОБНОВЛЕНИЯ ИНДИКАТОРА =====
-	local function updateIndicator()
-		if isInvisible then
-			indicator.Text = "👻 НЕВИДИМ"
-			indicator.TextColor3 = Color3.fromRGB(255, 255, 0)
-			button.BackgroundColor3 = Color3.fromRGB(50, 50, 0)
-		else
-			indicator.Text = "👀 ВИДИМ"
+	local function updateState()
+		if isEnabled then
+			indicator.Text = "ВКЛ"
 			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-			button.BackgroundColor3 = Color3.fromRGB(0, 50, 0)
+		else
+			indicator.Text = "ВЫКЛ"
+			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 		end
 	end
 	
-	-- ====== НАСТОЯЩИЙ ИНВИЗ ======
-	local function setInvisible(char, state)
+	-- ===== ПОЛУЧЕНИЕ СКОРОСТИ =====
+	local function getSpeed()
+		if speedBox then
+			local val = tonumber(speedBox.Text)
+			if val and val > 0 then
+				return val
+			end
+		end
+		return 50
+	end
+	
+	-- ===== ОСТАНОВКА =====
+	local function stopFly()
+		if flyLoop then
+			flyLoop:Disconnect()
+			flyLoop = nil
+		end
+		if bg then bg:Destroy() bg = nil end
+		if bv then bv:Destroy() bv = nil end
+	
+		local char = player.Character
+		if char then
+			local humanoid = char:FindFirstChildOfClass("Humanoid")
+			if humanoid then
+				humanoid.PlatformStand = false
+			end
+			local animate = char:FindFirstChild("Animate")
+			if animate then
+				animate.Disabled = false
+			end
+		end
+		ctrl = {f = 0, b = 0, l = 0, r = 0}
+	end
+	
+	-- ===== ЗАПУСК =====
+	local function startFly()
+		local char = player.Character
 		if not char then return end
 	
-		-- Делаем полностью прозрачным ВСЁ
-		for _, part in ipairs(char:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.Transparency = state and 1 or 0
-				part.CastShadow = not state
-				part.LocalTransparencyModifier = state and 1 or 0
-			end
-			if part:IsA("Decal") or part:IsA("Texture") then
-				part.Transparency = state and 1 or 0
-			end
-		end
-	
-		-- Прячем Humanoid
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			humanoid.Visible = not state
-		end
-	
-		-- Прячем аксессуары
-		for _, accessory in ipairs(char:GetChildren()) do
-			if accessory:IsA("Accessory") then
-				local handle = accessory:FindFirstChild("Handle")
-				if handle then
-					handle.Transparency = state and 1 or 0
-					handle.CastShadow = not state
-				end
-			end
-		end
-	
-		print(state and "👻 ИНВИЗ ВКЛЮЧЕН!" or "👀 ИНВИЗ ВЫКЛЮЧЕН!")
-	end
-	
-	-- ====== НАЖАТИЕ КНОПКИ ======
-	button.MouseButton1Click:Connect(function()
-		local char = player.Character
-		if not char then
-			print("❌ НЕТ ПЕРСОНАЖА!")
+		local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+		if not torso then
+			warn("❌ Torso/UpperTorso не найден!")
 			return
 		end
 	
-		isInvisible = not isInvisible
-		setInvisible(char, isInvisible)
-		updateIndicator()
-	end)
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid then return end
 	
-	-- ====== ПРИ РЕСПАВНЕ ВЫКЛЮЧАЕМ ИНВИЗ ======
-	player.CharacterAdded:Connect(function(char)
-		task.wait(0.5)
-		if isInvisible then
-			setInvisible(char, true)
-			updateIndicator()
+		maxspeed = getSpeed()
+		if maxspeed < 5 then maxspeed = 5 end
+		if maxspeed > 500 then maxspeed = 500 end
+	
+		stopFly()
+	
+		local animate = char:FindFirstChild("Animate")
+		if animate then
+			animate.Disabled = true
+		end
+	
+		humanoid.PlatformStand = true
+	
+		bg = Instance.new("BodyGyro", torso)
+		bg.P = 9e4
+		bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+		bg.cframe = torso.CFrame
+	
+		bv = Instance.new("BodyVelocity", torso)
+		bv.velocity = Vector3.new(0, 0.1, 0)
+		bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+	
+		ctrl = {f = 0, b = 0, l = 0, r = 0}
+	
+		flyLoop = runService.RenderStepped:Connect(function()
+			if not isEnabled or not player.Character then
+				stopFly()
+				return
+			end
+	
+			local torso = player.Character:FindFirstChild("Torso") or player.Character:FindFirstChild("UpperTorso")
+			if not torso then return end
+	
+			-- МГНОВЕННАЯ СКОРОСТЬ (БЕЗ ИНЕРЦИИ)
+			local moveX = ctrl.l + ctrl.r
+			local moveZ = ctrl.f + ctrl.b
+	
+			local cam = workspace.CurrentCamera
+			local forward = cam.CFrame.LookVector
+			local right = cam.CFrame.RightVector
+	
+			if moveX ~= 0 or moveZ ~= 0 then
+				bv.velocity = (forward * moveZ + right * moveX) * maxspeed
+			else
+				bv.velocity = Vector3.new(0, 0, 0)  -- МГНОВЕННАЯ ОСТАНОВКА
+			end
+	
+			-- Поворачиваем персонажа
+			bg.cframe = cam.CFrame
+		end)
+	end
+	
+	-- ===== КЛАВИШИ =====
+	uis.InputBegan:Connect(function(input, gameProcessed)
+		if gameProcessed or not isEnabled then return end
+	
+		if input.KeyCode == Enum.KeyCode.W then ctrl.f = 1
+		elseif input.KeyCode == Enum.KeyCode.S then ctrl.b = -1
+		elseif input.KeyCode == Enum.KeyCode.A then ctrl.l = -1
+		elseif input.KeyCode == Enum.KeyCode.D then ctrl.r = 1
 		end
 	end)
 	
-	updateIndicator()
-	print("✅ TROLL_Invisible ЗАГРУЖЕН!")
+	uis.InputEnded:Connect(function(input, gameProcessed)
+		if gameProcessed or not isEnabled then return end
+	
+		if input.KeyCode == Enum.KeyCode.W then ctrl.f = 0
+		elseif input.KeyCode == Enum.KeyCode.S then ctrl.b = 0
+		elseif input.KeyCode == Enum.KeyCode.A then ctrl.l = 0
+		elseif input.KeyCode == Enum.KeyCode.D then ctrl.r = 0
+		end
+	end)
+	
+	-- ===== ПЕРЕКЛЮЧЕНИЕ =====
+	local function toggleFly()
+		isEnabled = not isEnabled
+		updateState()
+	
+		if isEnabled then
+			startFly()
+			print("✈️ Полёт включён! Скорость: " .. maxspeed)
+		else
+			stopFly()
+			print("✈️ Полёт выключен!")
+		end
+	end
+	
+	button.MouseButton1Click:Connect(toggleFly)
+	
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5)
+		if isEnabled then
+			stopFly()
+			task.wait(0.5)
+			startFly()
+		end
+	end)
+	
+	if speedBox then
+		speedBox.FocusLost:Connect(function()
+			if isEnabled then
+				maxspeed = getSpeed()
+				if maxspeed < 5 then maxspeed = 5 end
+				if maxspeed > 500 then maxspeed = 500 end
+				print("✈️ Скорость обновлена: " .. maxspeed)
+			end
+		end)
+	end
+	
+	updateState()
+	print("✅ MISC_Fly загружена!")
 end;
 task.spawn(C_67);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_WhiteList.LocalScript
@@ -4676,84 +4785,76 @@ task.spawn(C_ae);
 local function C_b2()
 local script = G2L["b2"];
 	-- ==========================================
-	-- TROLL_Invisible (АДАПТИРОВАННЫЙ ИЗ FE INVISIBLE)
+	-- TROLL_Invisible (FE INVISIBLE СТИЛЬ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	
 	local invis_on = false
-	local invis_transparency = 0.75  -- 75% прозрачности (как в твоем скрипте)
+	local seatTeleportPosition = Vector3.new(-25.95, 400, 3537.55)
 	
-	-- ====== ФУНКЦИЯ ИНВИЗА (ИЗ ТВОЕГО СКРИПТА) ======
-	local function setCharacterTransparency(transparency)
-		local character = player.Character
-		if character then
-			for _, part in pairs(character:GetDescendants()) do
-				if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-					part.Transparency = transparency
-				end
-			end
-		end
-	end
-	
-	-- ====== ИНДИКАТОР ======
-	local indicator = Instance.new("TextLabel")
-	indicator.Name = "Indicator"
-	indicator.Size = UDim2.new(1, 0, 0.4, 0)
-	indicator.Position = UDim2.new(0, 0, 0.6, 0)
-	indicator.BackgroundTransparency = 1
-	indicator.Text = "👀 ВИДИМ"
-	indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-	indicator.TextSize = 18
-	indicator.Font = Enum.Font.SourceSansBold
-	indicator.TextStrokeTransparency = 0.5
-	indicator.Parent = button
-	
-	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
-	local function updateIndicator()
-		if invis_on then
-			indicator.Text = "👻 ИНВИЗ"
-			indicator.TextColor3 = Color3.fromRGB(255, 255, 0)
-			button.BackgroundColor3 = Color3.fromRGB(50, 50, 0)
-		else
-			indicator.Text = "👀 ВИДИМ"
-			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-			button.BackgroundColor3 = Color3.fromRGB(0, 50, 0)
-		end
-	end
-	
-	-- ====== КНОПКА ======
 	button.MouseButton1Click:Connect(function()
 		local char = player.Character
-		if not char then
-			print("❌ НЕТ ПЕРСОНАЖА!")
-			return
-		end
+		if not char then return end
 	
 		invis_on = not invis_on
 	
 		if invis_on then
-			setCharacterTransparency(invis_transparency)
-			print("👻 ИНВИЗ ВКЛЮЧЕН! Прозрачность: " .. invis_transparency * 100 .. "%")
+			-- Метод из твоего скрипта
+			for _, part in pairs(char:GetDescendants()) do
+				if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+					part.Transparency = 0.75
+				end
+			end
+	
+			-- Телепорт на сиденье
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				local savedpos = hrp.CFrame
+				task.wait(0.05)
+				pcall(function() char:MoveTo(seatTeleportPosition) end)
+				task.wait(0.05)
+	
+				local Seat = Instance.new('Seat')
+				Seat.Parent = workspace
+				Seat.Anchored = false
+				Seat.CanCollide = false
+				Seat.Name = 'invischair'
+				Seat.Transparency = 1
+				Seat.Position = seatTeleportPosition
+	
+				local Weld = Instance.new("Weld")
+				Weld.Part0 = Seat
+				local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+				if torso then
+					Weld.Part1 = torso
+					Weld.Parent = Seat
+					task.wait()
+					pcall(function() Seat.CFrame = savedpos end)
+				end
+			end
+	
+			button.Text = "Инвиз Вкл"
+			print("👻 ИНВИЗ ВКЛ!")
 		else
-			setCharacterTransparency(0)
-			print("👀 ИНВИЗ ВЫКЛЮЧЕН!")
-		end
+			-- Отключаем
+			for _, part in pairs(char:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.Transparency = 0
+				end
+			end
 	
-		updateIndicator()
+			local inv = workspace:FindFirstChild('invischair')
+			if inv then
+				pcall(function() inv:Destroy() end)
+			end
+	
+			button.Text = "Инвиз Выкл"
+			print("👀 ИНВИЗ ВЫКЛ!")
+		end
 	end)
 	
-	-- ====== ПРИ РЕСПАВНЕ ВЫКЛЮЧАЕМ ======
-	player.CharacterAdded:Connect(function(char)
-		task.wait(0.5)
-		if invis_on then
-			setCharacterTransparency(invis_transparency)
-			updateIndicator()
-		end
-	end)
-	
-	updateIndicator()
-	print("✅ TROLL_Invisible ЗАГРУЖЕН! (Адаптирован из FE Invisible)")
+	print("✅ FE INVISIBLE СТИЛЬ ЗАГРУЖЕН!")
 end;
 task.spawn(C_b2);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Slap.LocalScript
