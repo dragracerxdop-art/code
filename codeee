@@ -3051,7 +3051,7 @@ local script = G2L["60"];
 	local function applyHitbox()
 		local size = tonumber(textBox.Text) or 5
 		if size < 1 then size = 1 end
-		if size > 20 then size = 20 end  -- 👈 ОСТАВЛЯЕМ ОГРАНИЧЕНИЕ (рабочее)
+		if size > 20 then size = 20 end
 	
 		local transparency = 0.5
 		local color = BrickColor.new("Lilac")
