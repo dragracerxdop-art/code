@@ -5581,7 +5581,7 @@ task.spawn(C_bf);
 local function C_d2()
 local script = G2L["d2"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (С ANIMATIONS + CHOOSE)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (С ANIMATIONS_Choose)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -5744,14 +5744,14 @@ local script = G2L["d2"];
 			-- ===== ANIMATIONS =====
 		elseif tabName == "Animations" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("ImageButton") and child.Name == "Choose" then
+				if child:IsA("ImageButton") and child.Name == "ANIMATIONS_Choose" then
 					child.Visible = true
 				end
-				if child:IsA("TextButton") and child.Name == "Choose" then
+				if child:IsA("TextButton") and child.Name == "ANIMATIONS_Choose" then
 					child.Visible = true
 				end
 			end
-			print("✅ ANIMATIONS (Choose)")
+			print("✅ ANIMATIONS (ANIMATIONS_Choose)")
 	
 			-- ===== TROLL =====
 		elseif tabName == "Troll" then
@@ -5792,7 +5792,7 @@ local script = G2L["d2"];
 	end
 	
 	switchTab("TELEPORT")
-	print("✅ Переключение вкладок загружено! (Animations + Choose)")
+	print("✅ Переключение вкладок загружено! (ANIMATIONS_Choose)")
 end;
 task.spawn(C_d2);
 -- StarterGui.Folder.ScreenGui.MainFrame.HotKeys
