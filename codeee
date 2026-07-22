@@ -3002,7 +3002,7 @@ task.spawn(C_5c);
 local function C_60()
 local script = G2L["60"];
 	-- ==========================================
-	-- ХИТБОКС (С ВАЙТ-ЛИСТОМ) - СВЕТЛЫЙ
+	-- ХИТБОКС (БЕЗ ОГРАНИЧЕНИЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -3051,15 +3051,13 @@ local script = G2L["60"];
 	local function applyHitbox()
 		local size = tonumber(textBox.Text) or 5
 		if size < 1 then size = 1 end
-		if size > 20 then size = 20 end
+		-- 👇 УБРАЛ ОГРАНИЧЕНИЕ size > 20
 	
-		-- СВЕТЛЫЙ И ПРОЗРАЧНЫЙ
-		local transparency = 0.5   -- 👈 прозрачнее (было 0.3)
-		local color = BrickColor.new("Lilac")  -- 👈 светлый (было Really black)
+		local transparency = 0.5
+		local color = BrickColor.new("Lilac")
 	
 		for _, plr in pairs(game.Players:GetPlayers()) do
 			if plr ~= player and plr.Character then
-				-- ПРОВЕРЯЕМ ВАЙТ-ЛИСТ
 				if isInWhiteList(plr) then
 					continue
 				end
@@ -3112,7 +3110,7 @@ local script = G2L["60"];
 					applyHitbox()
 				end
 			end)
-			print("🟣 Хитбокс включен (светлый)!")
+			print("🟣 Хитбокс включен (размер: " .. textBox.Text .. ")")
 		else
 			if hitboxLoop then
 				hitboxLoop:Disconnect()
@@ -3134,8 +3132,7 @@ local script = G2L["60"];
 	
 	updateState()
 	indicator.BackgroundTransparency = 1
-	print("✅ Хитбокс с вайт-листом загружен (светлый)!")
-	
+	print("✅ Хитбокс с вайт-листом загружен (без ограничений)!")
 end;
 task.spawn(C_60);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_Fly.LocalScript
