@@ -3141,7 +3141,7 @@ task.spawn(C_60);
 local function C_67()
 local script = G2L["67"];
 	-- ==========================================
-	-- MISC_Fly (С ПОЛЕМ ВВОДА СКОРОСТИ)
+	-- MISC_Fly (БЕЗ ИНЕРЦИИ, МГНОВЕННАЯ ОСТАНОВКА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -3153,8 +3153,6 @@ local script = G2L["67"];
 	local bg = nil
 	local bv = nil
 	local ctrl = {f = 0, b = 0, l = 0, r = 0}
-	local lastctrl = {f = 0, b = 0, l = 0, r = 0}
-	local currentSpeed = 0
 	local maxspeed = 50
 	
 	-- Находим поле для ввода скорости
@@ -3198,6 +3196,20 @@ local script = G2L["67"];
 		return 50
 	end
 	
+	-- ===== ОБНОВЛЕНИЕ СКОРОСТИ =====
+	local function updateSpeed()
+		if isEnabled then
+			maxspeed = getSpeed()
+			if maxspeed < 5 then maxspeed = 5 end
+			if maxspeed > 500 then maxspeed = 500 end
+			print("✈️ Скорость: " .. maxspeed)
+		end
+	end
+	
+	if speedBox then
+		speedBox.FocusLost:Connect(updateSpeed)
+	end
+	
 	-- ===== ОСТАНОВКА =====
 	local function stopFly()
 		if flyLoop then
@@ -3219,8 +3231,6 @@ local script = G2L["67"];
 			end
 		end
 		ctrl = {f = 0, b = 0, l = 0, r = 0}
-		lastctrl = {f = 0, b = 0, l = 0, r = 0}
-		currentSpeed = 0
 	end
 	
 	-- ===== ЗАПУСК =====
@@ -3234,10 +3244,9 @@ local script = G2L["67"];
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid then return end
 	
-		-- Получаем скорость из поля
 		maxspeed = getSpeed()
 		if maxspeed < 5 then maxspeed = 5 end
-		if maxspeed > 200 then maxspeed = 200 end
+		if maxspeed > 500 then maxspeed = 500 end
 	
 		stopFly()
 	
@@ -3258,8 +3267,6 @@ local script = G2L["67"];
 		bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
 	
 		ctrl = {f = 0, b = 0, l = 0, r = 0}
-		lastctrl = {f = 0, b = 0, l = 0, r = 0}
-		currentSpeed = 0
 	
 		flyLoop = runService.RenderStepped:Connect(function()
 			if not isEnabled or not player.Character then
@@ -3272,24 +3279,16 @@ local script = G2L["67"];
 	
 			if not bg or not bv then return end
 	
-			if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
-				currentSpeed = currentSpeed + 0.5 + (currentSpeed / maxspeed)
-				if currentSpeed > maxspeed then
-					currentSpeed = maxspeed
-				end
-				local vel = (workspace.CurrentCamera.CoordinateFrame.LookVector * (ctrl.f + ctrl.b) +
-					workspace.CurrentCamera.CoordinateFrame.RightVector * (ctrl.l + ctrl.r)) * currentSpeed
-				bv.velocity = vel
-				lastctrl = {f = ctrl.f, b = ctrl.b, l = ctrl.l, r = ctrl.r}
-			elseif currentSpeed > 0 then
-				currentSpeed = currentSpeed - 1
-				if currentSpeed < 0 then
-					currentSpeed = 0
-				end
-				local vel = (workspace.CurrentCamera.CoordinateFrame.LookVector * (lastctrl.f + lastctrl.b) +
-					workspace.CurrentCamera.CoordinateFrame.RightVector * (lastctrl.l + lastctrl.r)) * currentSpeed
+			-- Мгновенная скорость (без инерции)
+			local moveX = ctrl.l + ctrl.r
+			local moveZ = ctrl.f + ctrl.b
+	
+			if moveX ~= 0 or moveZ ~= 0 then
+				local vel = (workspace.CurrentCamera.CoordinateFrame.LookVector * moveZ +
+					workspace.CurrentCamera.CoordinateFrame.RightVector * moveX) * maxspeed
 				bv.velocity = vel
 			else
+				-- МГНОВЕННАЯ ОСТАНОВКА
 				bv.velocity = Vector3.new(0, 0, 0)
 			end
 	
