@@ -209,7 +209,7 @@ G2L["1c"] = Instance.new("ImageButton", G2L["d"]);
 G2L["1c"]["BorderSizePixel"] = 0;
 G2L["1c"]["Visible"] = false;
 G2L["1c"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["1c"]["Image"] = [[rbxassetid://83079585228176]];
+G2L["1c"]["Image"] = [[rbxassetid://116489487891186]];
 G2L["1c"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["1c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["1c"]["Name"] = [[ANIMATIONS_Choose]];
@@ -2168,14 +2168,10 @@ task.spawn(C_1b);
 local function C_1f()
 local script = G2L["1f"];
 	-- ==========================================
-	-- ПАК АНИМАЦИЙ (С КРАСИВЫМ GUI)
+	-- ANIMATIONS_Choose (С ПРИНУДИТЕЛЬНЫМ ПРИМЕНЕНИЕМ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
-	
-	local isActive = false
-	local currentPack = nil
-	local currentAnimTracks = {}
 	
 	-- ====== ДОСТУПНЫЕ ПАКИ АНИМАЦИЙ ======
 	local AnimPacks = {
@@ -2207,20 +2203,31 @@ local script = G2L["1f"];
 			Fall = "507767749",
 			Idle = "507767662",
 		},
+		["Крутой"] = {
+			Walk = "507767685",
+			Run = "507767706",
+			Jump = "507767728",
+			Fall = "507767749",
+			Idle = "507767662",
+		},
 	}
 	
-	-- ====== ПРИМЕНЕНИЕ ПАКА ======
+	local isActive = false
+	local currentPack = nil
+	local currentAnimTracks = {}
+	
+	-- ====== ПРИНУДИТЕЛЬНОЕ ПРИМЕНЕНИЕ ПАКА ======
 	local function applyAnimPack(packName)
 		local char = player.Character
-		if not char then return end
+		if not char then
+			print("❌ НЕТ ПЕРСОНАЖА!")
+			return
+		end
 	
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid then return end
-	
-		local animator = humanoid:FindFirstChild("Animator")
-		if not animator then
-			animator = Instance.new("Animator")
-			animator.Parent = humanoid
+		if not humanoid then
+			print("❌ НЕТ HUMANOID!")
+			return
 		end
 	
 		-- Останавливаем старые анимации
@@ -2231,9 +2238,22 @@ local script = G2L["1f"];
 	
 		-- Загружаем новый пак
 		local pack = AnimPacks[packName]
-		if not pack then return end
+		if not pack then
+			print("❌ ПАК НЕ НАЙДЕН: " .. packName)
+			return
+		end
+	
+		local animator = humanoid:FindFirstChild("Animator")
+		if not animator then
+			animator = Instance.new("Animator")
+			animator.Parent = humanoid
+		end
+	
+		print("🎬 ПРИМЕНЯЮ ПАК: " .. packName)
 	
 		for name, id in pairs(pack) do
+			print("   - " .. name .. ": " .. id)
+	
 			local anim = Instance.new("Animation")
 			anim.AnimationId = "rbxassetid://" .. id
 	
@@ -2243,11 +2263,19 @@ local script = G2L["1f"];
 				track.Priority = Enum.AnimationPriority.Core
 				track:Play()
 				table.insert(currentAnimTracks, track)
+				print("   ✅ " .. name .. " запущена!")
+			else
+				print("   ❌ " .. name .. " НЕ ЗАГРУЗИЛАСЬ!")
 			end
 		end
 	
 		currentPack = packName
-		print("🎬 Пак применён: " .. packName)
+	
+		-- Меняем текст кнопки
+		button.Text = "Пак: " .. packName
+	
+		-- Уведомление
+		print("✅ ПАК ПРИМЕНЁН: " .. packName)
 	end
 	
 	-- ====== ОСТАНОВКА ======
@@ -2257,40 +2285,38 @@ local script = G2L["1f"];
 		end
 		currentAnimTracks = {}
 		currentPack = nil
-		print("🛑 Пак остановлен!")
-	end
-	
-	-- ====== СОЗДАНИЕ UIStroke ======
-	local function createUIStroke(parent, color, thickness)
-		local stroke = Instance.new("UIStroke")
-		stroke.Parent = parent
-		stroke.Color = color
-		stroke.Thickness = thickness
-		stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-		return stroke
+		button.Text = "Выбрать пак"
+		print("🛑 ПАК ОСТАНОВЛЕН!")
 	end
 	
 	-- ====== GUI ВЫБОРА ======
 	local function createSelectionGUI()
+		local existing = player.PlayerGui:FindFirstChild("AnimPackSelector")
+		if existing then
+			existing:Destroy()
+			return
+		end
+	
 		local screenGui = Instance.new("ScreenGui")
 		screenGui.Parent = player.PlayerGui
 		screenGui.Name = "AnimPackSelector"
 		screenGui.ResetOnSpawn = false
 	
-		-- ====== ОСНОВНАЯ РАМКА ======
 		local frame = Instance.new("Frame")
 		frame.Parent = screenGui
-		frame.Size = UDim2.new(0, 280, 0, 420)
-		frame.Position = UDim2.new(0.5, -140, 0.5, -210)
+		frame.Size = UDim2.new(0, 280, 0, 480)
+		frame.Position = UDim2.new(0.5, -140, 0.5, -240)
 		frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 		frame.BackgroundTransparency = 0
 		frame.Active = true
 		frame.Draggable = true
 	
-		-- ФИОЛЕТОВАЯ ОБВОДКА
-		createUIStroke(frame, Color3.fromRGB(128, 0, 255), 3)
+		local stroke = Instance.new("UIStroke")
+		stroke.Parent = frame
+		stroke.Color = Color3.fromRGB(128, 0, 255)
+		stroke.Thickness = 3
+		stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	
-		-- ====== ЗАГОЛОВОК ======
 		local title = Instance.new("TextLabel")
 		title.Parent = frame
 		title.Size = UDim2.new(1, 0, 0, 45)
@@ -2300,20 +2326,16 @@ local script = G2L["1f"];
 		title.BackgroundTransparency = 1
 		title.TextSize = 22
 		title.Font = Enum.Font.SourceSansBold
-		title.TextScaled = false
 	
-		-- Линия разделитель
 		local line = Instance.new("Frame")
 		line.Parent = frame
 		line.Size = UDim2.new(0.9, 0, 0, 1)
 		line.Position = UDim2.new(0.05, 0, 0, 52)
 		line.BackgroundColor3 = Color3.fromRGB(128, 0, 255)
-		line.BackgroundTransparency = 0
 	
-		-- ====== КНОПКИ ВЫБОРА ПАКОВ ======
 		local yOffset = 65
 		local btnHeight = 40
-		local spacing = 8
+		local spacing = 6
 	
 		for packName, _ in pairs(AnimPacks) do
 			local btn = Instance.new("TextButton")
@@ -2327,10 +2349,12 @@ local script = G2L["1f"];
 			btn.Font = Enum.Font.SourceSans
 			btn.TextSize = 18
 	
-			-- Обводка для кнопок
-			createUIStroke(btn, Color3.fromRGB(128, 0, 255), 2)
+			local btnStroke = Instance.new("UIStroke")
+			btnStroke.Parent = btn
+			btnStroke.Color = Color3.fromRGB(128, 0, 255)
+			btnStroke.Thickness = 2
+			btnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	
-			-- Hover эффект
 			btn.MouseEnter:Connect(function()
 				btn.BackgroundColor3 = Color3.fromRGB(30, 10, 50)
 			end)
@@ -2340,19 +2364,16 @@ local script = G2L["1f"];
 	
 			btn.MouseButton1Click:Connect(function()
 				applyAnimPack(packName)
-				isActive = true
-				button.Text = "Пак: " .. packName
 				screenGui:Destroy()
 			end)
 	
 			yOffset = yOffset + btnHeight + spacing
 		end
 	
-		-- ====== КНОПКА "ВЫКЛЮЧИТЬ" ======
 		local offBtn = Instance.new("TextButton")
 		offBtn.Parent = frame
 		offBtn.Size = UDim2.new(0.85, 0, 0, 40)
-		offBtn.Position = UDim2.new(0.075, 0, 0, yOffset + 10)
+		offBtn.Position = UDim2.new(0.075, 0, 0, yOffset + 5)
 		offBtn.Text = "❌ ВЫКЛЮЧИТЬ"
 		offBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
 		offBtn.BackgroundColor3 = Color3.fromRGB(30, 5, 5)
@@ -2360,8 +2381,11 @@ local script = G2L["1f"];
 		offBtn.Font = Enum.Font.SourceSansBold
 		offBtn.TextSize = 18
 	
-		-- Обводка красная для кнопки выключения
-		createUIStroke(offBtn, Color3.fromRGB(255, 50, 50), 2)
+		local offStroke = Instance.new("UIStroke")
+		offStroke.Parent = offBtn
+		offStroke.Color = Color3.fromRGB(255, 50, 50)
+		offStroke.Thickness = 2
+		offStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	
 		offBtn.MouseEnter:Connect(function()
 			offBtn.BackgroundColor3 = Color3.fromRGB(50, 10, 10)
@@ -2372,12 +2396,9 @@ local script = G2L["1f"];
 	
 		offBtn.MouseButton1Click:Connect(function()
 			stopAnimPack()
-			isActive = false
-			button.Text = "Выбрать пак"
 			screenGui:Destroy()
 		end)
 	
-		-- ====== КНОПКА ЗАКРЫТЬ (крестик) ======
 		local closeBtn = Instance.new("TextButton")
 		closeBtn.Parent = frame
 		closeBtn.Size = UDim2.new(0, 35, 0, 35)
@@ -2392,7 +2413,6 @@ local script = G2L["1f"];
 			screenGui:Destroy()
 		end)
 	
-		-- ====== ПОДПИСЬ ВНИЗУ ======
 		local footer = Instance.new("TextLabel")
 		footer.Parent = frame
 		footer.Size = UDim2.new(1, 0, 0, 25)
@@ -2402,30 +2422,22 @@ local script = G2L["1f"];
 		footer.BackgroundTransparency = 1
 		footer.TextSize = 13
 		footer.Font = Enum.Font.SourceSans
-		footer.TextScaled = false
 	end
 	
 	-- ====== КНОПКА ======
 	button.MouseButton1Click:Connect(function()
-		-- Если уже есть GUI - удаляем
-		local existing = player.PlayerGui:FindFirstChild("AnimPackSelector")
-		if existing then
-			existing:Destroy()
-			return
-		end
-	
 		createSelectionGUI()
 	end)
 	
 	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function(char)
 		task.wait(0.5)
-		if isActive and currentPack then
+		if currentPack then
 			applyAnimPack(currentPack)
 		end
 	end)
 	
-	print("✅ ПАК АНИМАЦИЙ С КРАСИВЫМ GUI ЗАГРУЖЕН!")
+	print("✅ ANIMATIONS_Choose ЗАГРУЖЕНА!")
 	print("🎯 Нажми на кнопку чтобы выбрать анимацию!")
 end;
 task.spawn(C_1f);
