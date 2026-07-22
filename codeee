@@ -3002,7 +3002,7 @@ task.spawn(C_5c);
 local function C_60()
 local script = G2L["60"];
 	-- ==========================================
-	-- ХИТБОКС (НА ВСЕХ ЧАСТЯХ ТЕЛА)
+	-- ХИТБОКС (РАБОЧАЯ ВЕРСИЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -3049,12 +3049,9 @@ local script = G2L["60"];
 	
 	-- ===== ПРИМЕНЕНИЕ ХИТБОКСА =====
 	local function applyHitbox()
-		local rawText = textBox.Text
-		local size = tonumber(rawText)
-		if not size then size = 5 end
+		local size = tonumber(textBox.Text) or 5
 		if size < 1 then size = 1 end
-	
-		print("🟣 Хитбокс размер: " .. size)
+		if size > 20 then size = 20 end  -- 👈 ОСТАВЛЯЕМ ОГРАНИЧЕНИЕ (рабочее)
 	
 		local transparency = 0.5
 		local color = BrickColor.new("Lilac")
@@ -3065,19 +3062,15 @@ local script = G2L["60"];
 					continue
 				end
 	
-				local char = plr.Character
-	
-				-- 👇 МЕНЯЕМ ВСЕ ЧАСТИ ТЕЛА, КРОМЕ HumanoidRootPart
-				for _, part in pairs(char:GetChildren()) do
-					if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-						pcall(function()
-							part.Size = Vector3.new(size, size, size)
-							part.Transparency = transparency
-							part.BrickColor = color
-							part.Material = Enum.Material.Neon
-							part.CanCollide = false
-						end)
-					end
+				local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+				if hrp then
+					pcall(function()
+						hrp.Size = Vector3.new(size, size, size)
+						hrp.Transparency = transparency
+						hrp.BrickColor = color
+						hrp.Material = Enum.Material.Neon
+						hrp.CanCollide = false
+					end)
 				end
 			end
 		end
@@ -3087,17 +3080,15 @@ local script = G2L["60"];
 	local function restoreHitbox()
 		for _, plr in pairs(game.Players:GetPlayers()) do
 			if plr ~= player and plr.Character then
-				local char = plr.Character
-				for _, part in pairs(char:GetChildren()) do
-					if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-						pcall(function()
-							part.Size = Vector3.new(2, 2, 1)
-							part.Transparency = 1
-							part.BrickColor = BrickColor.new("Medium stone grey")
-							part.Material = Enum.Material.Plastic
-							part.CanCollide = false
-						end)
-					end
+				local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+				if hrp then
+					pcall(function()
+						hrp.Size = Vector3.new(2, 2, 1)
+						hrp.Transparency = 1
+						hrp.BrickColor = BrickColor.new("Medium stone grey")
+						hrp.Material = Enum.Material.Plastic
+						hrp.CanCollide = false
+					end)
 				end
 			end
 		end
@@ -3119,7 +3110,7 @@ local script = G2L["60"];
 					applyHitbox()
 				end
 			end)
-			print("🟣 Хитбокс включен (размер: " .. textBox.Text .. ")")
+			print("🟣 Хитбокс включен!")
 		else
 			if hitboxLoop then
 				hitboxLoop:Disconnect()
@@ -3141,7 +3132,7 @@ local script = G2L["60"];
 	
 	updateState()
 	indicator.BackgroundTransparency = 1
-	print("✅ Хитбокс загружен (все части тела)!")
+	print("✅ Хитбокс загружен!")
 end;
 task.spawn(C_60);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_Fly.LocalScript
