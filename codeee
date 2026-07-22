@@ -5443,7 +5443,7 @@ task.spawn(C_c2);
 local function C_d5()
 local script = G2L["d5"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (С TROLL)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -5478,7 +5478,7 @@ local script = G2L["d5"];
 	local function switchTab(tabName)
 		print("🔘 Переключение на: " .. tabName)
 	
-		-- Скрываем ВСЁ в правой панели
+		-- Скрываем ВСЁ
 		for _, child in pairs(rightFrame:GetChildren()) do
 			if child:IsA("ImageButton") then
 				child.Visible = false
@@ -5614,6 +5614,23 @@ local script = G2L["d5"];
 				end
 			end
 			print("✅ DA HOOD")
+	
+			-- ===== TROLL =====
+		elseif tabName == "Troll" then
+			for _, child in pairs(rightFrame:GetChildren()) do
+				if child:IsA("ImageButton") and (
+					child.Name == "TROLL_Dropkick" or
+						child.Name == "TROLL_TennaKick" or
+						child.Name == "TROLL_MMAKick" or
+						child.Name == "TROLL_Slap" or
+						child.Name == "TROLL_Slap2" or
+						child.Name == "TROLL_Push" or
+						child.Name == "TROLL_Push2"
+					) then
+					child.Visible = true
+				end
+			end
+			print("✅ TROLL")
 	
 			-- ===== INFO =====
 		elseif tabName == "INFO" then
