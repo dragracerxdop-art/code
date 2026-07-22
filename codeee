@@ -1429,7 +1429,6 @@ G2L["bf"] = Instance.new("LocalScript", G2L["bc"]);
 G2L["c0"] = Instance.new("ScrollingFrame", G2L["2"]);
 G2L["c0"]["Active"] = true;
 G2L["c0"]["BorderSizePixel"] = 0;
-G2L["c0"]["CanvasPosition"] = Vector2.new(0, 300);
 G2L["c0"]["Name"] = [[LeftFrame]];
 G2L["c0"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["c0"]["Size"] = UDim2.new(0, 149, 0, 419);
@@ -5581,7 +5580,7 @@ task.spawn(C_bf);
 local function C_d2()
 local script = G2L["d2"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (С ANIMATIONS_Choose)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (С ОТЛАДКОЙ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -5743,15 +5742,32 @@ local script = G2L["d2"];
 	
 			-- ===== ANIMATIONS =====
 		elseif tabName == "Animations" then
+			print("🔍 Ищем ANIMATIONS_Choose в RightFrame...")
+			local found = false
+	
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("ImageButton") and child.Name == "ANIMATIONS_Choose" then
-					child.Visible = true
-				end
-				if child:IsA("TextButton") and child.Name == "ANIMATIONS_Choose" then
-					child.Visible = true
+				print("🔍 Найдено: " .. child.Name .. " (" .. child.ClassName .. ")")
+	
+				if child.Name == "ANIMATIONS_Choose" then
+					if child:IsA("ImageButton") or child:IsA("TextButton") then
+						child.Visible = true
+						found = true
+						print("✅ ANIMATIONS_Choose найдена и показана!")
+					end
 				end
 			end
-			print("✅ ANIMATIONS (ANIMATIONS_Choose)")
+	
+			if not found then
+				print("❌ ANIMATIONS_Choose НЕ НАЙДЕНА в RightFrame!")
+				print("📋 Доступные кнопки в RightFrame:")
+				for _, child in pairs(rightFrame:GetChildren()) do
+					if child:IsA("ImageButton") or child:IsA("TextButton") then
+						print("   - " .. child.Name)
+					end
+				end
+			end
+	
+			print("✅ ANIMATIONS")
 	
 			-- ===== TROLL =====
 		elseif tabName == "Troll" then
@@ -5792,7 +5808,7 @@ local script = G2L["d2"];
 	end
 	
 	switchTab("TELEPORT")
-	print("✅ Переключение вкладок загружено! (ANIMATIONS_Choose)")
+	print("✅ Переключение вкладок загружено! (С ОТЛАДКОЙ)")
 end;
 task.spawn(C_d2);
 -- StarterGui.Folder.ScreenGui.MainFrame.HotKeys
