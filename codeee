@@ -4463,13 +4463,13 @@ task.spawn(C_a3);
 local function C_aa()
 local script = G2L["aa"];
 	-- ==========================================
-	-- TROLL_Dropkick
+	-- TROLL_АНИМАЦИЯ (ИСПРАВЛЕННАЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local runService = game:GetService("RunService")
 	
-	local ANIM_ID = "133566007754001"
+	local ANIM_ID = "133566007754001"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
 	local isActive = false
 	local flingLoop = nil
 	local animTrack = nil
@@ -4508,52 +4508,42 @@ local script = G2L["aa"];
 			return
 		end
 	
+		-- Отключаем анимации
 		local animate = char:FindFirstChild("Animate")
-		if animate then animate.Disabled = true end
+		if animate then
+			animate.Disabled = true
+		end
 	
 		humanoid.PlatformStand = true
 	
+		-- Загружаем анимацию
 		animTrack = loadAnimation(char)
 		if animTrack then
 			animTrack.Priority = Enum.AnimationPriority.Action
 			animTrack:Play()
 		end
 	
-		local flip = 1
-		local timeout = tick() + 3
+		-- Направление движения (в сторону камеры)
+		local cam = workspace.CurrentCamera
+		local forward = cam.CFrame.LookVector
+		local dir = Vector3.new(forward.X, 0, forward.Z).Unit
 	
-		flingLoop = runService.Heartbeat:Connect(function()
-			if tick() > timeout or not player.Character then
-				stopFling()
-				return
-			end
+		if dir.Magnitude == 0 then
+			dir = Vector3.new(0, 0, 1)
+		end
 	
-			local char = player.Character
-			local hrp = char and char:FindFirstChild("HumanoidRootPart")
-			local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+		-- Сила флинга (умеренная)
+		local power = 80
+		local vel = dir * power + Vector3.new(0, 5, 0)
 	
-			if hrp and humanoid then
-				local dir = humanoid.MoveDirection
-				flip = flip * -1
+		-- Применяем скорость
+		hrp.AssemblyLinearVelocity = vel
+		hrp.Velocity = vel
 	
-				hrp.AssemblyLinearVelocity = Vector3.new(100000 * flip, 0, 100000 * flip)
-				hrp.AssemblyAngularVelocity = Vector3.new(100000 * flip, 100000 * flip, 100000 * flip)
+		print("💥 Флинг в сторону камеры! Сила: " .. power)
 	
-				runService.RenderStepped:Wait()
-	
-				if dir.Magnitude > 0 then
-					hrp.AssemblyLinearVelocity = Vector3.new(dir.X * 50, -2, dir.Z * 50)
-					hrp.Velocity = Vector3.new(dir.X * 50, -2, dir.Z * 50)
-				else
-					hrp.AssemblyLinearVelocity = Vector3.new(0, -2, 0)
-					hrp.Velocity = Vector3.new(0, -2, 0)
-				end
-				hrp.AssemblyAngularVelocity = Vector3.zero
-				hrp.RotVelocity = Vector3.zero
-			end
-		end)
-	
-		task.delay(3, function()
+		-- Останавливаем через 2 секунды
+		task.delay(2, function()
 			stopFling()
 		end)
 	end
@@ -4575,6 +4565,7 @@ local script = G2L["aa"];
 			if hrp then
 				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+				hrp.Velocity = Vector3.new(0, 0, 0)
 			end
 			local humanoid = char:FindFirstChildOfClass("Humanoid")
 			if humanoid then
@@ -4597,19 +4588,21 @@ local script = G2L["aa"];
 			stopFling()
 		end
 	end)
+	
+	print("✅ TROLL кнопка загружена!")
 end;
 task.spawn(C_aa);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_TennaKick.LocalScript
 local function C_ae()
 local script = G2L["ae"];
 	-- ==========================================
-	-- TROLL_TennaKick
+	-- TROLL_АНИМАЦИЯ (ИСПРАВЛЕННАЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local runService = game:GetService("RunService")
 	
-	local ANIM_ID = "118139885865308"
+	local ANIM_ID = "118139885865308"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
 	local isActive = false
 	local flingLoop = nil
 	local animTrack = nil
@@ -4648,52 +4641,42 @@ local script = G2L["ae"];
 			return
 		end
 	
+		-- Отключаем анимации
 		local animate = char:FindFirstChild("Animate")
-		if animate then animate.Disabled = true end
+		if animate then
+			animate.Disabled = true
+		end
 	
 		humanoid.PlatformStand = true
 	
+		-- Загружаем анимацию
 		animTrack = loadAnimation(char)
 		if animTrack then
 			animTrack.Priority = Enum.AnimationPriority.Action
 			animTrack:Play()
 		end
 	
-		local flip = 1
-		local timeout = tick() + 3
+		-- Направление движения (в сторону камеры)
+		local cam = workspace.CurrentCamera
+		local forward = cam.CFrame.LookVector
+		local dir = Vector3.new(forward.X, 0, forward.Z).Unit
 	
-		flingLoop = runService.Heartbeat:Connect(function()
-			if tick() > timeout or not player.Character then
-				stopFling()
-				return
-			end
+		if dir.Magnitude == 0 then
+			dir = Vector3.new(0, 0, 1)
+		end
 	
-			local char = player.Character
-			local hrp = char and char:FindFirstChild("HumanoidRootPart")
-			local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+		-- Сила флинга (умеренная)
+		local power = 80
+		local vel = dir * power + Vector3.new(0, 5, 0)
 	
-			if hrp and humanoid then
-				local dir = humanoid.MoveDirection
-				flip = flip * -1
+		-- Применяем скорость
+		hrp.AssemblyLinearVelocity = vel
+		hrp.Velocity = vel
 	
-				hrp.AssemblyLinearVelocity = Vector3.new(100000 * flip, 0, 100000 * flip)
-				hrp.AssemblyAngularVelocity = Vector3.new(100000 * flip, 100000 * flip, 100000 * flip)
+		print("💥 Флинг в сторону камеры! Сила: " .. power)
 	
-				runService.RenderStepped:Wait()
-	
-				if dir.Magnitude > 0 then
-					hrp.AssemblyLinearVelocity = Vector3.new(dir.X * 50, -2, dir.Z * 50)
-					hrp.Velocity = Vector3.new(dir.X * 50, -2, dir.Z * 50)
-				else
-					hrp.AssemblyLinearVelocity = Vector3.new(0, -2, 0)
-					hrp.Velocity = Vector3.new(0, -2, 0)
-				end
-				hrp.AssemblyAngularVelocity = Vector3.zero
-				hrp.RotVelocity = Vector3.zero
-			end
-		end)
-	
-		task.delay(3, function()
+		-- Останавливаем через 2 секунды
+		task.delay(2, function()
 			stopFling()
 		end)
 	end
@@ -4715,6 +4698,7 @@ local script = G2L["ae"];
 			if hrp then
 				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+				hrp.Velocity = Vector3.new(0, 0, 0)
 			end
 			local humanoid = char:FindFirstChildOfClass("Humanoid")
 			if humanoid then
@@ -4737,19 +4721,21 @@ local script = G2L["ae"];
 			stopFling()
 		end
 	end)
+	
+	print("✅ TROLL кнопка загружена!")
 end;
 task.spawn(C_ae);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_MMAKick.LocalScript
 local function C_b2()
 local script = G2L["b2"];
 	-- ==========================================
-	-- TROLL_MMAKick
+	-- TROLL_АНИМАЦИЯ (ИСПРАВЛЕННАЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local runService = game:GetService("RunService")
 	
-	local ANIM_ID = "88347541858075"
+	local ANIM_ID = "88347541858075"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
 	local isActive = false
 	local flingLoop = nil
 	local animTrack = nil
@@ -4788,52 +4774,42 @@ local script = G2L["b2"];
 			return
 		end
 	
+		-- Отключаем анимации
 		local animate = char:FindFirstChild("Animate")
-		if animate then animate.Disabled = true end
+		if animate then
+			animate.Disabled = true
+		end
 	
 		humanoid.PlatformStand = true
 	
+		-- Загружаем анимацию
 		animTrack = loadAnimation(char)
 		if animTrack then
 			animTrack.Priority = Enum.AnimationPriority.Action
 			animTrack:Play()
 		end
 	
-		local flip = 1
-		local timeout = tick() + 3
+		-- Направление движения (в сторону камеры)
+		local cam = workspace.CurrentCamera
+		local forward = cam.CFrame.LookVector
+		local dir = Vector3.new(forward.X, 0, forward.Z).Unit
 	
-		flingLoop = runService.Heartbeat:Connect(function()
-			if tick() > timeout or not player.Character then
-				stopFling()
-				return
-			end
+		if dir.Magnitude == 0 then
+			dir = Vector3.new(0, 0, 1)
+		end
 	
-			local char = player.Character
-			local hrp = char and char:FindFirstChild("HumanoidRootPart")
-			local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+		-- Сила флинга (умеренная)
+		local power = 80
+		local vel = dir * power + Vector3.new(0, 5, 0)
 	
-			if hrp and humanoid then
-				local dir = humanoid.MoveDirection
-				flip = flip * -1
+		-- Применяем скорость
+		hrp.AssemblyLinearVelocity = vel
+		hrp.Velocity = vel
 	
-				hrp.AssemblyLinearVelocity = Vector3.new(100000 * flip, 0, 100000 * flip)
-				hrp.AssemblyAngularVelocity = Vector3.new(100000 * flip, 100000 * flip, 100000 * flip)
+		print("💥 Флинг в сторону камеры! Сила: " .. power)
 	
-				runService.RenderStepped:Wait()
-	
-				if dir.Magnitude > 0 then
-					hrp.AssemblyLinearVelocity = Vector3.new(dir.X * 50, -2, dir.Z * 50)
-					hrp.Velocity = Vector3.new(dir.X * 50, -2, dir.Z * 50)
-				else
-					hrp.AssemblyLinearVelocity = Vector3.new(0, -2, 0)
-					hrp.Velocity = Vector3.new(0, -2, 0)
-				end
-				hrp.AssemblyAngularVelocity = Vector3.zero
-				hrp.RotVelocity = Vector3.zero
-			end
-		end)
-	
-		task.delay(3, function()
+		-- Останавливаем через 2 секунды
+		task.delay(2, function()
 			stopFling()
 		end)
 	end
@@ -4855,6 +4831,7 @@ local script = G2L["b2"];
 			if hrp then
 				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+				hrp.Velocity = Vector3.new(0, 0, 0)
 			end
 			local humanoid = char:FindFirstChildOfClass("Humanoid")
 			if humanoid then
@@ -4877,19 +4854,21 @@ local script = G2L["b2"];
 			stopFling()
 		end
 	end)
+	
+	print("✅ TROLL кнопка загружена!")
 end;
 task.spawn(C_b2);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Slap.LocalScript
 local function C_b6()
 local script = G2L["b6"];
 	-- ==========================================
-	-- TROLL_Slap
+	-- TROLL_АНИМАЦИЯ (ИСПРАВЛЕННАЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local runService = game:GetService("RunService")
 	
-	local ANIM_ID = "108225134235478"
+	local ANIM_ID = "108225134235478"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
 	local isActive = false
 	local flingLoop = nil
 	local animTrack = nil
@@ -4928,52 +4907,42 @@ local script = G2L["b6"];
 			return
 		end
 	
+		-- Отключаем анимации
 		local animate = char:FindFirstChild("Animate")
-		if animate then animate.Disabled = true end
+		if animate then
+			animate.Disabled = true
+		end
 	
 		humanoid.PlatformStand = true
 	
+		-- Загружаем анимацию
 		animTrack = loadAnimation(char)
 		if animTrack then
 			animTrack.Priority = Enum.AnimationPriority.Action
 			animTrack:Play()
 		end
 	
-		local flip = 1
-		local timeout = tick() + 3
+		-- Направление движения (в сторону камеры)
+		local cam = workspace.CurrentCamera
+		local forward = cam.CFrame.LookVector
+		local dir = Vector3.new(forward.X, 0, forward.Z).Unit
 	
-		flingLoop = runService.Heartbeat:Connect(function()
-			if tick() > timeout or not player.Character then
-				stopFling()
-				return
-			end
+		if dir.Magnitude == 0 then
+			dir = Vector3.new(0, 0, 1)
+		end
 	
-			local char = player.Character
-			local hrp = char and char:FindFirstChild("HumanoidRootPart")
-			local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+		-- Сила флинга (умеренная)
+		local power = 80
+		local vel = dir * power + Vector3.new(0, 5, 0)
 	
-			if hrp and humanoid then
-				local dir = humanoid.MoveDirection
-				flip = flip * -1
+		-- Применяем скорость
+		hrp.AssemblyLinearVelocity = vel
+		hrp.Velocity = vel
 	
-				hrp.AssemblyLinearVelocity = Vector3.new(100000 * flip, 0, 100000 * flip)
-				hrp.AssemblyAngularVelocity = Vector3.new(100000 * flip, 100000 * flip, 100000 * flip)
+		print("💥 Флинг в сторону камеры! Сила: " .. power)
 	
-				runService.RenderStepped:Wait()
-	
-				if dir.Magnitude > 0 then
-					hrp.AssemblyLinearVelocity = Vector3.new(dir.X * 50, -2, dir.Z * 50)
-					hrp.Velocity = Vector3.new(dir.X * 50, -2, dir.Z * 50)
-				else
-					hrp.AssemblyLinearVelocity = Vector3.new(0, -2, 0)
-					hrp.Velocity = Vector3.new(0, -2, 0)
-				end
-				hrp.AssemblyAngularVelocity = Vector3.zero
-				hrp.RotVelocity = Vector3.zero
-			end
-		end)
-	
-		task.delay(3, function()
+		-- Останавливаем через 2 секунды
+		task.delay(2, function()
 			stopFling()
 		end)
 	end
@@ -4995,6 +4964,7 @@ local script = G2L["b6"];
 			if hrp then
 				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+				hrp.Velocity = Vector3.new(0, 0, 0)
 			end
 			local humanoid = char:FindFirstChildOfClass("Humanoid")
 			if humanoid then
@@ -5017,19 +4987,21 @@ local script = G2L["b6"];
 			stopFling()
 		end
 	end)
+	
+	print("✅ TROLL кнопка загружена!")
 end;
 task.spawn(C_b6);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Slap2.LocalScript
 local function C_ba()
 local script = G2L["ba"];
 	-- ==========================================
-	-- TROLL_Slap2
+	-- TROLL_АНИМАЦИЯ (ИСПРАВЛЕННАЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local runService = game:GetService("RunService")
 	
-	local ANIM_ID = "78221709455150"
+	local ANIM_ID = "78221709455150"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
 	local isActive = false
 	local flingLoop = nil
 	local animTrack = nil
@@ -5068,52 +5040,42 @@ local script = G2L["ba"];
 			return
 		end
 	
+		-- Отключаем анимации
 		local animate = char:FindFirstChild("Animate")
-		if animate then animate.Disabled = true end
+		if animate then
+			animate.Disabled = true
+		end
 	
 		humanoid.PlatformStand = true
 	
+		-- Загружаем анимацию
 		animTrack = loadAnimation(char)
 		if animTrack then
 			animTrack.Priority = Enum.AnimationPriority.Action
 			animTrack:Play()
 		end
 	
-		local flip = 1
-		local timeout = tick() + 3
+		-- Направление движения (в сторону камеры)
+		local cam = workspace.CurrentCamera
+		local forward = cam.CFrame.LookVector
+		local dir = Vector3.new(forward.X, 0, forward.Z).Unit
 	
-		flingLoop = runService.Heartbeat:Connect(function()
-			if tick() > timeout or not player.Character then
-				stopFling()
-				return
-			end
+		if dir.Magnitude == 0 then
+			dir = Vector3.new(0, 0, 1)
+		end
 	
-			local char = player.Character
-			local hrp = char and char:FindFirstChild("HumanoidRootPart")
-			local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+		-- Сила флинга (умеренная)
+		local power = 80
+		local vel = dir * power + Vector3.new(0, 5, 0)
 	
-			if hrp and humanoid then
-				local dir = humanoid.MoveDirection
-				flip = flip * -1
+		-- Применяем скорость
+		hrp.AssemblyLinearVelocity = vel
+		hrp.Velocity = vel
 	
-				hrp.AssemblyLinearVelocity = Vector3.new(100000 * flip, 0, 100000 * flip)
-				hrp.AssemblyAngularVelocity = Vector3.new(100000 * flip, 100000 * flip, 100000 * flip)
+		print("💥 Флинг в сторону камеры! Сила: " .. power)
 	
-				runService.RenderStepped:Wait()
-	
-				if dir.Magnitude > 0 then
-					hrp.AssemblyLinearVelocity = Vector3.new(dir.X * 50, -2, dir.Z * 50)
-					hrp.Velocity = Vector3.new(dir.X * 50, -2, dir.Z * 50)
-				else
-					hrp.AssemblyLinearVelocity = Vector3.new(0, -2, 0)
-					hrp.Velocity = Vector3.new(0, -2, 0)
-				end
-				hrp.AssemblyAngularVelocity = Vector3.zero
-				hrp.RotVelocity = Vector3.zero
-			end
-		end)
-	
-		task.delay(3, function()
+		-- Останавливаем через 2 секунды
+		task.delay(2, function()
 			stopFling()
 		end)
 	end
@@ -5135,6 +5097,7 @@ local script = G2L["ba"];
 			if hrp then
 				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+				hrp.Velocity = Vector3.new(0, 0, 0)
 			end
 			local humanoid = char:FindFirstChildOfClass("Humanoid")
 			if humanoid then
@@ -5157,19 +5120,21 @@ local script = G2L["ba"];
 			stopFling()
 		end
 	end)
+	
+	print("✅ TROLL кнопка загружена!")
 end;
 task.spawn(C_ba);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Push.LocalScript
 local function C_be()
 local script = G2L["be"];
 	-- ==========================================
-	-- TROLL_Push
+	-- TROLL_АНИМАЦИЯ (ИСПРАВЛЕННАЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local runService = game:GetService("RunService")
 	
-	local ANIM_ID = "135890160317037"
+	local ANIM_ID = "135890160317037"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
 	local isActive = false
 	local flingLoop = nil
 	local animTrack = nil
@@ -5208,52 +5173,42 @@ local script = G2L["be"];
 			return
 		end
 	
+		-- Отключаем анимации
 		local animate = char:FindFirstChild("Animate")
-		if animate then animate.Disabled = true end
+		if animate then
+			animate.Disabled = true
+		end
 	
 		humanoid.PlatformStand = true
 	
+		-- Загружаем анимацию
 		animTrack = loadAnimation(char)
 		if animTrack then
 			animTrack.Priority = Enum.AnimationPriority.Action
 			animTrack:Play()
 		end
 	
-		local flip = 1
-		local timeout = tick() + 3
+		-- Направление движения (в сторону камеры)
+		local cam = workspace.CurrentCamera
+		local forward = cam.CFrame.LookVector
+		local dir = Vector3.new(forward.X, 0, forward.Z).Unit
 	
-		flingLoop = runService.Heartbeat:Connect(function()
-			if tick() > timeout or not player.Character then
-				stopFling()
-				return
-			end
+		if dir.Magnitude == 0 then
+			dir = Vector3.new(0, 0, 1)
+		end
 	
-			local char = player.Character
-			local hrp = char and char:FindFirstChild("HumanoidRootPart")
-			local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+		-- Сила флинга (умеренная)
+		local power = 80
+		local vel = dir * power + Vector3.new(0, 5, 0)
 	
-			if hrp and humanoid then
-				local dir = humanoid.MoveDirection
-				flip = flip * -1
+		-- Применяем скорость
+		hrp.AssemblyLinearVelocity = vel
+		hrp.Velocity = vel
 	
-				hrp.AssemblyLinearVelocity = Vector3.new(100000 * flip, 0, 100000 * flip)
-				hrp.AssemblyAngularVelocity = Vector3.new(100000 * flip, 100000 * flip, 100000 * flip)
+		print("💥 Флинг в сторону камеры! Сила: " .. power)
 	
-				runService.RenderStepped:Wait()
-	
-				if dir.Magnitude > 0 then
-					hrp.AssemblyLinearVelocity = Vector3.new(dir.X * 50, -2, dir.Z * 50)
-					hrp.Velocity = Vector3.new(dir.X * 50, -2, dir.Z * 50)
-				else
-					hrp.AssemblyLinearVelocity = Vector3.new(0, -2, 0)
-					hrp.Velocity = Vector3.new(0, -2, 0)
-				end
-				hrp.AssemblyAngularVelocity = Vector3.zero
-				hrp.RotVelocity = Vector3.zero
-			end
-		end)
-	
-		task.delay(3, function()
+		-- Останавливаем через 2 секунды
+		task.delay(2, function()
 			stopFling()
 		end)
 	end
@@ -5275,6 +5230,7 @@ local script = G2L["be"];
 			if hrp then
 				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+				hrp.Velocity = Vector3.new(0, 0, 0)
 			end
 			local humanoid = char:FindFirstChildOfClass("Humanoid")
 			if humanoid then
@@ -5297,19 +5253,21 @@ local script = G2L["be"];
 			stopFling()
 		end
 	end)
+	
+	print("✅ TROLL кнопка загружена!")
 end;
 task.spawn(C_be);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Push2.LocalScript
 local function C_c2()
 local script = G2L["c2"];
 	-- ==========================================
-	-- TROLL_Push2
+	-- TROLL_АНИМАЦИЯ (ИСПРАВЛЕННАЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local runService = game:GetService("RunService")
 	
-	local ANIM_ID = "82070755455634"
+	local ANIM_ID = "82070755455634"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
 	local isActive = false
 	local flingLoop = nil
 	local animTrack = nil
@@ -5348,52 +5306,42 @@ local script = G2L["c2"];
 			return
 		end
 	
+		-- Отключаем анимации
 		local animate = char:FindFirstChild("Animate")
-		if animate then animate.Disabled = true end
+		if animate then
+			animate.Disabled = true
+		end
 	
 		humanoid.PlatformStand = true
 	
+		-- Загружаем анимацию
 		animTrack = loadAnimation(char)
 		if animTrack then
 			animTrack.Priority = Enum.AnimationPriority.Action
 			animTrack:Play()
 		end
 	
-		local flip = 1
-		local timeout = tick() + 3
+		-- Направление движения (в сторону камеры)
+		local cam = workspace.CurrentCamera
+		local forward = cam.CFrame.LookVector
+		local dir = Vector3.new(forward.X, 0, forward.Z).Unit
 	
-		flingLoop = runService.Heartbeat:Connect(function()
-			if tick() > timeout or not player.Character then
-				stopFling()
-				return
-			end
+		if dir.Magnitude == 0 then
+			dir = Vector3.new(0, 0, 1)
+		end
 	
-			local char = player.Character
-			local hrp = char and char:FindFirstChild("HumanoidRootPart")
-			local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+		-- Сила флинга (умеренная)
+		local power = 80
+		local vel = dir * power + Vector3.new(0, 5, 0)
 	
-			if hrp and humanoid then
-				local dir = humanoid.MoveDirection
-				flip = flip * -1
+		-- Применяем скорость
+		hrp.AssemblyLinearVelocity = vel
+		hrp.Velocity = vel
 	
-				hrp.AssemblyLinearVelocity = Vector3.new(100000 * flip, 0, 100000 * flip)
-				hrp.AssemblyAngularVelocity = Vector3.new(100000 * flip, 100000 * flip, 100000 * flip)
+		print("💥 Флинг в сторону камеры! Сила: " .. power)
 	
-				runService.RenderStepped:Wait()
-	
-				if dir.Magnitude > 0 then
-					hrp.AssemblyLinearVelocity = Vector3.new(dir.X * 50, -2, dir.Z * 50)
-					hrp.Velocity = Vector3.new(dir.X * 50, -2, dir.Z * 50)
-				else
-					hrp.AssemblyLinearVelocity = Vector3.new(0, -2, 0)
-					hrp.Velocity = Vector3.new(0, -2, 0)
-				end
-				hrp.AssemblyAngularVelocity = Vector3.zero
-				hrp.RotVelocity = Vector3.zero
-			end
-		end)
-	
-		task.delay(3, function()
+		-- Останавливаем через 2 секунды
+		task.delay(2, function()
 			stopFling()
 		end)
 	end
@@ -5415,6 +5363,7 @@ local script = G2L["c2"];
 			if hrp then
 				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+				hrp.Velocity = Vector3.new(0, 0, 0)
 			end
 			local humanoid = char:FindFirstChildOfClass("Humanoid")
 			if humanoid then
@@ -5437,6 +5386,8 @@ local script = G2L["c2"];
 			stopFling()
 		end
 	end)
+	
+	print("✅ TROLL кнопка загружена!")
 end;
 task.spawn(C_c2);
 -- StarterGui.Folder.ScreenGui.MainFrame.LeftFrame.SwitchTabs
