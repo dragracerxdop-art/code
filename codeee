@@ -3002,7 +3002,7 @@ task.spawn(C_5c);
 local function C_60()
 local script = G2L["60"];
 	-- ==========================================
-	-- ХИТБОКС (БЕЗ ОГРАНИЧЕНИЙ)
+	-- ХИТБОКС (С ОТЛАДКОЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -3049,9 +3049,21 @@ local script = G2L["60"];
 	
 	-- ===== ПРИМЕНЕНИЕ ХИТБОКСА =====
 	local function applyHitbox()
-		local size = tonumber(textBox.Text) or 5
+		-- Жесткий парсинг
+		local rawText = textBox.Text
+		local size = tonumber(rawText)
+	
+		-- Если не число — ставим 5
+		if not size then
+			size = 5
+			print("⚠️ Введено не число! Ставлю размер 5")
+		end
+	
+		-- Ограничиваем только минимум
 		if size < 1 then size = 1 end
-		-- 👇 НЕТ ОГРАНИЧЕНИЙ
+	
+		-- 👇 ЛОГ В КОНСОЛЬ
+		print("🟣 Применяю хитбокс: размер = " .. size)
 	
 		local transparency = 0.5
 		local color = BrickColor.new("Lilac")
