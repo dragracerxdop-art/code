@@ -2168,29 +2168,62 @@ task.spawn(C_1b);
 local function C_1f()
 local script = G2L["1f"];
 	-- ==========================================
-	-- ANIMATIONS_Choose (ОТКРЫТИЕ AFEM)
+	-- ANIMATIONS_Choose (С ДИАГНОСТИКОЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	
 	button.MouseButton1Click:Connect(function()
+		print("🔍 КНОПКА НАЖАТА!")
+	
 		-- Проверяем загружен ли AFEM
 		local afem = getgenv().AFEM
+		print("🔍 AFEM в getgenv():", afem)
+	
 		if afem then
-			-- Открываем меню (если закрыто)
-			if afem.Menu.Close then
+			print("🔍 AFEM найден! Пытаюсь открыть...")
+	
+			-- Пробуем открыть через Open
+			if afem.Menu and afem.Menu.Open then
 				afem.Menu.Open:Fire()
+				print("✅ AFEM.Menu.Open:Fire() вызван!")
 			else
-				-- Если меню уже открыто - закрываем
-				afem.Menu.Close:Fire()
+				print("❌ afem.Menu.Open не найден!")
+	
+				-- Пробуем альтернативный способ
+				if afem.Menu and afem.Menu.Close then
+					afem.Menu.Close:Fire()
+					print("✅ AFEM.Menu.Close:Fire() вызван!")
+				end
 			end
-			print("🎬 AFEM открыт!")
 		else
-			warn("❌ AFEM не загружен! Вставь скрипт AFEM в CoreGui")
+			print("❌ AFEM НЕ НАЙДЕН в getgenv()!")
+			print("🔍 Проверяем другие места...")
+	
+			-- Проверяем CoreGui
+			local coreGui = game:GetService("CoreGui")
+			local afemGui = coreGui:FindFirstChild("AFEM")
+			if afemGui then
+				print("✅ Найден AFEM в CoreGui!")
+				-- Пытаемся найти меню
+				local menu = afemGui:FindFirstChild("Menu")
+				if menu then
+					print("✅ Найдено Menu!")
+					-- Пробуем открыть
+					if menu:FindFirstChild("Open") then
+						menu.Open:Fire()
+						print("✅ Menu.Open:Fire() вызван!")
+					end
+				end
+			else
+				print("❌ AFEM НЕ НАЙДЕН в CoreGui!")
+				print("📌 Убедись что скрипт AFEM вставлен в CoreGui")
+			end
 		end
 	end)
 	
-	print("✅ ANIMATIONS_Choose загружена!")
+	print("✅ ANIMATIONS_Choose (С ДИАГНОСТИКОЙ) загружена!")
+	print("🔍 Нажми на кнопку и посмотри в консоль (F9)")
 end;
 task.spawn(C_1f);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TELEPORT_ToggleList.LocalScript
