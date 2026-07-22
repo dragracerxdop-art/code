@@ -5789,13 +5789,13 @@ task.spawn(C_be);
 local function C_c2()
 local script = G2L["c2"];
 	-- ==========================================
-	-- TROLL_АНИМАЦИЯ (ФЛИНГ ТОЛЬКО ТОГО, К КОМУ ПОДОШЕЛ)
+	-- TROLL_АНИМАЦИЯ (СТО ПРОЦЕНТОВ РАБОЧИЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local runService = game:GetService("RunService")
 	
-	local ANIM_ID = "82070755455634"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
+	local ANIM_ID = "82070755455634"  -- 👈 ТВОЙ ID
 	local isActive = false
 	local animTrack = nil
 	local cooldown = false
@@ -5817,13 +5817,13 @@ local script = G2L["c2"];
 		return track
 	end
 	
-	-- ====== ПОИСК БЛИЖАЙШЕГО ИГРОКА (КОМУ ПОДОШЕЛ) ======
-	local function getNearestPlayer(char, radius)
+	-- ====== ВЫКИДЫВАЕМ ВСЕХ В РАДИУСЕ (ПРИНУДИТЕЛЬНО) ======
+	local function flingEveryoneInRadius(char, radius)
 		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return nil end
+		if not hrp then return 0 end
 	
-		local nearest = nil
-		local minDist = radius
+		local flinged = 0
+		local myPos = hrp.Position
 	
 		for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
 			if otherPlayer ~= player then
@@ -5831,73 +5831,39 @@ local script = G2L["c2"];
 				if otherChar then
 					local otherHrp = otherChar:FindFirstChild("HumanoidRootPart")
 					if otherHrp then
-						local dist = (hrp.Position - otherHrp.Position).Magnitude
-						if dist < minDist then
-							minDist = dist
-							nearest = otherChar
+						local dist = (myPos - otherHrp.Position).Magnitude
+						if dist < radius then
+							-- ====== ПРИНУДИТЕЛЬНО ВЫКИДЫВАЕМ ======
+							local dir = (otherHrp.Position - myPos).Unit
+							local power = 80  -- Сила (увеличил)
+	
+							-- СИЛЬНЫЙ ТОЛЧОК
+							local vel = dir * power + Vector3.new(0, 15, 0)
+	
+							-- ПРИНУДИТЕЛЬНО ставим скорость (не через AssemblyLinearVelocity, а напрямую)
+							otherHrp.Velocity = vel
+							otherHrp.AssemblyLinearVelocity = vel
+	
+							-- ВТОРОЙ ТОЛЧОК через рендер (для надежности)
+							task.spawn(function()
+								for i = 1, 3 do
+									task.wait(0.05)
+									if otherHrp and otherHrp.Parent then
+										otherHrp.Velocity = vel * (1 + i * 0.1)
+										otherHrp.AssemblyLinearVelocity = vel * (1 + i * 0.1)
+									end
+								end
+							end)
+	
+							flinged = flinged + 1
+							print("💥 ВЫКИНУЛ " .. otherPlayer.Name .. " сила: " .. power)
 						end
 					end
 				end
 			end
 		end
 	
-		return nearest
-	end
-	
-	-- ====== ВЫКИДЫВАЕМ КОНКРЕТНОГО ИГРОКА ======
-	local function flingTarget(targetChar, char)
-		local targetHrp = targetChar:FindFirstChild("HumanoidRootPart")
-		local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
-	
-		if not targetHrp or not targetHum then return false end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return false end
-	
-		-- Вырубаем анимации врага
-		local targetAnimate = targetChar:FindFirstChild("Animate")
-		if targetAnimate then
-			targetAnimate.Disabled = true
-		end
-	
-		-- Блокируем врага
-		targetHum.PlatformStand = true
-		targetHum.AutoRotate = false
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
-	
-		-- Направление ОТ ТЕБЯ К ВРАГУ
-		local dir = (targetHrp.Position - hrp.Position).Unit
-		local power = 60  -- Сила выброса
-	
-		-- Выкидываем
-		local vel = dir * power + Vector3.new(0, 10, 0)
-		targetHrp.AssemblyLinearVelocity = vel
-		targetHrp.Velocity = vel
-	
-		print("💥 ВЫКИНУЛ " .. targetChar.Parent.Name)
-	
-		-- Возвращаем врага в норму через 3 секунды
-		task.delay(3, function()
-			if targetHum and targetHum.Parent then
-				targetHum.PlatformStand = false
-				targetHum.AutoRotate = true
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true)
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-			end
-			if targetAnimate and targetAnimate.Parent then
-				targetAnimate.Disabled = false
-			end
-			if targetHrp and targetHrp.Parent then
-				targetHrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-				targetHrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-				targetHrp.Velocity = Vector3.new(0, 0, 0)
-			end
-		end)
-	
-		return true
+		return flinged
 	end
 	
 	local function startFling()
@@ -5922,17 +5888,7 @@ local script = G2L["c2"];
 			return
 		end
 	
-		-- ====== ИЩЕМ ТОГО, К КОМУ ПОДОШЕЛ (В РАДИУСЕ 7) ======
-		local target = getNearestPlayer(char, 7)  -- 👈 7 студей - почти впритык
-	
-		if not target then
-			print("❌ РЯДОМ НИКОГО НЕТ! ПОДОЙДИ К ИГРОКУ")
-			isActive = false
-			cooldown = false
-			return
-		end
-	
-		-- ====== ВЫРУБАЕМ ТВОИ СТАНДАРТНЫЕ АНИМАЦИИ ======
+		-- ====== ВЫРУБАЕМ ТВОИ АНИМАЦИИ ======
 		local animate = char:FindFirstChild("Animate")
 		if animate then
 			animate.Disabled = true
@@ -5942,24 +5898,26 @@ local script = G2L["c2"];
 		animTrack = loadAnimation(char)
 		if animTrack then
 			animTrack.Priority = Enum.AnimationPriority.Action
-			animTrack.Looped = false  -- 👈 НЕ ЗАЦИКЛИВАТЬ!
+			animTrack.Looped = false
 			animTrack:Play()
 			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
 		end
 	
-		-- ====== ВЫКИДЫВАЕМ ТОГО, К КОМУ ПОДОШЕЛ ======
-		local flinged = flingTarget(target, char)
+		-- ====== ВЫКИДЫВАЕМ ВСЕХ В РАДИУСЕ 10 ======
+		local flinged = flingEveryoneInRadius(char, 10)
 	
-		if flinged then
-			print("💥 ВЫКИНУЛ ИГРОКА!")
+		if flinged > 0 then
+			print("💥 ВЫКИНУЛ " .. flinged .. " ИГРОКОВ!")
+		else
+			print("❌ РЯДОМ НИКОГО НЕТ!")
 		end
 	
 		-- ====== ЖДЕМ ОКОНЧАНИЯ АНИМАЦИИ ======
-		local timeout = tick() + 3  -- Максимум 3 секунды
+		local timeout = tick() + 2.5
 	
 		while isActive and tick() < timeout do
 			if animTrack and not animTrack.IsPlaying then
-				break  -- Анимация закончилась
+				break
 			end
 			runService.Heartbeat:Wait()
 		end
@@ -5970,27 +5928,23 @@ local script = G2L["c2"];
 			animTrack = nil
 		end
 	
-		-- Включаем стандартные анимации обратно
 		if animate and animate.Parent then
 			animate.Disabled = false
 		end
 	
-		-- Ты остаешься на месте
 		humanoid.PlatformStand = false
 		humanoid.AutoRotate = true
 	
 		isActive = false
-		task.delay(1, function()
+		task.delay(1.5, function()
 			cooldown = false
 		end)
 	
-		print("✅ АНИМАЦИЯ ЗАВЕРШЕНА, МОЖНО СНОВА")
+		print("✅ АНИМАЦИЯ ЗАВЕРШЕНА")
 	end
 	
-	-- ====== КЛИК ПО КНОПКЕ ======
 	button.MouseButton1Click:Connect(startFling)
 	
-	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
 		if isActive then
@@ -6003,7 +5957,7 @@ local script = G2L["c2"];
 		end
 	end)
 	
-	print("✅ TROLL КНОПКА ЗАГРУЖЕНА! (ВЫКИДЫВАЕТ ТОЛЬКО ТОГО, К КОМУ ПОДОШЕЛ)")
+	print("✅ КНОПКА ЗАГРУЖЕНА!")
 end;
 task.spawn(C_c2);
 -- StarterGui.Folder.ScreenGui.MainFrame.LeftFrame.SwitchTabs
