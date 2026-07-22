@@ -1307,31 +1307,31 @@ G2L["ae"] = Instance.new("LocalScript", G2L["ab"]);
 
 
 
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_MMAKick
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Invisible
 G2L["af"] = Instance.new("ImageButton", G2L["d"]);
 G2L["af"]["BorderSizePixel"] = 0;
 G2L["af"]["Visible"] = false;
 G2L["af"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["af"]["Image"] = [[rbxassetid://105894094680368]];
+G2L["af"]["Image"] = [[rbxassetid://131090368100076]];
 G2L["af"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["af"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["af"]["Name"] = [[TROLL_MMAKick]];
+G2L["af"]["Name"] = [[TROLL_Invisible]];
 G2L["af"]["Position"] = UDim2.new(0.4858, 0, 0.11538, 0);
 
 
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_MMAKick.UICorner
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Invisible.UICorner
 G2L["b0"] = Instance.new("UICorner", G2L["af"]);
 G2L["b0"]["CornerRadius"] = UDim.new(0, 25);
 
 
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_MMAKick.UIStroke
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Invisible.UIStroke
 G2L["b1"] = Instance.new("UIStroke", G2L["af"]);
 G2L["b1"]["Thickness"] = 3;
 G2L["b1"]["Color"] = Color3.fromRGB(180, 4, 255);
 G2L["b1"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_MMAKick.LocalScript
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Invisible.LocalScript
 G2L["b2"] = Instance.new("LocalScript", G2L["af"]);
 
 
@@ -4784,155 +4784,75 @@ local script = G2L["ae"];
 	print("✅ КНОПКА ЗАГРУЖЕНА!")
 end;
 task.spawn(C_ae);
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_MMAKick.LocalScript
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Invisible.LocalScript
 local function C_b2()
 local script = G2L["b2"];
 	-- ==========================================
-	-- [НАЗВАНИЕ_КНОПКИ] (РАБОЧИЙ)
+	-- TROLL_Invisible (НЕВИДИМОСТЬ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
-	local RunService = game:GetService("RunService")
 	
-	local ANIM_ID = "88347541858075"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
-	local isActive = false
-	local animTrack = nil
-	local flingConnection = nil
-	local isFlinging = false
+	local isInvisible = false
 	
-	local function loadAnimation(char)
-		if not char then return nil end
+	-- ====== ФУНКЦИЯ ИНВИЗА ======
+	local function setInvisible(char, state)
+		if not char then return end
+	
+		-- Делаем невидимым всего персонажа
+		for _, part in ipairs(char:GetDescendants()) do
+			if part:IsA("BasePart") or part:IsA("Decal") or part:IsA("Texture") then
+				part.Transparency = state and 1 or 0
+			end
+		end
+	
+		-- Делаем невидимым Humanoid
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid then return nil end
-	
-		local animator = humanoid:FindFirstChild("Animator")
-		if not animator then
-			animator = Instance.new("Animator")
-			animator.Parent = humanoid
+		if humanoid then
+			humanoid.Visible = not state
 		end
 	
-		local anim = Instance.new("Animation")
-		anim.AnimationId = "rbxassetid://" .. ANIM_ID
-		local track = animator:LoadAnimation(anim)
-		return track
-	end
-	
-	local function startFling(char)
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return end
-	
-		if isFlinging then return end
-		isFlinging = true
-	
-		local vel = nil
-		local movel = 0.1
-	
-		flingConnection = RunService.Heartbeat:Connect(function()
-			if not isFlinging then return end
-			if not hrp or not hrp.Parent then 
-				isFlinging = false
-				return 
-			end
-	
-			vel = hrp.Velocity
-			hrp.Velocity = vel * 1000000 + Vector3.new(0, 1000000, 0)
-	
-			RunService.RenderStepped:Wait()
-	
-			if hrp and hrp.Parent then
-				hrp.Velocity = vel
-			end
-	
-			RunService.Stepped:Wait()
-	
-			if hrp and hrp.Parent then
-				hrp.Velocity = vel + Vector3.new(0, movel, 0)
-				movel = movel * -1
-			end
-		end)
-	end
-	
-	local function stopFling()
-		isFlinging = false
-	
-		if flingConnection then
-			flingConnection:Disconnect()
-			flingConnection = nil
-		end
-	
-		local char = player.Character
-		if char then
-			local hrp = char:FindFirstChild("HumanoidRootPart")
-			if hrp then
-				hrp.Velocity = Vector3.new(0, 0, 0)
-				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+		-- Делаем невидимым Accessory (аксессуары)
+		for _, accessory in ipairs(char:GetChildren()) do
+			if accessory:IsA("Accessory") then
+				local handle = accessory:FindFirstChild("Handle")
+				if handle then
+					handle.Transparency = state and 1 or 0
+				end
 			end
 		end
+	
+		print(state and "👻 ИНВИЗ ВКЛЮЧЕН!" or "👀 ИНВИЗ ВЫКЛЮЧЕН!")
 	end
 	
-	local function startFlingWithAnim()
-		if isActive then return end
-		isActive = true
-	
+	-- ====== НАЖАТИЕ КНОПКИ ======
+	button.MouseButton1Click:Connect(function()
 		local char = player.Character
 		if not char then
-			isActive = false
+			print("❌ НЕТ ПЕРСОНАЖА!")
 			return
 		end
 	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not hrp or not humanoid then
-			isActive = false
-			return
+		isInvisible = not isInvisible
+		setInvisible(char, isInvisible)
+	
+		-- Меняем текст кнопки
+		if isInvisible then
+			button.Text = "Инвиз Вкл"
+		else
+			button.Text = "Инвиз Выкл"
 		end
-	
-		local animate = char:FindFirstChild("Animate")
-		if animate then
-			animate.Disabled = true
-		end
-	
-		animTrack = loadAnimation(char)
-		if animTrack then
-			animTrack.Priority = Enum.AnimationPriority.Action
-			animTrack.Looped = false
-			animTrack:Play()
-			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
-		end
-	
-		startFling(char)
-	
-		task.wait(2.5)
-	
-		stopFling()
-	
-		if animTrack then
-			animTrack:Stop()
-			animTrack = nil
-		end
-	
-		if animate and animate.Parent then
-			animate.Disabled = false
-		end
-	
-		isActive = false
-		print("✅ АНИМАЦИЯ И ФЛИНГ ЗАВЕРШЕНЫ!")
-	end
-	
-	button.MouseButton1Click:Connect(startFlingWithAnim)
-	
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		stopFling()
-		if animTrack then
-			animTrack:Stop()
-			animTrack = nil
-		end
-		isActive = false
 	end)
 	
-	print("✅ КНОПКА ЗАГРУЖЕНА!")
+	-- ====== ПРИ РЕСПАВНЕ ВЫКЛЮЧАЕМ ИНВИЗ ======
+	player.CharacterAdded:Connect(function(char)
+		task.wait(0.5)
+		if isInvisible then
+			setInvisible(char, true)
+		end
+	end)
+	
+	print("✅ TROLL_Invisible КНОПКА ЗАГРУЖЕНА!")
 end;
 task.spawn(C_b2);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Slap.LocalScript
