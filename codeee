@@ -2168,272 +2168,60 @@ task.spawn(C_1b);
 local function C_1f()
 local script = G2L["1f"];
 	-- ==========================================
-	-- ANIMATIONS_Choose (ОПТИМИЗИРОВАННАЯ)
+	-- ТЕСТ ОТКРЫТИЯ GUI
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	
-	-- ====== ПАКИ АНИМАЦИЙ ======
-	local AnimPacks = {
-		["Обычный"] = {
-			Walk = "507767685",
-			Run = "507767706",
-			Jump = "507767728",
-			Fall = "507767749",
-			Idle = "507767662",
-		},
-		["🧟 Зомби"] = {
-			Walk = "6165401727",
-			Run = "6165404579",
-			Jump = "6165409370",
-			Fall = "6165412564",
-			Idle = "6165398516",
-		},
-		["🧸 Игрушечный"] = {
-			Walk = "6165420011",
-			Run = "6165423769",
-			Jump = "6165427105",
-			Fall = "6165430565",
-			Idle = "6165417904",
-		},
-		["🤖 Робот"] = {
-			Walk = "6165436548",
-			Run = "6165440279",
-			Jump = "6165445423",
-			Fall = "6165448082",
-			Idle = "6165434436",
-		},
-		["🧌 Карлик"] = {
-			Walk = "6165450815",
-			Run = "6165455172",
-			Jump = "6165459052",
-			Fall = "6165464476",
-			Idle = "6165449381",
-		},
-		["🧝 Эльф"] = {
-			Walk = "6165468089",
-			Run = "6165472355",
-			Jump = "6165476130",
-			Fall = "6165480161",
-			Idle = "6165466002",
-		},
-		["🦸 Супергерой"] = {
-			Walk = "6165484393",
-			Run = "6165489036",
-			Jump = "6165493573",
-			Fall = "6165497216",
-			Idle = "6165482347",
-		},
-	}
+	print("🔧 Скрипт запущен!")
 	
-	local currentTracks = {}
-	local currentPack = nil
-	local isApplying = false
+	button.MouseButton1Click:Connect(function()
+		print("🖱️ КНОПКА НАЖАТА!")
 	
-	-- ====== ПРИМЕНЕНИЕ ПАКА (БЕЗ ВЫЛЕТОВ) ======
-	local function applyPack(packName)
-		if isApplying then return end
-		isApplying = true
-	
-		local char = player.Character
-		if not char then
-			isApplying = false
-			return
+		-- ПРОВЕРКА: ЕСТЬ ЛИ PlayerGui
+		local playerGui = player:FindFirstChild("PlayerGui")
+		if not playerGui then
+			print("❌ PlayerGui не найден! Создаю...")
+			playerGui = Instance.new("PlayerGui")
+			playerGui.Parent = player
 		end
 	
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid then
-			isApplying = false
-			return
-		end
-	
-		-- Останавливаем старые анимации
-		for _, track in ipairs(currentTracks) do
-			pcall(function() track:Stop() end)
-		end
-		currentTracks = {}
-	
-		local pack = AnimPacks[packName]
-		if not pack then
-			isApplying = false
-			return
-		end
-	
-		-- Ждем пока персонаж полностью загрузится
-		task.wait(0.5)
-	
-		local animator = humanoid:FindFirstChild("Animator")
-		if not animator then
-			animator = Instance.new("Animator")
-			animator.Parent = humanoid
-			task.wait(0.3)
-		end
-	
-		print("🎬 ПАК: " .. packName)
-	
-		for name, id in pairs(pack) do
-			pcall(function()
-				local anim = Instance.new("Animation")
-				anim.AnimationId = "rbxassetid://" .. id
-	
-				local track = animator:LoadAnimation(anim)
-				if track then
-					track.Looped = true
-					track.Priority = Enum.AnimationPriority.Core
-					track:Play()
-					table.insert(currentTracks, track)
-				end
-			end)
-		end
-	
-		currentPack = packName
-		button.Text = "📦 " .. packName
-		isApplying = false
-		print("✅ ПАК ПРИМЕНЁН: " .. packName)
-	end
-	
-	-- ====== ОСТАНОВКА ======
-	local function stopPack()
-		for _, track in ipairs(currentTracks) do
-			pcall(function() track:Stop() end)
-		end
-		currentTracks = {}
-		currentPack = nil
-		button.Text = "🎬 Выбрать пак"
-		print("🛑 ПАК ОСТАНОВЛЕН!")
-	end
-	
-	-- ====== GUI ======
-	local function createGUI()
-		local existing = player.PlayerGui:FindFirstChild("AnimPackSelector")
-		if existing then
-			existing:Destroy()
-			return
-		end
-	
+		-- СОЗДАЕМ ПРОСТОЙ GUI
 		local screenGui = Instance.new("ScreenGui")
-		screenGui.Parent = player.PlayerGui
-		screenGui.Name = "AnimPackSelector"
-		screenGui.ResetOnSpawn = false
+		screenGui.Parent = playerGui
+		screenGui.Name = "TestGUI"
 	
 		local frame = Instance.new("Frame")
 		frame.Parent = screenGui
-		frame.Size = UDim2.new(0, 280, 0, 460)
-		frame.Position = UDim2.new(0.5, -140, 0.5, -230)
-		frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-		frame.Active = true
-		frame.Draggable = true
+		frame.Size = UDim2.new(0, 300, 0, 200)
+		frame.Position = UDim2.new(0.5, -150, 0.5, -100)
+		frame.BackgroundColor3 = Color3.fromRGB(50, 0, 100)
 	
-		local stroke = Instance.new("UIStroke")
-		stroke.Parent = frame
-		stroke.Color = Color3.fromRGB(128, 0, 255)
-		stroke.Thickness = 3
+		local label = Instance.new("TextLabel")
+		label.Parent = frame
+		label.Size = UDim2.new(1, 0, 1, 0)
+		label.Text = "✅ GUI РАБОТАЕТ!"
+		label.TextColor3 = Color3.fromRGB(255, 255, 255)
+		label.BackgroundTransparency = 1
+		label.TextSize = 30
+		label.Font = Enum.Font.SourceSansBold
 	
-		local title = Instance.new("TextLabel")
-		title.Parent = frame
-		title.Size = UDim2.new(1, 0, 0, 40)
-		title.Position = UDim2.new(0, 0, 0, 5)
-		title.Text = "🎬 ВЫБОР ПАКА"
-		title.TextColor3 = Color3.fromRGB(128, 0, 255)
-		title.BackgroundTransparency = 1
-		title.TextSize = 22
-		title.Font = Enum.Font.SourceSansBold
-	
-		local line = Instance.new("Frame")
-		line.Parent = frame
-		line.Size = UDim2.new(0.9, 0, 0, 1)
-		line.Position = UDim2.new(0.05, 0, 0, 48)
-		line.BackgroundColor3 = Color3.fromRGB(128, 0, 255)
-	
-		local yOffset = 58
-		local btnHeight = 35
-		local spacing = 4
-	
-		for packName, _ in pairs(AnimPacks) do
-			local btn = Instance.new("TextButton")
-			btn.Parent = frame
-			btn.Size = UDim2.new(0.85, 0, 0, btnHeight)
-			btn.Position = UDim2.new(0.075, 0, 0, yOffset)
-			btn.Text = packName
-			btn.TextColor3 = Color3.fromRGB(200, 150, 255)
-			btn.BackgroundColor3 = Color3.fromRGB(10, 10, 25)
-			btn.BorderSizePixel = 0
-			btn.Font = Enum.Font.SourceSans
-			btn.TextSize = 16
-	
-			local btnStroke = Instance.new("UIStroke")
-			btnStroke.Parent = btn
-			btnStroke.Color = Color3.fromRGB(128, 0, 255)
-			btnStroke.Thickness = 2
-	
-			btn.MouseButton1Click:Connect(function()
-				applyPack(packName)
-				screenGui:Destroy()
-			end)
-	
-			yOffset = yOffset + btnHeight + spacing
-		end
-	
-		local offBtn = Instance.new("TextButton")
-		offBtn.Parent = frame
-		offBtn.Size = UDim2.new(0.85, 0, 0, 38)
-		offBtn.Position = UDim2.new(0.075, 0, 0, yOffset + 8)
-		offBtn.Text = "❌ ВЫКЛЮЧИТЬ"
-		offBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-		offBtn.BackgroundColor3 = Color3.fromRGB(30, 5, 5)
-		offBtn.BorderSizePixel = 0
-		offBtn.Font = Enum.Font.SourceSansBold
-		offBtn.TextSize = 17
-	
-		local offStroke = Instance.new("UIStroke")
-		offStroke.Parent = offBtn
-		offStroke.Color = Color3.fromRGB(255, 50, 50)
-		offStroke.Thickness = 2
-	
-		offBtn.MouseButton1Click:Connect(function()
-			stopPack()
+		local close = Instance.new("TextButton")
+		close.Parent = frame
+		close.Size = UDim2.new(0, 40, 0, 40)
+		close.Position = UDim2.new(1, -45, 0, 5)
+		close.Text = "✕"
+		close.TextColor3 = Color3.fromRGB(255, 255, 255)
+		close.BackgroundTransparency = 1
+		close.TextSize = 24
+		close.MouseButton1Click:Connect(function()
 			screenGui:Destroy()
 		end)
 	
-		local closeBtn = Instance.new("TextButton")
-		closeBtn.Parent = frame
-		closeBtn.Size = UDim2.new(0, 30, 0, 30)
-		closeBtn.Position = UDim2.new(1, -38, 0, 5)
-		closeBtn.Text = "✕"
-		closeBtn.TextColor3 = Color3.fromRGB(128, 0, 255)
-		closeBtn.BackgroundTransparency = 1
-		closeBtn.TextSize = 22
-		closeBtn.Font = Enum.Font.SourceSansBold
-		closeBtn.MouseButton1Click:Connect(function()
-			screenGui:Destroy()
-		end)
-	
-		local footer = Instance.new("TextLabel")
-		footer.Parent = frame
-		footer.Size = UDim2.new(1, 0, 0, 20)
-		footer.Position = UDim2.new(0, 0, 1, -24)
-		footer.Text = "Нажми на пак для применения"
-		footer.TextColor3 = Color3.fromRGB(100, 50, 150)
-		footer.BackgroundTransparency = 1
-		footer.TextSize = 12
-		footer.Font = Enum.Font.SourceSans
-	end
-	
-	-- ====== КЛИК ======
-	button.MouseButton1Click:Connect(function()
-		pcall(createGUI)
+		print("✅ GUI СОЗДАН!")
 	end)
 	
-	-- ====== ПРИ РЕСПАВНЕ ======
-	player.CharacterAdded:Connect(function(char)
-		task.wait(1)
-		if currentPack then
-			task.wait(0.5)
-			pcall(function() applyPack(currentPack) end)
-		end
-	end)
-	
-	print("✅ ANIMATIONS_Choose ЗАГРУЖЕНА!")
+	print("✅ ТЕСТОВЫЙ СКРИПТ ЗАГРУЖЕН!")
 end;
 task.spawn(C_1f);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TELEPORT_ToggleList.LocalScript
