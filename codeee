@@ -4637,17 +4637,19 @@ task.spawn(C_aa);
 local function C_ae()
 local script = G2L["ae"];
 	-- ==========================================
-	-- TROLL_АНИМАЦИЯ (ФЛИНГ ТОЛЬКО ТОГО, К КОМУ ПОДОШЕЛ)
+	-- TROLL_ФЛИНГ С АНИМАЦИЕЙ (РАБОЧИЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
-	local runService = game:GetService("RunService")
+	local RunService = game:GetService("RunService")
 	
-	local ANIM_ID = "118139885865308"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
+	local ANIM_ID = "118139885865308"  -- 👈 ТВОЙ ID
 	local isActive = false
 	local animTrack = nil
-	local cooldown = false
+	local flingConnection = nil
+	local isFlinging = false
 	
+	-- ====== ЗАГРУЗКА АНИМАЦИИ ======
 	local function loadAnimation(char)
 		if not char then return nil end
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
@@ -4665,100 +4667,75 @@ local script = G2L["ae"];
 		return track
 	end
 	
-	-- ====== ПОИСК БЛИЖАЙШЕГО ИГРОКА (КОМУ ПОДОШЕЛ) ======
-	local function getNearestPlayer(char, radius)
+	-- ====== ЗАПУСК ФЛИНГА ======
+	local function startFling(char)
 		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return nil end
+		if not hrp then return end
 	
-		local nearest = nil
-		local minDist = radius
+		if isFlinging then return end
+		isFlinging = true
 	
-		for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
-			if otherPlayer ~= player then
-				local otherChar = otherPlayer.Character
-				if otherChar then
-					local otherHrp = otherChar:FindFirstChild("HumanoidRootPart")
-					if otherHrp then
-						local dist = (hrp.Position - otherHrp.Position).Magnitude
-						if dist < minDist then
-							minDist = dist
-							nearest = otherChar
-						end
-					end
-				end
+		local vel = nil
+		local movel = 0.1
+	
+		print("🚀 ФЛИНГ ВКЛЮЧЕН!")
+	
+		flingConnection = RunService.Heartbeat:Connect(function()
+			if not isFlinging then return end
+			if not hrp or not hrp.Parent then 
+				isFlinging = false
+				return 
 			end
-		end
 	
-		return nearest
-	end
+			-- Флинг из твоего скрипта
+			vel = hrp.Velocity
+			hrp.Velocity = vel * 1000000 + Vector3.new(0, 1000000, 0)
 	
-	-- ====== ВЫКИДЫВАЕМ КОНКРЕТНОГО ИГРОКА ======
-	local function flingTarget(targetChar, char)
-		local targetHrp = targetChar:FindFirstChild("HumanoidRootPart")
-		local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
+			RunService.RenderStepped:Wait()
 	
-		if not targetHrp or not targetHum then return false end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return false end
-	
-		-- Вырубаем анимации врага
-		local targetAnimate = targetChar:FindFirstChild("Animate")
-		if targetAnimate then
-			targetAnimate.Disabled = true
-		end
-	
-		-- Блокируем врага
-		targetHum.PlatformStand = true
-		targetHum.AutoRotate = false
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
-	
-		-- Направление ОТ ТЕБЯ К ВРАГУ
-		local dir = (targetHrp.Position - hrp.Position).Unit
-		local power = 60  -- Сила выброса
-	
-		-- Выкидываем
-		local vel = dir * power + Vector3.new(0, 10, 0)
-		targetHrp.AssemblyLinearVelocity = vel
-		targetHrp.Velocity = vel
-	
-		print("💥 ВЫКИНУЛ " .. targetChar.Parent.Name)
-	
-		-- Возвращаем врага в норму через 3 секунды
-		task.delay(3, function()
-			if targetHum and targetHum.Parent then
-				targetHum.PlatformStand = false
-				targetHum.AutoRotate = true
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true)
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
+			if hrp and hrp.Parent then
+				hrp.Velocity = vel
 			end
-			if targetAnimate and targetAnimate.Parent then
-				targetAnimate.Disabled = false
-			end
-			if targetHrp and targetHrp.Parent then
-				targetHrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-				targetHrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-				targetHrp.Velocity = Vector3.new(0, 0, 0)
+	
+			RunService.Stepped:Wait()
+	
+			if hrp and hrp.Parent then
+				hrp.Velocity = vel + Vector3.new(0, movel, 0)
+				movel = movel * -1
 			end
 		end)
-	
-		return true
 	end
 	
-	local function startFling()
-		if isActive then return end
-		if cooldown then return end
+	-- ====== ОСТАНОВКА ФЛИНГА ======
+	local function stopFling()
+		isFlinging = false
 	
+		if flingConnection then
+			flingConnection:Disconnect()
+			flingConnection = nil
+		end
+	
+		local char = player.Character
+		if char then
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.Velocity = Vector3.new(0, 0, 0)
+				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+			end
+		end
+	
+		print("🛑 ФЛИНГ ВЫКЛЮЧЕН!")
+	end
+	
+	-- ====== ОСНОВНАЯ ФУНКЦИЯ ======
+	local function startFlingWithAnim()
+		if isActive then return end
 		isActive = true
-		cooldown = true
 	
 		local char = player.Character
 		if not char then
 			isActive = false
-			cooldown = false
 			return
 		end
 	
@@ -4766,1032 +4743,16 @@ local script = G2L["ae"];
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not hrp or not humanoid then
 			isActive = false
-			cooldown = false
 			return
 		end
 	
-		-- ====== ИЩЕМ ТОГО, К КОМУ ПОДОШЕЛ (В РАДИУСЕ 7) ======
-		local target = getNearestPlayer(char, 7)  -- 👈 7 студей - почти впритык
-	
-		if not target then
-			print("❌ РЯДОМ НИКОГО НЕТ! ПОДОЙДИ К ИГРОКУ")
-			isActive = false
-			cooldown = false
-			return
-		end
-	
-		-- ====== ВЫРУБАЕМ ТВОИ СТАНДАРТНЫЕ АНИМАЦИИ ======
+		-- ====== 1. ВЫРУБАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
 		local animate = char:FindFirstChild("Animate")
 		if animate then
 			animate.Disabled = true
 		end
 	
-		-- ====== ЗАГРУЖАЕМ ТВОЮ АНИМАЦИЮ ======
-		animTrack = loadAnimation(char)
-		if animTrack then
-			animTrack.Priority = Enum.AnimationPriority.Action
-			animTrack.Looped = false  -- 👈 НЕ ЗАЦИКЛИВАТЬ!
-			animTrack:Play()
-			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
-		end
-	
-		-- ====== ВЫКИДЫВАЕМ ТОГО, К КОМУ ПОДОШЕЛ ======
-		local flinged = flingTarget(target, char)
-	
-		if flinged then
-			print("💥 ВЫКИНУЛ ИГРОКА!")
-		end
-	
-		-- ====== ЖДЕМ ОКОНЧАНИЯ АНИМАЦИИ ======
-		local timeout = tick() + 3  -- Максимум 3 секунды
-	
-		while isActive and tick() < timeout do
-			if animTrack and not animTrack.IsPlaying then
-				break  -- Анимация закончилась
-			end
-			runService.Heartbeat:Wait()
-		end
-	
-		-- ====== ВОЗВРАЩАЕМ ВСЁ В НОРМУ ======
-		if animTrack then
-			animTrack:Stop()
-			animTrack = nil
-		end
-	
-		-- Включаем стандартные анимации обратно
-		if animate and animate.Parent then
-			animate.Disabled = false
-		end
-	
-		-- Ты остаешься на месте
-		humanoid.PlatformStand = false
-		humanoid.AutoRotate = true
-	
-		isActive = false
-		task.delay(1, function()
-			cooldown = false
-		end)
-	
-		print("✅ АНИМАЦИЯ ЗАВЕРШЕНА, МОЖНО СНОВА")
-	end
-	
-	-- ====== КЛИК ПО КНОПКЕ ======
-	button.MouseButton1Click:Connect(startFling)
-	
-	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		if isActive then
-			if animTrack then
-				animTrack:Stop()
-				animTrack = nil
-			end
-			isActive = false
-			cooldown = false
-		end
-	end)
-	
-	print("✅ TROLL КНОПКА ЗАГРУЖЕНА! (ВЫКИДЫВАЕТ ТОЛЬКО ТОГО, К КОМУ ПОДОШЕЛ)")
-end;
-task.spawn(C_ae);
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_MMAKick.LocalScript
-local function C_b2()
-local script = G2L["b2"];
-	-- ==========================================
-	-- TROLL_АНИМАЦИЯ (ФЛИНГ ТОЛЬКО ТОГО, К КОМУ ПОДОШЕЛ)
-	-- ==========================================
-	local button = script.Parent
-	local player = game.Players.LocalPlayer
-	local runService = game:GetService("RunService")
-	
-	local ANIM_ID = "88347541858075"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
-	local isActive = false
-	local animTrack = nil
-	local cooldown = false
-	
-	local function loadAnimation(char)
-		if not char then return nil end
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid then return nil end
-	
-		local animator = humanoid:FindFirstChild("Animator")
-		if not animator then
-			animator = Instance.new("Animator")
-			animator.Parent = humanoid
-		end
-	
-		local anim = Instance.new("Animation")
-		anim.AnimationId = "rbxassetid://" .. ANIM_ID
-		local track = animator:LoadAnimation(anim)
-		return track
-	end
-	
-	-- ====== ПОИСК БЛИЖАЙШЕГО ИГРОКА (КОМУ ПОДОШЕЛ) ======
-	local function getNearestPlayer(char, radius)
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return nil end
-	
-		local nearest = nil
-		local minDist = radius
-	
-		for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
-			if otherPlayer ~= player then
-				local otherChar = otherPlayer.Character
-				if otherChar then
-					local otherHrp = otherChar:FindFirstChild("HumanoidRootPart")
-					if otherHrp then
-						local dist = (hrp.Position - otherHrp.Position).Magnitude
-						if dist < minDist then
-							minDist = dist
-							nearest = otherChar
-						end
-					end
-				end
-			end
-		end
-	
-		return nearest
-	end
-	
-	-- ====== ВЫКИДЫВАЕМ КОНКРЕТНОГО ИГРОКА ======
-	local function flingTarget(targetChar, char)
-		local targetHrp = targetChar:FindFirstChild("HumanoidRootPart")
-		local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
-	
-		if not targetHrp or not targetHum then return false end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return false end
-	
-		-- Вырубаем анимации врага
-		local targetAnimate = targetChar:FindFirstChild("Animate")
-		if targetAnimate then
-			targetAnimate.Disabled = true
-		end
-	
-		-- Блокируем врага
-		targetHum.PlatformStand = true
-		targetHum.AutoRotate = false
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
-	
-		-- Направление ОТ ТЕБЯ К ВРАГУ
-		local dir = (targetHrp.Position - hrp.Position).Unit
-		local power = 60  -- Сила выброса
-	
-		-- Выкидываем
-		local vel = dir * power + Vector3.new(0, 10, 0)
-		targetHrp.AssemblyLinearVelocity = vel
-		targetHrp.Velocity = vel
-	
-		print("💥 ВЫКИНУЛ " .. targetChar.Parent.Name)
-	
-		-- Возвращаем врага в норму через 3 секунды
-		task.delay(3, function()
-			if targetHum and targetHum.Parent then
-				targetHum.PlatformStand = false
-				targetHum.AutoRotate = true
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true)
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-			end
-			if targetAnimate and targetAnimate.Parent then
-				targetAnimate.Disabled = false
-			end
-			if targetHrp and targetHrp.Parent then
-				targetHrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-				targetHrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-				targetHrp.Velocity = Vector3.new(0, 0, 0)
-			end
-		end)
-	
-		return true
-	end
-	
-	local function startFling()
-		if isActive then return end
-		if cooldown then return end
-	
-		isActive = true
-		cooldown = true
-	
-		local char = player.Character
-		if not char then
-			isActive = false
-			cooldown = false
-			return
-		end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not hrp or not humanoid then
-			isActive = false
-			cooldown = false
-			return
-		end
-	
-		-- ====== ИЩЕМ ТОГО, К КОМУ ПОДОШЕЛ (В РАДИУСЕ 7) ======
-		local target = getNearestPlayer(char, 7)  -- 👈 7 студей - почти впритык
-	
-		if not target then
-			print("❌ РЯДОМ НИКОГО НЕТ! ПОДОЙДИ К ИГРОКУ")
-			isActive = false
-			cooldown = false
-			return
-		end
-	
-		-- ====== ВЫРУБАЕМ ТВОИ СТАНДАРТНЫЕ АНИМАЦИИ ======
-		local animate = char:FindFirstChild("Animate")
-		if animate then
-			animate.Disabled = true
-		end
-	
-		-- ====== ЗАГРУЖАЕМ ТВОЮ АНИМАЦИЮ ======
-		animTrack = loadAnimation(char)
-		if animTrack then
-			animTrack.Priority = Enum.AnimationPriority.Action
-			animTrack.Looped = false  -- 👈 НЕ ЗАЦИКЛИВАТЬ!
-			animTrack:Play()
-			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
-		end
-	
-		-- ====== ВЫКИДЫВАЕМ ТОГО, К КОМУ ПОДОШЕЛ ======
-		local flinged = flingTarget(target, char)
-	
-		if flinged then
-			print("💥 ВЫКИНУЛ ИГРОКА!")
-		end
-	
-		-- ====== ЖДЕМ ОКОНЧАНИЯ АНИМАЦИИ ======
-		local timeout = tick() + 3  -- Максимум 3 секунды
-	
-		while isActive and tick() < timeout do
-			if animTrack and not animTrack.IsPlaying then
-				break  -- Анимация закончилась
-			end
-			runService.Heartbeat:Wait()
-		end
-	
-		-- ====== ВОЗВРАЩАЕМ ВСЁ В НОРМУ ======
-		if animTrack then
-			animTrack:Stop()
-			animTrack = nil
-		end
-	
-		-- Включаем стандартные анимации обратно
-		if animate and animate.Parent then
-			animate.Disabled = false
-		end
-	
-		-- Ты остаешься на месте
-		humanoid.PlatformStand = false
-		humanoid.AutoRotate = true
-	
-		isActive = false
-		task.delay(1, function()
-			cooldown = false
-		end)
-	
-		print("✅ АНИМАЦИЯ ЗАВЕРШЕНА, МОЖНО СНОВА")
-	end
-	
-	-- ====== КЛИК ПО КНОПКЕ ======
-	button.MouseButton1Click:Connect(startFling)
-	
-	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		if isActive then
-			if animTrack then
-				animTrack:Stop()
-				animTrack = nil
-			end
-			isActive = false
-			cooldown = false
-		end
-	end)
-	
-	print("✅ TROLL КНОПКА ЗАГРУЖЕНА! (ВЫКИДЫВАЕТ ТОЛЬКО ТОГО, К КОМУ ПОДОШЕЛ)")
-end;
-task.spawn(C_b2);
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Slap.LocalScript
-local function C_b6()
-local script = G2L["b6"];
-	-- ==========================================
-	-- TROLL_АНИМАЦИЯ (ФЛИНГ ТОЛЬКО ТОГО, К КОМУ ПОДОШЕЛ)
-	-- ==========================================
-	local button = script.Parent
-	local player = game.Players.LocalPlayer
-	local runService = game:GetService("RunService")
-	
-	local ANIM_ID = "108225134235478"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
-	local isActive = false
-	local animTrack = nil
-	local cooldown = false
-	
-	local function loadAnimation(char)
-		if not char then return nil end
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid then return nil end
-	
-		local animator = humanoid:FindFirstChild("Animator")
-		if not animator then
-			animator = Instance.new("Animator")
-			animator.Parent = humanoid
-		end
-	
-		local anim = Instance.new("Animation")
-		anim.AnimationId = "rbxassetid://" .. ANIM_ID
-		local track = animator:LoadAnimation(anim)
-		return track
-	end
-	
-	-- ====== ПОИСК БЛИЖАЙШЕГО ИГРОКА (КОМУ ПОДОШЕЛ) ======
-	local function getNearestPlayer(char, radius)
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return nil end
-	
-		local nearest = nil
-		local minDist = radius
-	
-		for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
-			if otherPlayer ~= player then
-				local otherChar = otherPlayer.Character
-				if otherChar then
-					local otherHrp = otherChar:FindFirstChild("HumanoidRootPart")
-					if otherHrp then
-						local dist = (hrp.Position - otherHrp.Position).Magnitude
-						if dist < minDist then
-							minDist = dist
-							nearest = otherChar
-						end
-					end
-				end
-			end
-		end
-	
-		return nearest
-	end
-	
-	-- ====== ВЫКИДЫВАЕМ КОНКРЕТНОГО ИГРОКА ======
-	local function flingTarget(targetChar, char)
-		local targetHrp = targetChar:FindFirstChild("HumanoidRootPart")
-		local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
-	
-		if not targetHrp or not targetHum then return false end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return false end
-	
-		-- Вырубаем анимации врага
-		local targetAnimate = targetChar:FindFirstChild("Animate")
-		if targetAnimate then
-			targetAnimate.Disabled = true
-		end
-	
-		-- Блокируем врага
-		targetHum.PlatformStand = true
-		targetHum.AutoRotate = false
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
-	
-		-- Направление ОТ ТЕБЯ К ВРАГУ
-		local dir = (targetHrp.Position - hrp.Position).Unit
-		local power = 60  -- Сила выброса
-	
-		-- Выкидываем
-		local vel = dir * power + Vector3.new(0, 10, 0)
-		targetHrp.AssemblyLinearVelocity = vel
-		targetHrp.Velocity = vel
-	
-		print("💥 ВЫКИНУЛ " .. targetChar.Parent.Name)
-	
-		-- Возвращаем врага в норму через 3 секунды
-		task.delay(3, function()
-			if targetHum and targetHum.Parent then
-				targetHum.PlatformStand = false
-				targetHum.AutoRotate = true
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true)
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-			end
-			if targetAnimate and targetAnimate.Parent then
-				targetAnimate.Disabled = false
-			end
-			if targetHrp and targetHrp.Parent then
-				targetHrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-				targetHrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-				targetHrp.Velocity = Vector3.new(0, 0, 0)
-			end
-		end)
-	
-		return true
-	end
-	
-	local function startFling()
-		if isActive then return end
-		if cooldown then return end
-	
-		isActive = true
-		cooldown = true
-	
-		local char = player.Character
-		if not char then
-			isActive = false
-			cooldown = false
-			return
-		end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not hrp or not humanoid then
-			isActive = false
-			cooldown = false
-			return
-		end
-	
-		-- ====== ИЩЕМ ТОГО, К КОМУ ПОДОШЕЛ (В РАДИУСЕ 7) ======
-		local target = getNearestPlayer(char, 7)  -- 👈 7 студей - почти впритык
-	
-		if not target then
-			print("❌ РЯДОМ НИКОГО НЕТ! ПОДОЙДИ К ИГРОКУ")
-			isActive = false
-			cooldown = false
-			return
-		end
-	
-		-- ====== ВЫРУБАЕМ ТВОИ СТАНДАРТНЫЕ АНИМАЦИИ ======
-		local animate = char:FindFirstChild("Animate")
-		if animate then
-			animate.Disabled = true
-		end
-	
-		-- ====== ЗАГРУЖАЕМ ТВОЮ АНИМАЦИЮ ======
-		animTrack = loadAnimation(char)
-		if animTrack then
-			animTrack.Priority = Enum.AnimationPriority.Action
-			animTrack.Looped = false  -- 👈 НЕ ЗАЦИКЛИВАТЬ!
-			animTrack:Play()
-			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
-		end
-	
-		-- ====== ВЫКИДЫВАЕМ ТОГО, К КОМУ ПОДОШЕЛ ======
-		local flinged = flingTarget(target, char)
-	
-		if flinged then
-			print("💥 ВЫКИНУЛ ИГРОКА!")
-		end
-	
-		-- ====== ЖДЕМ ОКОНЧАНИЯ АНИМАЦИИ ======
-		local timeout = tick() + 3  -- Максимум 3 секунды
-	
-		while isActive and tick() < timeout do
-			if animTrack and not animTrack.IsPlaying then
-				break  -- Анимация закончилась
-			end
-			runService.Heartbeat:Wait()
-		end
-	
-		-- ====== ВОЗВРАЩАЕМ ВСЁ В НОРМУ ======
-		if animTrack then
-			animTrack:Stop()
-			animTrack = nil
-		end
-	
-		-- Включаем стандартные анимации обратно
-		if animate and animate.Parent then
-			animate.Disabled = false
-		end
-	
-		-- Ты остаешься на месте
-		humanoid.PlatformStand = false
-		humanoid.AutoRotate = true
-	
-		isActive = false
-		task.delay(1, function()
-			cooldown = false
-		end)
-	
-		print("✅ АНИМАЦИЯ ЗАВЕРШЕНА, МОЖНО СНОВА")
-	end
-	
-	-- ====== КЛИК ПО КНОПКЕ ======
-	button.MouseButton1Click:Connect(startFling)
-	
-	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		if isActive then
-			if animTrack then
-				animTrack:Stop()
-				animTrack = nil
-			end
-			isActive = false
-			cooldown = false
-		end
-	end)
-	
-	print("✅ TROLL КНОПКА ЗАГРУЖЕНА! (ВЫКИДЫВАЕТ ТОЛЬКО ТОГО, К КОМУ ПОДОШЕЛ)")
-end;
-task.spawn(C_b6);
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Slap2.LocalScript
-local function C_ba()
-local script = G2L["ba"];
-	-- ==========================================
-	-- TROLL_АНИМАЦИЯ (ФЛИНГ ТОЛЬКО ТОГО, К КОМУ ПОДОШЕЛ)
-	-- ==========================================
-	local button = script.Parent
-	local player = game.Players.LocalPlayer
-	local runService = game:GetService("RunService")
-	
-	local ANIM_ID = "78221709455150"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
-	local isActive = false
-	local animTrack = nil
-	local cooldown = false
-	
-	local function loadAnimation(char)
-		if not char then return nil end
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid then return nil end
-	
-		local animator = humanoid:FindFirstChild("Animator")
-		if not animator then
-			animator = Instance.new("Animator")
-			animator.Parent = humanoid
-		end
-	
-		local anim = Instance.new("Animation")
-		anim.AnimationId = "rbxassetid://" .. ANIM_ID
-		local track = animator:LoadAnimation(anim)
-		return track
-	end
-	
-	-- ====== ПОИСК БЛИЖАЙШЕГО ИГРОКА (КОМУ ПОДОШЕЛ) ======
-	local function getNearestPlayer(char, radius)
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return nil end
-	
-		local nearest = nil
-		local minDist = radius
-	
-		for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
-			if otherPlayer ~= player then
-				local otherChar = otherPlayer.Character
-				if otherChar then
-					local otherHrp = otherChar:FindFirstChild("HumanoidRootPart")
-					if otherHrp then
-						local dist = (hrp.Position - otherHrp.Position).Magnitude
-						if dist < minDist then
-							minDist = dist
-							nearest = otherChar
-						end
-					end
-				end
-			end
-		end
-	
-		return nearest
-	end
-	
-	-- ====== ВЫКИДЫВАЕМ КОНКРЕТНОГО ИГРОКА ======
-	local function flingTarget(targetChar, char)
-		local targetHrp = targetChar:FindFirstChild("HumanoidRootPart")
-		local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
-	
-		if not targetHrp or not targetHum then return false end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return false end
-	
-		-- Вырубаем анимации врага
-		local targetAnimate = targetChar:FindFirstChild("Animate")
-		if targetAnimate then
-			targetAnimate.Disabled = true
-		end
-	
-		-- Блокируем врага
-		targetHum.PlatformStand = true
-		targetHum.AutoRotate = false
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
-	
-		-- Направление ОТ ТЕБЯ К ВРАГУ
-		local dir = (targetHrp.Position - hrp.Position).Unit
-		local power = 60  -- Сила выброса
-	
-		-- Выкидываем
-		local vel = dir * power + Vector3.new(0, 10, 0)
-		targetHrp.AssemblyLinearVelocity = vel
-		targetHrp.Velocity = vel
-	
-		print("💥 ВЫКИНУЛ " .. targetChar.Parent.Name)
-	
-		-- Возвращаем врага в норму через 3 секунды
-		task.delay(3, function()
-			if targetHum and targetHum.Parent then
-				targetHum.PlatformStand = false
-				targetHum.AutoRotate = true
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true)
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-			end
-			if targetAnimate and targetAnimate.Parent then
-				targetAnimate.Disabled = false
-			end
-			if targetHrp and targetHrp.Parent then
-				targetHrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-				targetHrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-				targetHrp.Velocity = Vector3.new(0, 0, 0)
-			end
-		end)
-	
-		return true
-	end
-	
-	local function startFling()
-		if isActive then return end
-		if cooldown then return end
-	
-		isActive = true
-		cooldown = true
-	
-		local char = player.Character
-		if not char then
-			isActive = false
-			cooldown = false
-			return
-		end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not hrp or not humanoid then
-			isActive = false
-			cooldown = false
-			return
-		end
-	
-		-- ====== ИЩЕМ ТОГО, К КОМУ ПОДОШЕЛ (В РАДИУСЕ 7) ======
-		local target = getNearestPlayer(char, 7)  -- 👈 7 студей - почти впритык
-	
-		if not target then
-			print("❌ РЯДОМ НИКОГО НЕТ! ПОДОЙДИ К ИГРОКУ")
-			isActive = false
-			cooldown = false
-			return
-		end
-	
-		-- ====== ВЫРУБАЕМ ТВОИ СТАНДАРТНЫЕ АНИМАЦИИ ======
-		local animate = char:FindFirstChild("Animate")
-		if animate then
-			animate.Disabled = true
-		end
-	
-		-- ====== ЗАГРУЖАЕМ ТВОЮ АНИМАЦИЮ ======
-		animTrack = loadAnimation(char)
-		if animTrack then
-			animTrack.Priority = Enum.AnimationPriority.Action
-			animTrack.Looped = false  -- 👈 НЕ ЗАЦИКЛИВАТЬ!
-			animTrack:Play()
-			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
-		end
-	
-		-- ====== ВЫКИДЫВАЕМ ТОГО, К КОМУ ПОДОШЕЛ ======
-		local flinged = flingTarget(target, char)
-	
-		if flinged then
-			print("💥 ВЫКИНУЛ ИГРОКА!")
-		end
-	
-		-- ====== ЖДЕМ ОКОНЧАНИЯ АНИМАЦИИ ======
-		local timeout = tick() + 3  -- Максимум 3 секунды
-	
-		while isActive and tick() < timeout do
-			if animTrack and not animTrack.IsPlaying then
-				break  -- Анимация закончилась
-			end
-			runService.Heartbeat:Wait()
-		end
-	
-		-- ====== ВОЗВРАЩАЕМ ВСЁ В НОРМУ ======
-		if animTrack then
-			animTrack:Stop()
-			animTrack = nil
-		end
-	
-		-- Включаем стандартные анимации обратно
-		if animate and animate.Parent then
-			animate.Disabled = false
-		end
-	
-		-- Ты остаешься на месте
-		humanoid.PlatformStand = false
-		humanoid.AutoRotate = true
-	
-		isActive = false
-		task.delay(1, function()
-			cooldown = false
-		end)
-	
-		print("✅ АНИМАЦИЯ ЗАВЕРШЕНА, МОЖНО СНОВА")
-	end
-	
-	-- ====== КЛИК ПО КНОПКЕ ======
-	button.MouseButton1Click:Connect(startFling)
-	
-	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		if isActive then
-			if animTrack then
-				animTrack:Stop()
-				animTrack = nil
-			end
-			isActive = false
-			cooldown = false
-		end
-	end)
-	
-	print("✅ TROLL КНОПКА ЗАГРУЖЕНА! (ВЫКИДЫВАЕТ ТОЛЬКО ТОГО, К КОМУ ПОДОШЕЛ)")
-end;
-task.spawn(C_ba);
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Push.LocalScript
-local function C_be()
-local script = G2L["be"];
-	-- ==========================================
-	-- TROLL_АНИМАЦИЯ (ФЛИНГ ТОЛЬКО ТОГО, К КОМУ ПОДОШЕЛ)
-	-- ==========================================
-	local button = script.Parent
-	local player = game.Players.LocalPlayer
-	local runService = game:GetService("RunService")
-	
-	local ANIM_ID = "135890160317037"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
-	local isActive = false
-	local animTrack = nil
-	local cooldown = false
-	
-	local function loadAnimation(char)
-		if not char then return nil end
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid then return nil end
-	
-		local animator = humanoid:FindFirstChild("Animator")
-		if not animator then
-			animator = Instance.new("Animator")
-			animator.Parent = humanoid
-		end
-	
-		local anim = Instance.new("Animation")
-		anim.AnimationId = "rbxassetid://" .. ANIM_ID
-		local track = animator:LoadAnimation(anim)
-		return track
-	end
-	
-	-- ====== ПОИСК БЛИЖАЙШЕГО ИГРОКА (КОМУ ПОДОШЕЛ) ======
-	local function getNearestPlayer(char, radius)
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return nil end
-	
-		local nearest = nil
-		local minDist = radius
-	
-		for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
-			if otherPlayer ~= player then
-				local otherChar = otherPlayer.Character
-				if otherChar then
-					local otherHrp = otherChar:FindFirstChild("HumanoidRootPart")
-					if otherHrp then
-						local dist = (hrp.Position - otherHrp.Position).Magnitude
-						if dist < minDist then
-							minDist = dist
-							nearest = otherChar
-						end
-					end
-				end
-			end
-		end
-	
-		return nearest
-	end
-	
-	-- ====== ВЫКИДЫВАЕМ КОНКРЕТНОГО ИГРОКА ======
-	local function flingTarget(targetChar, char)
-		local targetHrp = targetChar:FindFirstChild("HumanoidRootPart")
-		local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
-	
-		if not targetHrp or not targetHum then return false end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return false end
-	
-		-- Вырубаем анимации врага
-		local targetAnimate = targetChar:FindFirstChild("Animate")
-		if targetAnimate then
-			targetAnimate.Disabled = true
-		end
-	
-		-- Блокируем врага
-		targetHum.PlatformStand = true
-		targetHum.AutoRotate = false
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
-		targetHum:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
-	
-		-- Направление ОТ ТЕБЯ К ВРАГУ
-		local dir = (targetHrp.Position - hrp.Position).Unit
-		local power = 60  -- Сила выброса
-	
-		-- Выкидываем
-		local vel = dir * power + Vector3.new(0, 10, 0)
-		targetHrp.AssemblyLinearVelocity = vel
-		targetHrp.Velocity = vel
-	
-		print("💥 ВЫКИНУЛ " .. targetChar.Parent.Name)
-	
-		-- Возвращаем врага в норму через 3 секунды
-		task.delay(3, function()
-			if targetHum and targetHum.Parent then
-				targetHum.PlatformStand = false
-				targetHum.AutoRotate = true
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true)
-				targetHum:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-			end
-			if targetAnimate and targetAnimate.Parent then
-				targetAnimate.Disabled = false
-			end
-			if targetHrp and targetHrp.Parent then
-				targetHrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-				targetHrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-				targetHrp.Velocity = Vector3.new(0, 0, 0)
-			end
-		end)
-	
-		return true
-	end
-	
-	local function startFling()
-		if isActive then return end
-		if cooldown then return end
-	
-		isActive = true
-		cooldown = true
-	
-		local char = player.Character
-		if not char then
-			isActive = false
-			cooldown = false
-			return
-		end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not hrp or not humanoid then
-			isActive = false
-			cooldown = false
-			return
-		end
-	
-		-- ====== ИЩЕМ ТОГО, К КОМУ ПОДОШЕЛ (В РАДИУСЕ 7) ======
-		local target = getNearestPlayer(char, 7)  -- 👈 7 студей - почти впритык
-	
-		if not target then
-			print("❌ РЯДОМ НИКОГО НЕТ! ПОДОЙДИ К ИГРОКУ")
-			isActive = false
-			cooldown = false
-			return
-		end
-	
-		-- ====== ВЫРУБАЕМ ТВОИ СТАНДАРТНЫЕ АНИМАЦИИ ======
-		local animate = char:FindFirstChild("Animate")
-		if animate then
-			animate.Disabled = true
-		end
-	
-		-- ====== ЗАГРУЖАЕМ ТВОЮ АНИМАЦИЮ ======
-		animTrack = loadAnimation(char)
-		if animTrack then
-			animTrack.Priority = Enum.AnimationPriority.Action
-			animTrack.Looped = false  -- 👈 НЕ ЗАЦИКЛИВАТЬ!
-			animTrack:Play()
-			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
-		end
-	
-		-- ====== ВЫКИДЫВАЕМ ТОГО, К КОМУ ПОДОШЕЛ ======
-		local flinged = flingTarget(target, char)
-	
-		if flinged then
-			print("💥 ВЫКИНУЛ ИГРОКА!")
-		end
-	
-		-- ====== ЖДЕМ ОКОНЧАНИЯ АНИМАЦИИ ======
-		local timeout = tick() + 3  -- Максимум 3 секунды
-	
-		while isActive and tick() < timeout do
-			if animTrack and not animTrack.IsPlaying then
-				break  -- Анимация закончилась
-			end
-			runService.Heartbeat:Wait()
-		end
-	
-		-- ====== ВОЗВРАЩАЕМ ВСЁ В НОРМУ ======
-		if animTrack then
-			animTrack:Stop()
-			animTrack = nil
-		end
-	
-		-- Включаем стандартные анимации обратно
-		if animate and animate.Parent then
-			animate.Disabled = false
-		end
-	
-		-- Ты остаешься на месте
-		humanoid.PlatformStand = false
-		humanoid.AutoRotate = true
-	
-		isActive = false
-		task.delay(1, function()
-			cooldown = false
-		end)
-	
-		print("✅ АНИМАЦИЯ ЗАВЕРШЕНА, МОЖНО СНОВА")
-	end
-	
-	-- ====== КЛИК ПО КНОПКЕ ======
-	button.MouseButton1Click:Connect(startFling)
-	
-	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		if isActive then
-			if animTrack then
-				animTrack:Stop()
-				animTrack = nil
-			end
-			isActive = false
-			cooldown = false
-		end
-	end)
-	
-	print("✅ TROLL КНОПКА ЗАГРУЖЕНА! (ВЫКИДЫВАЕТ ТОЛЬКО ТОГО, К КОМУ ПОДОШЕЛ)")
-end;
-task.spawn(C_be);
--- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Push2.LocalScript
-local function C_c2()
-local script = G2L["c2"];
-	-- ==========================================
-	-- TROLL_АНИМАЦИЯ (САМЫЙ ПРОСТОЙ ВАРИАНТ)
-	-- ==========================================
-	local button = script.Parent
-	local player = game.Players.LocalPlayer
-	
-	local ANIM_ID = "82070755455634"  -- 👈 ТВОЙ ID
-	local isActive = false
-	local animTrack = nil
-	
-	local function loadAnimation(char)
-		if not char then return nil end
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid then return nil end
-	
-		local animator = humanoid:FindFirstChild("Animator")
-		if not animator then
-			animator = Instance.new("Animator")
-			animator.Parent = humanoid
-		end
-	
-		local anim = Instance.new("Animation")
-		anim.AnimationId = "rbxassetid://" .. ANIM_ID
-		local track = animator:LoadAnimation(anim)
-		return track
-	end
-	
-	local function startFling()
-		if isActive then return end
-		isActive = true
-	
-		local char = player.Character
-		if not char then 
-			isActive = false
-			return 
-		end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not hrp or not humanoid then
-			isActive = false
-			return
-		end
-	
-		-- ====== ВЫРУБАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
-		local animate = char:FindFirstChild("Animate")
-		if animate then
-			animate.Disabled = true
-		end
-	
-		-- ====== ЗАПУСКАЕМ АНИМАЦИЮ ======
+		-- ====== 2. ЗАПУСКАЕМ АНИМАЦИЮ ======
 		animTrack = loadAnimation(char)
 		if animTrack then
 			animTrack.Priority = Enum.AnimationPriority.Action
@@ -5800,82 +4761,920 @@ local script = G2L["c2"];
 			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
 		end
 	
-		-- ====== ВЫКИДЫВАЕМ ВСЕХ В РАДИУСЕ ======
-		local radius = 10
-		local power = 100  -- МАКСИМАЛЬНАЯ СИЛА
+		-- ====== 3. ВКЛЮЧАЕМ ФЛИНГ ======
+		startFling(char)
 	
-		for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
-			if otherPlayer ~= player then
-				local otherChar = otherPlayer.Character
-				if otherChar then
-					local otherHrp = otherChar:FindFirstChild("HumanoidRootPart")
-					if otherHrp then
-						local dist = (hrp.Position - otherHrp.Position).Magnitude
-						if dist < radius then
-							-- ====== ВЫКИДЫВАЕМ ЧЕРЕЗ BodyVelocity (ОБХОДИТ АНТИ-ФЛИНГ) ======
-							local bv = Instance.new("BodyVelocity")
-							bv.MaxForce = Vector3.new(4000, 4000, 4000)
+		-- ====== 4. ЖДЕМ 2.5 СЕКУНДЫ ======
+		task.wait(2.5)
 	
-							local dir = (otherHrp.Position - hrp.Position).Unit
-							bv.Velocity = dir * power + Vector3.new(0, 20, 0)
-							bv.Parent = otherHrp
+		-- ====== 5. ВЫКЛЮЧАЕМ ФЛИНГ ======
+		stopFling()
 	
-							print("💥 ВЫКИНУЛ " .. otherPlayer.Name)
-	
-							-- Удаляем через 0.5 секунды
-							task.delay(0.5, function()
-								if bv and bv.Parent then
-									bv:Destroy()
-								end
-							end)
-	
-							-- ДОПОЛНИТЕЛЬНЫЙ ТОЛЧОК через Velocity
-							task.spawn(function()
-								for i = 1, 5 do
-									task.wait(0.05)
-									if otherHrp and otherHrp.Parent then
-										otherHrp.AssemblyLinearVelocity = dir * (power + i * 20) + Vector3.new(0, 20, 0)
-										otherHrp.Velocity = dir * (power + i * 20) + Vector3.new(0, 20, 0)
-									end
-								end
-							end)
-						end
-					end
-				end
-			end
-		end
-	
-		-- ====== ЖДЕМ 2 СЕКУНДЫ ======
-		task.wait(2)
-	
-		-- ====== ВОЗВРАЩАЕМ ВСЁ В НОРМУ ======
+		-- ====== 6. ОСТАНАВЛИВАЕМ АНИМАЦИЮ ======
 		if animTrack then
 			animTrack:Stop()
 			animTrack = nil
 		end
 	
+		-- ====== 7. ВКЛЮЧАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
 		if animate and animate.Parent then
 			animate.Disabled = false
 		end
 	
 		isActive = false
-		print("✅ АНИМАЦИЯ ЗАВЕРШЕНА")
+		print("✅ АНИМАЦИЯ И ФЛИНГ ЗАВЕРШЕНЫ!")
 	end
 	
-	button.MouseButton1Click:Connect(startFling)
+	-- ====== НАЖАТИЕ КНОПКИ ======
+	button.MouseButton1Click:Connect(startFlingWithAnim)
 	
+	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
-		if isActive then
-			if animTrack then
-				animTrack:Stop()
-				animTrack = nil
-			end
-			isActive = false
+	
+		-- Останавливаем флинг
+		stopFling()
+	
+		-- Останавливаем анимацию
+		if animTrack then
+			animTrack:Stop()
+			animTrack = nil
 		end
+	
+		isActive = false
 	end)
 	
-	print("✅ КНОПКА ЗАГРУЖЕНА!")
+	print("✅ КНОПКА ЗАГРУЖЕНА! ФЛИНГ + АНИМАЦИЯ НА 2.5 СЕКУНДЫ")
+end;
+task.spawn(C_ae);
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_MMAKick.LocalScript
+local function C_b2()
+local script = G2L["b2"];
+	-- ==========================================
+	-- TROLL_ФЛИНГ С АНИМАЦИЕЙ (РАБОЧИЙ)
+	-- ==========================================
+	local button = script.Parent
+	local player = game.Players.LocalPlayer
+	local RunService = game:GetService("RunService")
+	
+	local ANIM_ID = "88347541858075"  -- 👈 ТВОЙ ID
+	local isActive = false
+	local animTrack = nil
+	local flingConnection = nil
+	local isFlinging = false
+	
+	-- ====== ЗАГРУЗКА АНИМАЦИИ ======
+	local function loadAnimation(char)
+		if not char then return nil end
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid then return nil end
+	
+		local animator = humanoid:FindFirstChild("Animator")
+		if not animator then
+			animator = Instance.new("Animator")
+			animator.Parent = humanoid
+		end
+	
+		local anim = Instance.new("Animation")
+		anim.AnimationId = "rbxassetid://" .. ANIM_ID
+		local track = animator:LoadAnimation(anim)
+		return track
+	end
+	
+	-- ====== ЗАПУСК ФЛИНГА ======
+	local function startFling(char)
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+	
+		if isFlinging then return end
+		isFlinging = true
+	
+		local vel = nil
+		local movel = 0.1
+	
+		print("🚀 ФЛИНГ ВКЛЮЧЕН!")
+	
+		flingConnection = RunService.Heartbeat:Connect(function()
+			if not isFlinging then return end
+			if not hrp or not hrp.Parent then 
+				isFlinging = false
+				return 
+			end
+	
+			-- Флинг из твоего скрипта
+			vel = hrp.Velocity
+			hrp.Velocity = vel * 1000000 + Vector3.new(0, 1000000, 0)
+	
+			RunService.RenderStepped:Wait()
+	
+			if hrp and hrp.Parent then
+				hrp.Velocity = vel
+			end
+	
+			RunService.Stepped:Wait()
+	
+			if hrp and hrp.Parent then
+				hrp.Velocity = vel + Vector3.new(0, movel, 0)
+				movel = movel * -1
+			end
+		end)
+	end
+	
+	-- ====== ОСТАНОВКА ФЛИНГА ======
+	local function stopFling()
+		isFlinging = false
+	
+		if flingConnection then
+			flingConnection:Disconnect()
+			flingConnection = nil
+		end
+	
+		local char = player.Character
+		if char then
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.Velocity = Vector3.new(0, 0, 0)
+				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+			end
+		end
+	
+		print("🛑 ФЛИНГ ВЫКЛЮЧЕН!")
+	end
+	
+	-- ====== ОСНОВНАЯ ФУНКЦИЯ ======
+	local function startFlingWithAnim()
+		if isActive then return end
+		isActive = true
+	
+		local char = player.Character
+		if not char then
+			isActive = false
+			return
+		end
+	
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not hrp or not humanoid then
+			isActive = false
+			return
+		end
+	
+		-- ====== 1. ВЫРУБАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
+		local animate = char:FindFirstChild("Animate")
+		if animate then
+			animate.Disabled = true
+		end
+	
+		-- ====== 2. ЗАПУСКАЕМ АНИМАЦИЮ ======
+		animTrack = loadAnimation(char)
+		if animTrack then
+			animTrack.Priority = Enum.AnimationPriority.Action
+			animTrack.Looped = false
+			animTrack:Play()
+			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
+		end
+	
+		-- ====== 3. ВКЛЮЧАЕМ ФЛИНГ ======
+		startFling(char)
+	
+		-- ====== 4. ЖДЕМ 2.5 СЕКУНДЫ ======
+		task.wait(2.5)
+	
+		-- ====== 5. ВЫКЛЮЧАЕМ ФЛИНГ ======
+		stopFling()
+	
+		-- ====== 6. ОСТАНАВЛИВАЕМ АНИМАЦИЮ ======
+		if animTrack then
+			animTrack:Stop()
+			animTrack = nil
+		end
+	
+		-- ====== 7. ВКЛЮЧАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
+		if animate and animate.Parent then
+			animate.Disabled = false
+		end
+	
+		isActive = false
+		print("✅ АНИМАЦИЯ И ФЛИНГ ЗАВЕРШЕНЫ!")
+	end
+	
+	-- ====== НАЖАТИЕ КНОПКИ ======
+	button.MouseButton1Click:Connect(startFlingWithAnim)
+	
+	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5)
+	
+		-- Останавливаем флинг
+		stopFling()
+	
+		-- Останавливаем анимацию
+		if animTrack then
+			animTrack:Stop()
+			animTrack = nil
+		end
+	
+		isActive = false
+	end)
+	
+	print("✅ КНОПКА ЗАГРУЖЕНА! ФЛИНГ + АНИМАЦИЯ НА 2.5 СЕКУНДЫ")
+end;
+task.spawn(C_b2);
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Slap.LocalScript
+local function C_b6()
+local script = G2L["b6"];
+	-- ==========================================
+	-- TROLL_ФЛИНГ С АНИМАЦИЕЙ (РАБОЧИЙ)
+	-- ==========================================
+	local button = script.Parent
+	local player = game.Players.LocalPlayer
+	local RunService = game:GetService("RunService")
+	
+	local ANIM_ID = "108225134235478"  -- 👈 ТВОЙ ID
+	local isActive = false
+	local animTrack = nil
+	local flingConnection = nil
+	local isFlinging = false
+	
+	-- ====== ЗАГРУЗКА АНИМАЦИИ ======
+	local function loadAnimation(char)
+		if not char then return nil end
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid then return nil end
+	
+		local animator = humanoid:FindFirstChild("Animator")
+		if not animator then
+			animator = Instance.new("Animator")
+			animator.Parent = humanoid
+		end
+	
+		local anim = Instance.new("Animation")
+		anim.AnimationId = "rbxassetid://" .. ANIM_ID
+		local track = animator:LoadAnimation(anim)
+		return track
+	end
+	
+	-- ====== ЗАПУСК ФЛИНГА ======
+	local function startFling(char)
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+	
+		if isFlinging then return end
+		isFlinging = true
+	
+		local vel = nil
+		local movel = 0.1
+	
+		print("🚀 ФЛИНГ ВКЛЮЧЕН!")
+	
+		flingConnection = RunService.Heartbeat:Connect(function()
+			if not isFlinging then return end
+			if not hrp or not hrp.Parent then 
+				isFlinging = false
+				return 
+			end
+	
+			-- Флинг из твоего скрипта
+			vel = hrp.Velocity
+			hrp.Velocity = vel * 1000000 + Vector3.new(0, 1000000, 0)
+	
+			RunService.RenderStepped:Wait()
+	
+			if hrp and hrp.Parent then
+				hrp.Velocity = vel
+			end
+	
+			RunService.Stepped:Wait()
+	
+			if hrp and hrp.Parent then
+				hrp.Velocity = vel + Vector3.new(0, movel, 0)
+				movel = movel * -1
+			end
+		end)
+	end
+	
+	-- ====== ОСТАНОВКА ФЛИНГА ======
+	local function stopFling()
+		isFlinging = false
+	
+		if flingConnection then
+			flingConnection:Disconnect()
+			flingConnection = nil
+		end
+	
+		local char = player.Character
+		if char then
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.Velocity = Vector3.new(0, 0, 0)
+				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+			end
+		end
+	
+		print("🛑 ФЛИНГ ВЫКЛЮЧЕН!")
+	end
+	
+	-- ====== ОСНОВНАЯ ФУНКЦИЯ ======
+	local function startFlingWithAnim()
+		if isActive then return end
+		isActive = true
+	
+		local char = player.Character
+		if not char then
+			isActive = false
+			return
+		end
+	
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not hrp or not humanoid then
+			isActive = false
+			return
+		end
+	
+		-- ====== 1. ВЫРУБАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
+		local animate = char:FindFirstChild("Animate")
+		if animate then
+			animate.Disabled = true
+		end
+	
+		-- ====== 2. ЗАПУСКАЕМ АНИМАЦИЮ ======
+		animTrack = loadAnimation(char)
+		if animTrack then
+			animTrack.Priority = Enum.AnimationPriority.Action
+			animTrack.Looped = false
+			animTrack:Play()
+			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
+		end
+	
+		-- ====== 3. ВКЛЮЧАЕМ ФЛИНГ ======
+		startFling(char)
+	
+		-- ====== 4. ЖДЕМ 2.5 СЕКУНДЫ ======
+		task.wait(2.5)
+	
+		-- ====== 5. ВЫКЛЮЧАЕМ ФЛИНГ ======
+		stopFling()
+	
+		-- ====== 6. ОСТАНАВЛИВАЕМ АНИМАЦИЮ ======
+		if animTrack then
+			animTrack:Stop()
+			animTrack = nil
+		end
+	
+		-- ====== 7. ВКЛЮЧАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
+		if animate and animate.Parent then
+			animate.Disabled = false
+		end
+	
+		isActive = false
+		print("✅ АНИМАЦИЯ И ФЛИНГ ЗАВЕРШЕНЫ!")
+	end
+	
+	-- ====== НАЖАТИЕ КНОПКИ ======
+	button.MouseButton1Click:Connect(startFlingWithAnim)
+	
+	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5)
+	
+		-- Останавливаем флинг
+		stopFling()
+	
+		-- Останавливаем анимацию
+		if animTrack then
+			animTrack:Stop()
+			animTrack = nil
+		end
+	
+		isActive = false
+	end)
+	
+	print("✅ КНОПКА ЗАГРУЖЕНА! ФЛИНГ + АНИМАЦИЯ НА 2.5 СЕКУНДЫ")
+end;
+task.spawn(C_b6);
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Slap2.LocalScript
+local function C_ba()
+local script = G2L["ba"];
+	-- ==========================================
+	-- TROLL_ФЛИНГ С АНИМАЦИЕЙ (РАБОЧИЙ)
+	-- ==========================================
+	local button = script.Parent
+	local player = game.Players.LocalPlayer
+	local RunService = game:GetService("RunService")
+	
+	local ANIM_ID = "78221709455150"  -- 👈 ТВОЙ ID
+	local isActive = false
+	local animTrack = nil
+	local flingConnection = nil
+	local isFlinging = false
+	
+	-- ====== ЗАГРУЗКА АНИМАЦИИ ======
+	local function loadAnimation(char)
+		if not char then return nil end
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid then return nil end
+	
+		local animator = humanoid:FindFirstChild("Animator")
+		if not animator then
+			animator = Instance.new("Animator")
+			animator.Parent = humanoid
+		end
+	
+		local anim = Instance.new("Animation")
+		anim.AnimationId = "rbxassetid://" .. ANIM_ID
+		local track = animator:LoadAnimation(anim)
+		return track
+	end
+	
+	-- ====== ЗАПУСК ФЛИНГА ======
+	local function startFling(char)
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+	
+		if isFlinging then return end
+		isFlinging = true
+	
+		local vel = nil
+		local movel = 0.1
+	
+		print("🚀 ФЛИНГ ВКЛЮЧЕН!")
+	
+		flingConnection = RunService.Heartbeat:Connect(function()
+			if not isFlinging then return end
+			if not hrp or not hrp.Parent then 
+				isFlinging = false
+				return 
+			end
+	
+			-- Флинг из твоего скрипта
+			vel = hrp.Velocity
+			hrp.Velocity = vel * 1000000 + Vector3.new(0, 1000000, 0)
+	
+			RunService.RenderStepped:Wait()
+	
+			if hrp and hrp.Parent then
+				hrp.Velocity = vel
+			end
+	
+			RunService.Stepped:Wait()
+	
+			if hrp and hrp.Parent then
+				hrp.Velocity = vel + Vector3.new(0, movel, 0)
+				movel = movel * -1
+			end
+		end)
+	end
+	
+	-- ====== ОСТАНОВКА ФЛИНГА ======
+	local function stopFling()
+		isFlinging = false
+	
+		if flingConnection then
+			flingConnection:Disconnect()
+			flingConnection = nil
+		end
+	
+		local char = player.Character
+		if char then
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.Velocity = Vector3.new(0, 0, 0)
+				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+			end
+		end
+	
+		print("🛑 ФЛИНГ ВЫКЛЮЧЕН!")
+	end
+	
+	-- ====== ОСНОВНАЯ ФУНКЦИЯ ======
+	local function startFlingWithAnim()
+		if isActive then return end
+		isActive = true
+	
+		local char = player.Character
+		if not char then
+			isActive = false
+			return
+		end
+	
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not hrp or not humanoid then
+			isActive = false
+			return
+		end
+	
+		-- ====== 1. ВЫРУБАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
+		local animate = char:FindFirstChild("Animate")
+		if animate then
+			animate.Disabled = true
+		end
+	
+		-- ====== 2. ЗАПУСКАЕМ АНИМАЦИЮ ======
+		animTrack = loadAnimation(char)
+		if animTrack then
+			animTrack.Priority = Enum.AnimationPriority.Action
+			animTrack.Looped = false
+			animTrack:Play()
+			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
+		end
+	
+		-- ====== 3. ВКЛЮЧАЕМ ФЛИНГ ======
+		startFling(char)
+	
+		-- ====== 4. ЖДЕМ 2.5 СЕКУНДЫ ======
+		task.wait(2.5)
+	
+		-- ====== 5. ВЫКЛЮЧАЕМ ФЛИНГ ======
+		stopFling()
+	
+		-- ====== 6. ОСТАНАВЛИВАЕМ АНИМАЦИЮ ======
+		if animTrack then
+			animTrack:Stop()
+			animTrack = nil
+		end
+	
+		-- ====== 7. ВКЛЮЧАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
+		if animate and animate.Parent then
+			animate.Disabled = false
+		end
+	
+		isActive = false
+		print("✅ АНИМАЦИЯ И ФЛИНГ ЗАВЕРШЕНЫ!")
+	end
+	
+	-- ====== НАЖАТИЕ КНОПКИ ======
+	button.MouseButton1Click:Connect(startFlingWithAnim)
+	
+	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5)
+	
+		-- Останавливаем флинг
+		stopFling()
+	
+		-- Останавливаем анимацию
+		if animTrack then
+			animTrack:Stop()
+			animTrack = nil
+		end
+	
+		isActive = false
+	end)
+	
+	print("✅ КНОПКА ЗАГРУЖЕНА! ФЛИНГ + АНИМАЦИЯ НА 2.5 СЕКУНДЫ")
+end;
+task.spawn(C_ba);
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Push.LocalScript
+local function C_be()
+local script = G2L["be"];
+	-- ==========================================
+	-- TROLL_ФЛИНГ С АНИМАЦИЕЙ (РАБОЧИЙ)
+	-- ==========================================
+	local button = script.Parent
+	local player = game.Players.LocalPlayer
+	local RunService = game:GetService("RunService")
+	
+	local ANIM_ID = "135890160317037"  -- 👈 ТВОЙ ID
+	local isActive = false
+	local animTrack = nil
+	local flingConnection = nil
+	local isFlinging = false
+	
+	-- ====== ЗАГРУЗКА АНИМАЦИИ ======
+	local function loadAnimation(char)
+		if not char then return nil end
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid then return nil end
+	
+		local animator = humanoid:FindFirstChild("Animator")
+		if not animator then
+			animator = Instance.new("Animator")
+			animator.Parent = humanoid
+		end
+	
+		local anim = Instance.new("Animation")
+		anim.AnimationId = "rbxassetid://" .. ANIM_ID
+		local track = animator:LoadAnimation(anim)
+		return track
+	end
+	
+	-- ====== ЗАПУСК ФЛИНГА ======
+	local function startFling(char)
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+	
+		if isFlinging then return end
+		isFlinging = true
+	
+		local vel = nil
+		local movel = 0.1
+	
+		print("🚀 ФЛИНГ ВКЛЮЧЕН!")
+	
+		flingConnection = RunService.Heartbeat:Connect(function()
+			if not isFlinging then return end
+			if not hrp or not hrp.Parent then 
+				isFlinging = false
+				return 
+			end
+	
+			-- Флинг из твоего скрипта
+			vel = hrp.Velocity
+			hrp.Velocity = vel * 1000000 + Vector3.new(0, 1000000, 0)
+	
+			RunService.RenderStepped:Wait()
+	
+			if hrp and hrp.Parent then
+				hrp.Velocity = vel
+			end
+	
+			RunService.Stepped:Wait()
+	
+			if hrp and hrp.Parent then
+				hrp.Velocity = vel + Vector3.new(0, movel, 0)
+				movel = movel * -1
+			end
+		end)
+	end
+	
+	-- ====== ОСТАНОВКА ФЛИНГА ======
+	local function stopFling()
+		isFlinging = false
+	
+		if flingConnection then
+			flingConnection:Disconnect()
+			flingConnection = nil
+		end
+	
+		local char = player.Character
+		if char then
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.Velocity = Vector3.new(0, 0, 0)
+				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+			end
+		end
+	
+		print("🛑 ФЛИНГ ВЫКЛЮЧЕН!")
+	end
+	
+	-- ====== ОСНОВНАЯ ФУНКЦИЯ ======
+	local function startFlingWithAnim()
+		if isActive then return end
+		isActive = true
+	
+		local char = player.Character
+		if not char then
+			isActive = false
+			return
+		end
+	
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not hrp or not humanoid then
+			isActive = false
+			return
+		end
+	
+		-- ====== 1. ВЫРУБАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
+		local animate = char:FindFirstChild("Animate")
+		if animate then
+			animate.Disabled = true
+		end
+	
+		-- ====== 2. ЗАПУСКАЕМ АНИМАЦИЮ ======
+		animTrack = loadAnimation(char)
+		if animTrack then
+			animTrack.Priority = Enum.AnimationPriority.Action
+			animTrack.Looped = false
+			animTrack:Play()
+			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
+		end
+	
+		-- ====== 3. ВКЛЮЧАЕМ ФЛИНГ ======
+		startFling(char)
+	
+		-- ====== 4. ЖДЕМ 2.5 СЕКУНДЫ ======
+		task.wait(2.5)
+	
+		-- ====== 5. ВЫКЛЮЧАЕМ ФЛИНГ ======
+		stopFling()
+	
+		-- ====== 6. ОСТАНАВЛИВАЕМ АНИМАЦИЮ ======
+		if animTrack then
+			animTrack:Stop()
+			animTrack = nil
+		end
+	
+		-- ====== 7. ВКЛЮЧАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
+		if animate and animate.Parent then
+			animate.Disabled = false
+		end
+	
+		isActive = false
+		print("✅ АНИМАЦИЯ И ФЛИНГ ЗАВЕРШЕНЫ!")
+	end
+	
+	-- ====== НАЖАТИЕ КНОПКИ ======
+	button.MouseButton1Click:Connect(startFlingWithAnim)
+	
+	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5)
+	
+		-- Останавливаем флинг
+		stopFling()
+	
+		-- Останавливаем анимацию
+		if animTrack then
+			animTrack:Stop()
+			animTrack = nil
+		end
+	
+		isActive = false
+	end)
+	
+	print("✅ КНОПКА ЗАГРУЖЕНА! ФЛИНГ + АНИМАЦИЯ НА 2.5 СЕКУНДЫ")
+end;
+task.spawn(C_be);
+-- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Push2.LocalScript
+local function C_c2()
+local script = G2L["c2"];
+	-- ==========================================
+	-- TROLL_ФЛИНГ С АНИМАЦИЕЙ (РАБОЧИЙ)
+	-- ==========================================
+	local button = script.Parent
+	local player = game.Players.LocalPlayer
+	local RunService = game:GetService("RunService")
+	
+	local ANIM_ID = "82070755455634"  -- 👈 ТВОЙ ID
+	local isActive = false
+	local animTrack = nil
+	local flingConnection = nil
+	local isFlinging = false
+	
+	-- ====== ЗАГРУЗКА АНИМАЦИИ ======
+	local function loadAnimation(char)
+		if not char then return nil end
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid then return nil end
+	
+		local animator = humanoid:FindFirstChild("Animator")
+		if not animator then
+			animator = Instance.new("Animator")
+			animator.Parent = humanoid
+		end
+	
+		local anim = Instance.new("Animation")
+		anim.AnimationId = "rbxassetid://" .. ANIM_ID
+		local track = animator:LoadAnimation(anim)
+		return track
+	end
+	
+	-- ====== ЗАПУСК ФЛИНГА ======
+	local function startFling(char)
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+	
+		if isFlinging then return end
+		isFlinging = true
+	
+		local vel = nil
+		local movel = 0.1
+	
+		print("🚀 ФЛИНГ ВКЛЮЧЕН!")
+	
+		flingConnection = RunService.Heartbeat:Connect(function()
+			if not isFlinging then return end
+			if not hrp or not hrp.Parent then 
+				isFlinging = false
+				return 
+			end
+	
+			-- Флинг из твоего скрипта
+			vel = hrp.Velocity
+			hrp.Velocity = vel * 1000000 + Vector3.new(0, 1000000, 0)
+	
+			RunService.RenderStepped:Wait()
+	
+			if hrp and hrp.Parent then
+				hrp.Velocity = vel
+			end
+	
+			RunService.Stepped:Wait()
+	
+			if hrp and hrp.Parent then
+				hrp.Velocity = vel + Vector3.new(0, movel, 0)
+				movel = movel * -1
+			end
+		end)
+	end
+	
+	-- ====== ОСТАНОВКА ФЛИНГА ======
+	local function stopFling()
+		isFlinging = false
+	
+		if flingConnection then
+			flingConnection:Disconnect()
+			flingConnection = nil
+		end
+	
+		local char = player.Character
+		if char then
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.Velocity = Vector3.new(0, 0, 0)
+				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+			end
+		end
+	
+		print("🛑 ФЛИНГ ВЫКЛЮЧЕН!")
+	end
+	
+	-- ====== ОСНОВНАЯ ФУНКЦИЯ ======
+	local function startFlingWithAnim()
+		if isActive then return end
+		isActive = true
+	
+		local char = player.Character
+		if not char then
+			isActive = false
+			return
+		end
+	
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not hrp or not humanoid then
+			isActive = false
+			return
+		end
+	
+		-- ====== 1. ВЫРУБАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
+		local animate = char:FindFirstChild("Animate")
+		if animate then
+			animate.Disabled = true
+		end
+	
+		-- ====== 2. ЗАПУСКАЕМ АНИМАЦИЮ ======
+		animTrack = loadAnimation(char)
+		if animTrack then
+			animTrack.Priority = Enum.AnimationPriority.Action
+			animTrack.Looped = false
+			animTrack:Play()
+			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
+		end
+	
+		-- ====== 3. ВКЛЮЧАЕМ ФЛИНГ ======
+		startFling(char)
+	
+		-- ====== 4. ЖДЕМ 2.5 СЕКУНДЫ ======
+		task.wait(2.5)
+	
+		-- ====== 5. ВЫКЛЮЧАЕМ ФЛИНГ ======
+		stopFling()
+	
+		-- ====== 6. ОСТАНАВЛИВАЕМ АНИМАЦИЮ ======
+		if animTrack then
+			animTrack:Stop()
+			animTrack = nil
+		end
+	
+		-- ====== 7. ВКЛЮЧАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
+		if animate and animate.Parent then
+			animate.Disabled = false
+		end
+	
+		isActive = false
+		print("✅ АНИМАЦИЯ И ФЛИНГ ЗАВЕРШЕНЫ!")
+	end
+	
+	-- ====== НАЖАТИЕ КНОПКИ ======
+	button.MouseButton1Click:Connect(startFlingWithAnim)
+	
+	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5)
+	
+		-- Останавливаем флинг
+		stopFling()
+	
+		-- Останавливаем анимацию
+		if animTrack then
+			animTrack:Stop()
+			animTrack = nil
+		end
+	
+		isActive = false
+	end)
+	
+	print("✅ КНОПКА ЗАГРУЖЕНА! ФЛИНГ + АНИМАЦИЯ НА 2.5 СЕКУНДЫ")
 end;
 task.spawn(C_c2);
 -- StarterGui.Folder.ScreenGui.MainFrame.LeftFrame.SwitchTabs
