@@ -3141,7 +3141,7 @@ task.spawn(C_60);
 local function C_67()
 local script = G2L["67"];
 	-- ==========================================
-	-- MISC_Fly (БЕЗ ИНЕРЦИИ, МГНОВЕННАЯ ОСТАНОВКА)
+	-- MISC_Fly (ЖЁСТКИЙ, БЕЗ ПЛАВНОСТИ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -3150,17 +3150,15 @@ local script = G2L["67"];
 	
 	local isEnabled = false
 	local flyLoop = nil
-	local bg = nil
-	local bv = nil
-	local ctrl = {f = 0, b = 0, l = 0, r = 0}
 	local maxspeed = 50
+	local ctrl = {f = 0, b = 0, l = 0, r = 0}
 	
 	-- Находим поле для ввода скорости
 	local rightFrame = button.Parent
 	local speedBox = rightFrame:FindFirstChild("MISC_FlySpeed")
 	
 	if not speedBox then
-		warn("❌ MISC_FlySpeed не найден! Создай TextBox в RightFrame")
+		warn("❌ MISC_FlySpeed не найден!")
 	end
 	
 	-- Индикатор
@@ -3185,7 +3183,7 @@ local script = G2L["67"];
 		end
 	end
 	
-	-- ===== ПОЛУЧЕНИЕ СКОРОСТИ ИЗ ПОЛЯ =====
+	-- ===== ПОЛУЧЕНИЕ СКОРОСТИ =====
 	local function getSpeed()
 		if speedBox then
 			local val = tonumber(speedBox.Text)
@@ -3196,31 +3194,19 @@ local script = G2L["67"];
 		return 50
 	end
 	
-	-- ===== ОБНОВЛЕНИЕ СКОРОСТИ =====
-	local function updateSpeed()
-		if isEnabled then
-			maxspeed = getSpeed()
-			if maxspeed < 5 then maxspeed = 5 end
-			if maxspeed > 500 then maxspeed = 500 end
-			print("✈️ Скорость: " .. maxspeed)
-		end
-	end
-	
-	if speedBox then
-		speedBox.FocusLost:Connect(updateSpeed)
-	end
-	
 	-- ===== ОСТАНОВКА =====
 	local function stopFly()
 		if flyLoop then
 			flyLoop:Disconnect()
 			flyLoop = nil
 		end
-		if bg then bg:Destroy() bg = nil end
-		if bv then bv:Destroy() bv = nil end
 	
 		local char = player.Character
 		if char then
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.Velocity = Vector3.new(0, 0, 0)
+			end
 			local humanoid = char:FindFirstChildOfClass("Humanoid")
 			if humanoid then
 				humanoid.PlatformStand = false
@@ -3256,16 +3242,6 @@ local script = G2L["67"];
 		end
 	
 		humanoid.PlatformStand = true
-	
-		bg = Instance.new("BodyGyro", hrp)
-		bg.P = 9e4
-		bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-		bg.cframe = hrp.CFrame
-	
-		bv = Instance.new("BodyVelocity", hrp)
-		bv.velocity = Vector3.new(0, 0.1, 0)
-		bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
-	
 		ctrl = {f = 0, b = 0, l = 0, r = 0}
 	
 		flyLoop = runService.RenderStepped:Connect(function()
@@ -3277,22 +3253,42 @@ local script = G2L["67"];
 			local hrp = player.Character:FindFirstChild("HumanoidRootPart")
 			if not hrp then return end
 	
-			if not bg or not bv then return end
-	
-			-- Мгновенная скорость (без инерции)
+			-- ЖЁСТКОЕ ДВИЖЕНИЕ (без плавности)
 			local moveX = ctrl.l + ctrl.r
 			local moveZ = ctrl.f + ctrl.b
 	
 			if moveX ~= 0 or moveZ ~= 0 then
-				local vel = (workspace.CurrentCamera.CoordinateFrame.LookVector * moveZ +
-					workspace.CurrentCamera.CoordinateFrame.RightVector * moveX) * maxspeed
-				bv.velocity = vel
+				local cam = workspace.CurrentCamera
+				local forward = cam.CFrame.LookVector
+				local right = cam.CFrame.RightVector
+	
+				-- Обнуляем вертикальную составляющую (чтобы не улетать вверх/вниз)
+				forward = Vector3.new(forward.X, 0, forward.Z).Unit
+				right = Vector3.new(right.X, 0, right.Z).Unit
+	
+				local vel = (forward * moveZ + right * moveX) * maxspeed
+				-- Добавляем вертикальную скорость (Пробел/Shift)
+				if uis:IsKeyDown(Enum.KeyCode.Space) then
+					vel = vel + Vector3.new(0, maxspeed, 0)
+				elseif uis:IsKeyDown(Enum.KeyCode.LeftShift) then
+					vel = vel - Vector3.new(0, maxspeed, 0)
+				end
+	
+				hrp.Velocity = vel
+				hrp.AssemblyLinearVelocity = vel
 			else
 				-- МГНОВЕННАЯ ОСТАНОВКА
-				bv.velocity = Vector3.new(0, 0, 0)
+				hrp.Velocity = Vector3.new(0, 0, 0)
+				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 			end
 	
-			bg.cframe = workspace.CurrentCamera.CoordinateFrame
+			-- Поворачиваем персонажа в сторону движения
+			if moveX ~= 0 or moveZ ~= 0 then
+				local lookDir = Vector3.new(moveX, 0, moveZ).Unit
+				if lookDir.Magnitude > 0 then
+					hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + lookDir)
+				end
+			end
 		end)
 	end
 	
@@ -3304,10 +3300,6 @@ local script = G2L["67"];
 		elseif input.KeyCode == Enum.KeyCode.S then ctrl.b = -1
 		elseif input.KeyCode == Enum.KeyCode.A then ctrl.l = -1
 		elseif input.KeyCode == Enum.KeyCode.D then ctrl.r = 1
-		elseif input.KeyCode == Enum.KeyCode.Space then
-			if bv then bv.velocity = Vector3.new(bv.velocity.X, 50, bv.velocity.Z) end
-		elseif input.KeyCode == Enum.KeyCode.LeftShift then
-			if bv then bv.velocity = Vector3.new(bv.velocity.X, -50, bv.velocity.Z) end
 		end
 	end)
 	
@@ -3346,8 +3338,20 @@ local script = G2L["67"];
 		end
 	end)
 	
+	-- Обновление скорости при изменении поля
+	if speedBox then
+		speedBox.FocusLost:Connect(function()
+			if isEnabled then
+				maxspeed = getSpeed()
+				if maxspeed < 5 then maxspeed = 5 end
+				if maxspeed > 500 then maxspeed = 500 end
+				print("✈️ Скорость обновлена: " .. maxspeed)
+			end
+		end)
+	end
+	
 	updateState()
-	print("✅ MISC_Fly загружена!")
+	print("✅ MISC_Fly (жёсткий) загружена!")
 end;
 task.spawn(C_67);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_WhiteList.LocalScript
