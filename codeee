@@ -2168,7 +2168,7 @@ task.spawn(C_1b);
 local function C_1f()
 local script = G2L["1f"];
 	-- ==========================================
-	-- ANIMATIONS_Choose (ФИНАЛЬНАЯ ВЕРСИЯ)
+	-- ANIMATIONS_Choose (С ДИАГНОСТИКОЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2229,7 +2229,7 @@ local script = G2L["1f"];
 	local currentTracks = {}
 	local currentPack = nil
 	
-	-- ====== ПРИМЕНЕНИЕ ПАКА ======
+	-- ====== ПРИМЕНЕНИЕ ПАКА (С ДИАГНОСТИКОЙ) ======
 	local function applyPack(packName)
 		local char = player.Character
 		if not char then
@@ -2262,10 +2262,14 @@ local script = G2L["1f"];
 			task.wait(0.1)
 		end
 	
-		print("🎬 ПАК: " .. packName)
+		print("========== ПРИМЕНЯЮ ПАК: " .. packName .. " ==========")
+	
+		local loadedCount = 0
 	
 		for name, id in pairs(pack) do
-			pcall(function()
+			print("🔍 Загрузка " .. name .. " (ID: " .. id .. ")")
+	
+			local success, result = pcall(function()
 				local anim = Instance.new("Animation")
 				anim.AnimationId = "rbxassetid://" .. id
 	
@@ -2275,16 +2279,31 @@ local script = G2L["1f"];
 					track.Priority = Enum.AnimationPriority.Core
 					track:Play()
 					table.insert(currentTracks, track)
+					return true
 				end
+				return false
 			end)
+	
+			if success and result then
+				loadedCount = loadedCount + 1
+				print("   ✅ " .. name .. " загружена!")
+			else
+				print("   ❌ " .. name .. " НЕ загрузилась!")
+			end
 		end
 	
-		currentPack = packName
-		button.Text = "📦 " .. packName
-		print("✅ ПАК ПРИМЕНЁН: " .. packName)
+		print("========== ИТОГ: " .. loadedCount .. "/" .. #pack .. " анимаций загружено ==========")
+	
+		if loadedCount > 0 then
+			currentPack = packName
+			button.Text = "📦 " .. packName
+			print("✅ ПАК ПРИМЕНЁН: " .. packName)
+		else
+			print("❌ НИ ОДНА АНИМАЦИЯ НЕ ЗАГРУЗИЛАСЬ!")
+		end
 	end
 	
-	-- ====== ОСТАНОВКА ПАКА ======
+	-- ====== ОСТАНОВКА ======
 	local function stopPack()
 		for _, track in ipairs(currentTracks) do
 			pcall(function() track:Stop() end)
@@ -2322,13 +2341,11 @@ local script = G2L["1f"];
 		frame.Active = true
 		frame.Draggable = true
 	
-		-- Обводка
 		local stroke = Instance.new("UIStroke")
 		stroke.Parent = frame
 		stroke.Color = Color3.fromRGB(128, 0, 255)
 		stroke.Thickness = 3
 	
-		-- Заголовок
 		local title = Instance.new("TextLabel")
 		title.Parent = frame
 		title.Size = UDim2.new(1, 0, 0, 40)
@@ -2349,7 +2366,6 @@ local script = G2L["1f"];
 		local btnHeight = 35
 		local spacing = 4
 	
-		-- Кнопки паков
 		for packName, _ in pairs(AnimPacks) do
 			local btn = Instance.new("TextButton")
 			btn.Parent = frame
@@ -2375,7 +2391,6 @@ local script = G2L["1f"];
 			yOffset = yOffset + btnHeight + spacing
 		end
 	
-		-- Кнопка выключить
 		local offBtn = Instance.new("TextButton")
 		offBtn.Parent = frame
 		offBtn.Size = UDim2.new(0.85, 0, 0, 38)
@@ -2397,7 +2412,6 @@ local script = G2L["1f"];
 			screenGui:Destroy()
 		end)
 	
-		-- Кнопка закрыть
 		local closeBtn = Instance.new("TextButton")
 		closeBtn.Parent = frame
 		closeBtn.Size = UDim2.new(0, 30, 0, 30)
@@ -2412,12 +2426,10 @@ local script = G2L["1f"];
 		end)
 	end
 	
-	-- ====== КЛИК ПО КНОПКЕ ======
 	button.MouseButton1Click:Connect(function()
 		pcall(createGUI)
 	end)
 	
-	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(1)
 		if currentPack then
@@ -2426,7 +2438,8 @@ local script = G2L["1f"];
 		end
 	end)
 	
-	print("✅ ANIMATIONS_Choose ЗАГРУЖЕНА!")
+	print("✅ ANIMATIONS_Choose ЗАГРУЖЕНА (С ДИАГНОСТИКОЙ)!")
+	print("🎯 Выбери пак и посмотри в консоль (F9)!")
 end;
 task.spawn(C_1f);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TELEPORT_ToggleList.LocalScript
