@@ -3141,7 +3141,7 @@ task.spawn(C_60);
 local function C_67()
 local script = G2L["67"];
 	-- ==========================================
-	-- MISC_Fly (ЖЁСТКИЙ, БЕЗ ПЛАВНОСТИ)
+	-- MISC_Fly (ЖЁСТКИЙ, С ВЕРТИКАЛЬЮ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -3152,6 +3152,7 @@ local script = G2L["67"];
 	local flyLoop = nil
 	local maxspeed = 50
 	local ctrl = {f = 0, b = 0, l = 0, r = 0}
+	local vertical = 0  -- -1 = вниз, 0 = нет, 1 = вверх
 	
 	-- Находим поле для ввода скорости
 	local rightFrame = button.Parent
@@ -3217,6 +3218,7 @@ local script = G2L["67"];
 			end
 		end
 		ctrl = {f = 0, b = 0, l = 0, r = 0}
+		vertical = 0
 	end
 	
 	-- ===== ЗАПУСК =====
@@ -3243,6 +3245,7 @@ local script = G2L["67"];
 	
 		humanoid.PlatformStand = true
 		ctrl = {f = 0, b = 0, l = 0, r = 0}
+		vertical = 0
 	
 		flyLoop = runService.RenderStepped:Connect(function()
 			if not isEnabled or not player.Character then
@@ -3253,36 +3256,38 @@ local script = G2L["67"];
 			local hrp = player.Character:FindFirstChild("HumanoidRootPart")
 			if not hrp then return end
 	
-			-- ЖЁСТКОЕ ДВИЖЕНИЕ (без плавности)
+			-- Получаем направление камеры
+			local cam = workspace.CurrentCamera
+			local forward = cam.CFrame.LookVector
+			local right = cam.CFrame.RightVector
+	
+			-- Обнуляем вертикальную составляющую (горизонтальное движение)
+			local forwardH = Vector3.new(forward.X, 0, forward.Z).Unit
+			local rightH = Vector3.new(right.X, 0, right.Z).Unit
+	
+			-- Движение по горизонтали
 			local moveX = ctrl.l + ctrl.r
 			local moveZ = ctrl.f + ctrl.b
 	
+			-- Собираем скорость
+			local vel = Vector3.new(0, 0, 0)
+	
 			if moveX ~= 0 or moveZ ~= 0 then
-				local cam = workspace.CurrentCamera
-				local forward = cam.CFrame.LookVector
-				local right = cam.CFrame.RightVector
-	
-				-- Обнуляем вертикальную составляющую (чтобы не улетать вверх/вниз)
-				forward = Vector3.new(forward.X, 0, forward.Z).Unit
-				right = Vector3.new(right.X, 0, right.Z).Unit
-	
-				local vel = (forward * moveZ + right * moveX) * maxspeed
-				-- Добавляем вертикальную скорость (Пробел/Shift)
-				if uis:IsKeyDown(Enum.KeyCode.Space) then
-					vel = vel + Vector3.new(0, maxspeed, 0)
-				elseif uis:IsKeyDown(Enum.KeyCode.LeftShift) then
-					vel = vel - Vector3.new(0, maxspeed, 0)
-				end
-	
-				hrp.Velocity = vel
-				hrp.AssemblyLinearVelocity = vel
-			else
-				-- МГНОВЕННАЯ ОСТАНОВКА
-				hrp.Velocity = Vector3.new(0, 0, 0)
-				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+				vel = (forwardH * moveZ + rightH * moveX) * maxspeed
 			end
 	
-			-- Поворачиваем персонажа в сторону движения
+			-- ВЕРТИКАЛЬ (Пробел - вверх, Shift - вниз)
+			if vertical > 0 then
+				vel = vel + Vector3.new(0, maxspeed, 0)
+			elseif vertical < 0 then
+				vel = vel - Vector3.new(0, maxspeed, 0)
+			end
+	
+			-- Применяем скорость
+			hrp.Velocity = vel
+			hrp.AssemblyLinearVelocity = vel
+	
+			-- Поворачиваем персонажа в сторону движения (по горизонтали)
 			if moveX ~= 0 or moveZ ~= 0 then
 				local lookDir = Vector3.new(moveX, 0, moveZ).Unit
 				if lookDir.Magnitude > 0 then
@@ -3300,6 +3305,10 @@ local script = G2L["67"];
 		elseif input.KeyCode == Enum.KeyCode.S then ctrl.b = -1
 		elseif input.KeyCode == Enum.KeyCode.A then ctrl.l = -1
 		elseif input.KeyCode == Enum.KeyCode.D then ctrl.r = 1
+		elseif input.KeyCode == Enum.KeyCode.Space then
+			vertical = 1
+		elseif input.KeyCode == Enum.KeyCode.LeftShift then
+			vertical = -1
 		end
 	end)
 	
@@ -3310,6 +3319,10 @@ local script = G2L["67"];
 		elseif input.KeyCode == Enum.KeyCode.S then ctrl.b = 0
 		elseif input.KeyCode == Enum.KeyCode.A then ctrl.l = 0
 		elseif input.KeyCode == Enum.KeyCode.D then ctrl.r = 0
+		elseif input.KeyCode == Enum.KeyCode.Space then
+			vertical = 0
+		elseif input.KeyCode == Enum.KeyCode.LeftShift then
+			vertical = 0
 		end
 	end)
 	
@@ -3321,6 +3334,7 @@ local script = G2L["67"];
 		if isEnabled then
 			startFly()
 			print("✈️ Полёт включён! Скорость: " .. maxspeed)
+			print("   Пробел - вверх, Shift - вниз")
 		else
 			stopFly()
 			print("✈️ Полёт выключен!")
@@ -3351,7 +3365,7 @@ local script = G2L["67"];
 	end
 	
 	updateState()
-	print("✅ MISC_Fly (жёсткий) загружена!")
+	print("✅ MISC_Fly загружена!")
 end;
 task.spawn(C_67);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.MISC_WhiteList.LocalScript
