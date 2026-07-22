@@ -4637,19 +4637,18 @@ task.spawn(C_aa);
 local function C_ae()
 local script = G2L["ae"];
 	-- ==========================================
-	-- TROLL_ФЛИНГ С АНИМАЦИЕЙ (РАБОЧИЙ)
+	-- [НАЗВАНИЕ_КНОПКИ] (РАБОЧИЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
 	
-	local ANIM_ID = "118139885865308"  -- 👈 ТВОЙ ID
+	local ANIM_ID = "118139885865308"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
 	local isActive = false
 	local animTrack = nil
 	local flingConnection = nil
 	local isFlinging = false
 	
-	-- ====== ЗАГРУЗКА АНИМАЦИИ ======
 	local function loadAnimation(char)
 		if not char then return nil end
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
@@ -4667,7 +4666,6 @@ local script = G2L["ae"];
 		return track
 	end
 	
-	-- ====== ЗАПУСК ФЛИНГА ======
 	local function startFling(char)
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return end
@@ -4678,8 +4676,6 @@ local script = G2L["ae"];
 		local vel = nil
 		local movel = 0.1
 	
-		print("🚀 ФЛИНГ ВКЛЮЧЕН!")
-	
 		flingConnection = RunService.Heartbeat:Connect(function()
 			if not isFlinging then return end
 			if not hrp or not hrp.Parent then 
@@ -4687,7 +4683,6 @@ local script = G2L["ae"];
 				return 
 			end
 	
-			-- Флинг из твоего скрипта
 			vel = hrp.Velocity
 			hrp.Velocity = vel * 1000000 + Vector3.new(0, 1000000, 0)
 	
@@ -4706,7 +4701,6 @@ local script = G2L["ae"];
 		end)
 	end
 	
-	-- ====== ОСТАНОВКА ФЛИНГА ======
 	local function stopFling()
 		isFlinging = false
 	
@@ -4724,11 +4718,8 @@ local script = G2L["ae"];
 				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
 			end
 		end
-	
-		print("🛑 ФЛИНГ ВЫКЛЮЧЕН!")
 	end
 	
-	-- ====== ОСНОВНАЯ ФУНКЦИЯ ======
 	local function startFlingWithAnim()
 		if isActive then return end
 		isActive = true
@@ -4746,13 +4737,11 @@ local script = G2L["ae"];
 			return
 		end
 	
-		-- ====== 1. ВЫРУБАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
 		local animate = char:FindFirstChild("Animate")
 		if animate then
 			animate.Disabled = true
 		end
 	
-		-- ====== 2. ЗАПУСКАЕМ АНИМАЦИЮ ======
 		animTrack = loadAnimation(char)
 		if animTrack then
 			animTrack.Priority = Enum.AnimationPriority.Action
@@ -4761,22 +4750,17 @@ local script = G2L["ae"];
 			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
 		end
 	
-		-- ====== 3. ВКЛЮЧАЕМ ФЛИНГ ======
 		startFling(char)
 	
-		-- ====== 4. ЖДЕМ 2.5 СЕКУНДЫ ======
 		task.wait(2.5)
 	
-		-- ====== 5. ВЫКЛЮЧАЕМ ФЛИНГ ======
 		stopFling()
 	
-		-- ====== 6. ОСТАНАВЛИВАЕМ АНИМАЦИЮ ======
 		if animTrack then
 			animTrack:Stop()
 			animTrack = nil
 		end
 	
-		-- ====== 7. ВКЛЮЧАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
 		if animate and animate.Parent then
 			animate.Disabled = false
 		end
@@ -4785,45 +4769,37 @@ local script = G2L["ae"];
 		print("✅ АНИМАЦИЯ И ФЛИНГ ЗАВЕРШЕНЫ!")
 	end
 	
-	-- ====== НАЖАТИЕ КНОПКИ ======
 	button.MouseButton1Click:Connect(startFlingWithAnim)
 	
-	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
-	
-		-- Останавливаем флинг
 		stopFling()
-	
-		-- Останавливаем анимацию
 		if animTrack then
 			animTrack:Stop()
 			animTrack = nil
 		end
-	
 		isActive = false
 	end)
 	
-	print("✅ КНОПКА ЗАГРУЖЕНА! ФЛИНГ + АНИМАЦИЯ НА 2.5 СЕКУНДЫ")
+	print("✅ КНОПКА ЗАГРУЖЕНА!")
 end;
 task.spawn(C_ae);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_MMAKick.LocalScript
 local function C_b2()
 local script = G2L["b2"];
 	-- ==========================================
-	-- TROLL_ФЛИНГ С АНИМАЦИЕЙ (РАБОЧИЙ)
+	-- [НАЗВАНИЕ_КНОПКИ] (РАБОЧИЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
 	
-	local ANIM_ID = "88347541858075"  -- 👈 ТВОЙ ID
+	local ANIM_ID = "88347541858075"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
 	local isActive = false
 	local animTrack = nil
 	local flingConnection = nil
 	local isFlinging = false
 	
-	-- ====== ЗАГРУЗКА АНИМАЦИИ ======
 	local function loadAnimation(char)
 		if not char then return nil end
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
@@ -4841,7 +4817,6 @@ local script = G2L["b2"];
 		return track
 	end
 	
-	-- ====== ЗАПУСК ФЛИНГА ======
 	local function startFling(char)
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return end
@@ -4852,8 +4827,6 @@ local script = G2L["b2"];
 		local vel = nil
 		local movel = 0.1
 	
-		print("🚀 ФЛИНГ ВКЛЮЧЕН!")
-	
 		flingConnection = RunService.Heartbeat:Connect(function()
 			if not isFlinging then return end
 			if not hrp or not hrp.Parent then 
@@ -4861,7 +4834,6 @@ local script = G2L["b2"];
 				return 
 			end
 	
-			-- Флинг из твоего скрипта
 			vel = hrp.Velocity
 			hrp.Velocity = vel * 1000000 + Vector3.new(0, 1000000, 0)
 	
@@ -4880,7 +4852,6 @@ local script = G2L["b2"];
 		end)
 	end
 	
-	-- ====== ОСТАНОВКА ФЛИНГА ======
 	local function stopFling()
 		isFlinging = false
 	
@@ -4898,11 +4869,8 @@ local script = G2L["b2"];
 				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
 			end
 		end
-	
-		print("🛑 ФЛИНГ ВЫКЛЮЧЕН!")
 	end
 	
-	-- ====== ОСНОВНАЯ ФУНКЦИЯ ======
 	local function startFlingWithAnim()
 		if isActive then return end
 		isActive = true
@@ -4920,13 +4888,11 @@ local script = G2L["b2"];
 			return
 		end
 	
-		-- ====== 1. ВЫРУБАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
 		local animate = char:FindFirstChild("Animate")
 		if animate then
 			animate.Disabled = true
 		end
 	
-		-- ====== 2. ЗАПУСКАЕМ АНИМАЦИЮ ======
 		animTrack = loadAnimation(char)
 		if animTrack then
 			animTrack.Priority = Enum.AnimationPriority.Action
@@ -4935,22 +4901,17 @@ local script = G2L["b2"];
 			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
 		end
 	
-		-- ====== 3. ВКЛЮЧАЕМ ФЛИНГ ======
 		startFling(char)
 	
-		-- ====== 4. ЖДЕМ 2.5 СЕКУНДЫ ======
 		task.wait(2.5)
 	
-		-- ====== 5. ВЫКЛЮЧАЕМ ФЛИНГ ======
 		stopFling()
 	
-		-- ====== 6. ОСТАНАВЛИВАЕМ АНИМАЦИЮ ======
 		if animTrack then
 			animTrack:Stop()
 			animTrack = nil
 		end
 	
-		-- ====== 7. ВКЛЮЧАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
 		if animate and animate.Parent then
 			animate.Disabled = false
 		end
@@ -4959,45 +4920,37 @@ local script = G2L["b2"];
 		print("✅ АНИМАЦИЯ И ФЛИНГ ЗАВЕРШЕНЫ!")
 	end
 	
-	-- ====== НАЖАТИЕ КНОПКИ ======
 	button.MouseButton1Click:Connect(startFlingWithAnim)
 	
-	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
-	
-		-- Останавливаем флинг
 		stopFling()
-	
-		-- Останавливаем анимацию
 		if animTrack then
 			animTrack:Stop()
 			animTrack = nil
 		end
-	
 		isActive = false
 	end)
 	
-	print("✅ КНОПКА ЗАГРУЖЕНА! ФЛИНГ + АНИМАЦИЯ НА 2.5 СЕКУНДЫ")
+	print("✅ КНОПКА ЗАГРУЖЕНА!")
 end;
 task.spawn(C_b2);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Slap.LocalScript
 local function C_b6()
 local script = G2L["b6"];
 	-- ==========================================
-	-- TROLL_ФЛИНГ С АНИМАЦИЕЙ (РАБОЧИЙ)
+	-- [НАЗВАНИЕ_КНОПКИ] (РАБОЧИЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
 	
-	local ANIM_ID = "108225134235478"  -- 👈 ТВОЙ ID
+	local ANIM_ID = "108225134235478"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
 	local isActive = false
 	local animTrack = nil
 	local flingConnection = nil
 	local isFlinging = false
 	
-	-- ====== ЗАГРУЗКА АНИМАЦИИ ======
 	local function loadAnimation(char)
 		if not char then return nil end
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
@@ -5015,7 +4968,6 @@ local script = G2L["b6"];
 		return track
 	end
 	
-	-- ====== ЗАПУСК ФЛИНГА ======
 	local function startFling(char)
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return end
@@ -5026,8 +4978,6 @@ local script = G2L["b6"];
 		local vel = nil
 		local movel = 0.1
 	
-		print("🚀 ФЛИНГ ВКЛЮЧЕН!")
-	
 		flingConnection = RunService.Heartbeat:Connect(function()
 			if not isFlinging then return end
 			if not hrp or not hrp.Parent then 
@@ -5035,7 +4985,6 @@ local script = G2L["b6"];
 				return 
 			end
 	
-			-- Флинг из твоего скрипта
 			vel = hrp.Velocity
 			hrp.Velocity = vel * 1000000 + Vector3.new(0, 1000000, 0)
 	
@@ -5054,7 +5003,6 @@ local script = G2L["b6"];
 		end)
 	end
 	
-	-- ====== ОСТАНОВКА ФЛИНГА ======
 	local function stopFling()
 		isFlinging = false
 	
@@ -5072,11 +5020,8 @@ local script = G2L["b6"];
 				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
 			end
 		end
-	
-		print("🛑 ФЛИНГ ВЫКЛЮЧЕН!")
 	end
 	
-	-- ====== ОСНОВНАЯ ФУНКЦИЯ ======
 	local function startFlingWithAnim()
 		if isActive then return end
 		isActive = true
@@ -5094,13 +5039,11 @@ local script = G2L["b6"];
 			return
 		end
 	
-		-- ====== 1. ВЫРУБАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
 		local animate = char:FindFirstChild("Animate")
 		if animate then
 			animate.Disabled = true
 		end
 	
-		-- ====== 2. ЗАПУСКАЕМ АНИМАЦИЮ ======
 		animTrack = loadAnimation(char)
 		if animTrack then
 			animTrack.Priority = Enum.AnimationPriority.Action
@@ -5109,22 +5052,17 @@ local script = G2L["b6"];
 			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
 		end
 	
-		-- ====== 3. ВКЛЮЧАЕМ ФЛИНГ ======
 		startFling(char)
 	
-		-- ====== 4. ЖДЕМ 2.5 СЕКУНДЫ ======
 		task.wait(2.5)
 	
-		-- ====== 5. ВЫКЛЮЧАЕМ ФЛИНГ ======
 		stopFling()
 	
-		-- ====== 6. ОСТАНАВЛИВАЕМ АНИМАЦИЮ ======
 		if animTrack then
 			animTrack:Stop()
 			animTrack = nil
 		end
 	
-		-- ====== 7. ВКЛЮЧАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
 		if animate and animate.Parent then
 			animate.Disabled = false
 		end
@@ -5133,45 +5071,37 @@ local script = G2L["b6"];
 		print("✅ АНИМАЦИЯ И ФЛИНГ ЗАВЕРШЕНЫ!")
 	end
 	
-	-- ====== НАЖАТИЕ КНОПКИ ======
 	button.MouseButton1Click:Connect(startFlingWithAnim)
 	
-	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
-	
-		-- Останавливаем флинг
 		stopFling()
-	
-		-- Останавливаем анимацию
 		if animTrack then
 			animTrack:Stop()
 			animTrack = nil
 		end
-	
 		isActive = false
 	end)
 	
-	print("✅ КНОПКА ЗАГРУЖЕНА! ФЛИНГ + АНИМАЦИЯ НА 2.5 СЕКУНДЫ")
+	print("✅ КНОПКА ЗАГРУЖЕНА!")
 end;
 task.spawn(C_b6);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Slap2.LocalScript
 local function C_ba()
 local script = G2L["ba"];
 	-- ==========================================
-	-- TROLL_ФЛИНГ С АНИМАЦИЕЙ (РАБОЧИЙ)
+	-- [НАЗВАНИЕ_КНОПКИ] (РАБОЧИЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
 	
-	local ANIM_ID = "78221709455150"  -- 👈 ТВОЙ ID
+	local ANIM_ID = "78221709455150"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
 	local isActive = false
 	local animTrack = nil
 	local flingConnection = nil
 	local isFlinging = false
 	
-	-- ====== ЗАГРУЗКА АНИМАЦИИ ======
 	local function loadAnimation(char)
 		if not char then return nil end
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
@@ -5189,7 +5119,6 @@ local script = G2L["ba"];
 		return track
 	end
 	
-	-- ====== ЗАПУСК ФЛИНГА ======
 	local function startFling(char)
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return end
@@ -5200,8 +5129,6 @@ local script = G2L["ba"];
 		local vel = nil
 		local movel = 0.1
 	
-		print("🚀 ФЛИНГ ВКЛЮЧЕН!")
-	
 		flingConnection = RunService.Heartbeat:Connect(function()
 			if not isFlinging then return end
 			if not hrp or not hrp.Parent then 
@@ -5209,7 +5136,6 @@ local script = G2L["ba"];
 				return 
 			end
 	
-			-- Флинг из твоего скрипта
 			vel = hrp.Velocity
 			hrp.Velocity = vel * 1000000 + Vector3.new(0, 1000000, 0)
 	
@@ -5228,7 +5154,6 @@ local script = G2L["ba"];
 		end)
 	end
 	
-	-- ====== ОСТАНОВКА ФЛИНГА ======
 	local function stopFling()
 		isFlinging = false
 	
@@ -5246,11 +5171,8 @@ local script = G2L["ba"];
 				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
 			end
 		end
-	
-		print("🛑 ФЛИНГ ВЫКЛЮЧЕН!")
 	end
 	
-	-- ====== ОСНОВНАЯ ФУНКЦИЯ ======
 	local function startFlingWithAnim()
 		if isActive then return end
 		isActive = true
@@ -5268,13 +5190,11 @@ local script = G2L["ba"];
 			return
 		end
 	
-		-- ====== 1. ВЫРУБАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
 		local animate = char:FindFirstChild("Animate")
 		if animate then
 			animate.Disabled = true
 		end
 	
-		-- ====== 2. ЗАПУСКАЕМ АНИМАЦИЮ ======
 		animTrack = loadAnimation(char)
 		if animTrack then
 			animTrack.Priority = Enum.AnimationPriority.Action
@@ -5283,22 +5203,17 @@ local script = G2L["ba"];
 			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
 		end
 	
-		-- ====== 3. ВКЛЮЧАЕМ ФЛИНГ ======
 		startFling(char)
 	
-		-- ====== 4. ЖДЕМ 2.5 СЕКУНДЫ ======
 		task.wait(2.5)
 	
-		-- ====== 5. ВЫКЛЮЧАЕМ ФЛИНГ ======
 		stopFling()
 	
-		-- ====== 6. ОСТАНАВЛИВАЕМ АНИМАЦИЮ ======
 		if animTrack then
 			animTrack:Stop()
 			animTrack = nil
 		end
 	
-		-- ====== 7. ВКЛЮЧАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
 		if animate and animate.Parent then
 			animate.Disabled = false
 		end
@@ -5307,45 +5222,37 @@ local script = G2L["ba"];
 		print("✅ АНИМАЦИЯ И ФЛИНГ ЗАВЕРШЕНЫ!")
 	end
 	
-	-- ====== НАЖАТИЕ КНОПКИ ======
 	button.MouseButton1Click:Connect(startFlingWithAnim)
 	
-	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
-	
-		-- Останавливаем флинг
 		stopFling()
-	
-		-- Останавливаем анимацию
 		if animTrack then
 			animTrack:Stop()
 			animTrack = nil
 		end
-	
 		isActive = false
 	end)
 	
-	print("✅ КНОПКА ЗАГРУЖЕНА! ФЛИНГ + АНИМАЦИЯ НА 2.5 СЕКУНДЫ")
+	print("✅ КНОПКА ЗАГРУЖЕНА!")
 end;
 task.spawn(C_ba);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Push.LocalScript
 local function C_be()
 local script = G2L["be"];
 	-- ==========================================
-	-- TROLL_ФЛИНГ С АНИМАЦИЕЙ (РАБОЧИЙ)
+	-- [НАЗВАНИЕ_КНОПКИ] (РАБОЧИЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
 	
-	local ANIM_ID = "135890160317037"  -- 👈 ТВОЙ ID
+	local ANIM_ID = "135890160317037"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
 	local isActive = false
 	local animTrack = nil
 	local flingConnection = nil
 	local isFlinging = false
 	
-	-- ====== ЗАГРУЗКА АНИМАЦИИ ======
 	local function loadAnimation(char)
 		if not char then return nil end
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
@@ -5363,7 +5270,6 @@ local script = G2L["be"];
 		return track
 	end
 	
-	-- ====== ЗАПУСК ФЛИНГА ======
 	local function startFling(char)
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return end
@@ -5374,8 +5280,6 @@ local script = G2L["be"];
 		local vel = nil
 		local movel = 0.1
 	
-		print("🚀 ФЛИНГ ВКЛЮЧЕН!")
-	
 		flingConnection = RunService.Heartbeat:Connect(function()
 			if not isFlinging then return end
 			if not hrp or not hrp.Parent then 
@@ -5383,7 +5287,6 @@ local script = G2L["be"];
 				return 
 			end
 	
-			-- Флинг из твоего скрипта
 			vel = hrp.Velocity
 			hrp.Velocity = vel * 1000000 + Vector3.new(0, 1000000, 0)
 	
@@ -5402,7 +5305,6 @@ local script = G2L["be"];
 		end)
 	end
 	
-	-- ====== ОСТАНОВКА ФЛИНГА ======
 	local function stopFling()
 		isFlinging = false
 	
@@ -5420,11 +5322,8 @@ local script = G2L["be"];
 				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
 			end
 		end
-	
-		print("🛑 ФЛИНГ ВЫКЛЮЧЕН!")
 	end
 	
-	-- ====== ОСНОВНАЯ ФУНКЦИЯ ======
 	local function startFlingWithAnim()
 		if isActive then return end
 		isActive = true
@@ -5442,13 +5341,11 @@ local script = G2L["be"];
 			return
 		end
 	
-		-- ====== 1. ВЫРУБАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
 		local animate = char:FindFirstChild("Animate")
 		if animate then
 			animate.Disabled = true
 		end
 	
-		-- ====== 2. ЗАПУСКАЕМ АНИМАЦИЮ ======
 		animTrack = loadAnimation(char)
 		if animTrack then
 			animTrack.Priority = Enum.AnimationPriority.Action
@@ -5457,22 +5354,17 @@ local script = G2L["be"];
 			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
 		end
 	
-		-- ====== 3. ВКЛЮЧАЕМ ФЛИНГ ======
 		startFling(char)
 	
-		-- ====== 4. ЖДЕМ 2.5 СЕКУНДЫ ======
 		task.wait(2.5)
 	
-		-- ====== 5. ВЫКЛЮЧАЕМ ФЛИНГ ======
 		stopFling()
 	
-		-- ====== 6. ОСТАНАВЛИВАЕМ АНИМАЦИЮ ======
 		if animTrack then
 			animTrack:Stop()
 			animTrack = nil
 		end
 	
-		-- ====== 7. ВКЛЮЧАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
 		if animate and animate.Parent then
 			animate.Disabled = false
 		end
@@ -5481,45 +5373,37 @@ local script = G2L["be"];
 		print("✅ АНИМАЦИЯ И ФЛИНГ ЗАВЕРШЕНЫ!")
 	end
 	
-	-- ====== НАЖАТИЕ КНОПКИ ======
 	button.MouseButton1Click:Connect(startFlingWithAnim)
 	
-	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
-	
-		-- Останавливаем флинг
 		stopFling()
-	
-		-- Останавливаем анимацию
 		if animTrack then
 			animTrack:Stop()
 			animTrack = nil
 		end
-	
 		isActive = false
 	end)
 	
-	print("✅ КНОПКА ЗАГРУЖЕНА! ФЛИНГ + АНИМАЦИЯ НА 2.5 СЕКУНДЫ")
+	print("✅ КНОПКА ЗАГРУЖЕНА!")
 end;
 task.spawn(C_be);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Push2.LocalScript
 local function C_c2()
 local script = G2L["c2"];
 	-- ==========================================
-	-- TROLL_ФЛИНГ С АНИМАЦИЕЙ (РАБОЧИЙ)
+	-- [НАЗВАНИЕ_КНОПКИ] (РАБОЧИЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
 	
-	local ANIM_ID = "82070755455634"  -- 👈 ТВОЙ ID
+	local ANIM_ID = "82070755455634"  -- 👈 МЕНЯЙ ДЛЯ КАЖДОЙ КНОПКИ
 	local isActive = false
 	local animTrack = nil
 	local flingConnection = nil
 	local isFlinging = false
 	
-	-- ====== ЗАГРУЗКА АНИМАЦИИ ======
 	local function loadAnimation(char)
 		if not char then return nil end
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
@@ -5537,7 +5421,6 @@ local script = G2L["c2"];
 		return track
 	end
 	
-	-- ====== ЗАПУСК ФЛИНГА ======
 	local function startFling(char)
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return end
@@ -5548,8 +5431,6 @@ local script = G2L["c2"];
 		local vel = nil
 		local movel = 0.1
 	
-		print("🚀 ФЛИНГ ВКЛЮЧЕН!")
-	
 		flingConnection = RunService.Heartbeat:Connect(function()
 			if not isFlinging then return end
 			if not hrp or not hrp.Parent then 
@@ -5557,7 +5438,6 @@ local script = G2L["c2"];
 				return 
 			end
 	
-			-- Флинг из твоего скрипта
 			vel = hrp.Velocity
 			hrp.Velocity = vel * 1000000 + Vector3.new(0, 1000000, 0)
 	
@@ -5576,7 +5456,6 @@ local script = G2L["c2"];
 		end)
 	end
 	
-	-- ====== ОСТАНОВКА ФЛИНГА ======
 	local function stopFling()
 		isFlinging = false
 	
@@ -5594,11 +5473,8 @@ local script = G2L["c2"];
 				hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
 			end
 		end
-	
-		print("🛑 ФЛИНГ ВЫКЛЮЧЕН!")
 	end
 	
-	-- ====== ОСНОВНАЯ ФУНКЦИЯ ======
 	local function startFlingWithAnim()
 		if isActive then return end
 		isActive = true
@@ -5616,13 +5492,11 @@ local script = G2L["c2"];
 			return
 		end
 	
-		-- ====== 1. ВЫРУБАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
 		local animate = char:FindFirstChild("Animate")
 		if animate then
 			animate.Disabled = true
 		end
 	
-		-- ====== 2. ЗАПУСКАЕМ АНИМАЦИЮ ======
 		animTrack = loadAnimation(char)
 		if animTrack then
 			animTrack.Priority = Enum.AnimationPriority.Action
@@ -5631,22 +5505,17 @@ local script = G2L["c2"];
 			print("🎬 АНИМАЦИЯ ЗАПУЩЕНА")
 		end
 	
-		-- ====== 3. ВКЛЮЧАЕМ ФЛИНГ ======
 		startFling(char)
 	
-		-- ====== 4. ЖДЕМ 2.5 СЕКУНДЫ ======
 		task.wait(2.5)
 	
-		-- ====== 5. ВЫКЛЮЧАЕМ ФЛИНГ ======
 		stopFling()
 	
-		-- ====== 6. ОСТАНАВЛИВАЕМ АНИМАЦИЮ ======
 		if animTrack then
 			animTrack:Stop()
 			animTrack = nil
 		end
 	
-		-- ====== 7. ВКЛЮЧАЕМ СТАНДАРТНЫЕ АНИМАЦИИ ======
 		if animate and animate.Parent then
 			animate.Disabled = false
 		end
@@ -5655,26 +5524,19 @@ local script = G2L["c2"];
 		print("✅ АНИМАЦИЯ И ФЛИНГ ЗАВЕРШЕНЫ!")
 	end
 	
-	-- ====== НАЖАТИЕ КНОПКИ ======
 	button.MouseButton1Click:Connect(startFlingWithAnim)
 	
-	-- ====== ОЧИСТКА ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
-	
-		-- Останавливаем флинг
 		stopFling()
-	
-		-- Останавливаем анимацию
 		if animTrack then
 			animTrack:Stop()
 			animTrack = nil
 		end
-	
 		isActive = false
 	end)
 	
-	print("✅ КНОПКА ЗАГРУЖЕНА! ФЛИНГ + АНИМАЦИЯ НА 2.5 СЕКУНДЫ")
+	print("✅ КНОПКА ЗАГРУЖЕНА!")
 end;
 task.spawn(C_c2);
 -- StarterGui.Folder.ScreenGui.MainFrame.LeftFrame.SwitchTabs
