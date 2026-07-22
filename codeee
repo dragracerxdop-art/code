@@ -4783,31 +4783,34 @@ task.spawn(C_ae);
 local function C_b2()
 local script = G2L["b2"];
 	-- ==========================================
-	-- TROLL_Invisible (НЕВИДИМОСТЬ)
+	-- TROLL_Invisible (ВИЗУАЛЬНЫЙ ИНВИЗ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	
 	local isInvisible = false
 	
-	-- ====== ФУНКЦИЯ ИНВИЗА ======
-	local function setInvisible(char, state)
+	-- ====== ТОЛЬКО ВИЗУАЛЬНЫЙ ИНВИЗ ======
+	local function setVisualInvisible(char, state)
 		if not char then return end
 	
-		-- Делаем невидимым всего персонажа
+		-- Делаем невидимым только визуальные части
 		for _, part in ipairs(char:GetDescendants()) do
-			if part:IsA("BasePart") or part:IsA("Decal") or part:IsA("Texture") then
+			if part:IsA("BasePart") then
+				part.Transparency = state and 1 or 0
+			end
+			if part:IsA("Decal") or part:IsA("Texture") then
 				part.Transparency = state and 1 or 0
 			end
 		end
 	
-		-- Делаем невидимым Humanoid
+		-- Скрываем Humanoid (чтобы не было видно)
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if humanoid then
 			humanoid.Visible = not state
 		end
 	
-		-- Делаем невидимым Accessory (аксессуары)
+		-- Скрываем аксессуары
 		for _, accessory in ipairs(char:GetChildren()) do
 			if accessory:IsA("Accessory") then
 				local handle = accessory:FindFirstChild("Handle")
@@ -4817,7 +4820,13 @@ local script = G2L["b2"];
 			end
 		end
 	
-		print(state and "👻 ИНВИЗ ВКЛЮЧЕН!" or "👀 ИНВИЗ ВЫКЛЮЧЕН!")
+		-- Оставляем тень (чтобы можно было задеть)
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			hrp.LocalTransparencyModifier = state and 0 or 0  -- НЕ МЕНЯЕМ
+		end
+	
+		print(state and "👻 ВИЗУАЛЬНЫЙ ИНВИЗ ВКЛЮЧЕН!" or "👀 ВИЗУАЛЬНЫЙ ИНВИЗ ВЫКЛЮЧЕН!")
 	end
 	
 	-- ====== НАЖАТИЕ КНОПКИ ======
@@ -4829,7 +4838,7 @@ local script = G2L["b2"];
 		end
 	
 		isInvisible = not isInvisible
-		setInvisible(char, isInvisible)
+		setVisualInvisible(char, isInvisible)
 	
 		-- Меняем текст кнопки
 		if isInvisible then
@@ -4843,11 +4852,11 @@ local script = G2L["b2"];
 	player.CharacterAdded:Connect(function(char)
 		task.wait(0.5)
 		if isInvisible then
-			setInvisible(char, true)
+			setVisualInvisible(char, true)
 		end
 	end)
 	
-	print("✅ TROLL_Invisible КНОПКА ЗАГРУЖЕНА!")
+	print("✅ TROLL_Invisible (ВИЗУАЛЬНЫЙ) КНОПКА ЗАГРУЖЕНА!")
 end;
 task.spawn(C_b2);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Slap.LocalScript
