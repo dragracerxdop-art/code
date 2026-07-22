@@ -3141,7 +3141,7 @@ task.spawn(C_60);
 local function C_67()
 local script = G2L["67"];
 	-- ==========================================
-	-- MISC_Fly (ПРОСТОЙ И РАБОЧИЙ)
+	-- MISC_Fly (ФИНАЛЬНАЯ ВЕРСИЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -3151,6 +3151,7 @@ local script = G2L["67"];
 	local isEnabled = false
 	local flyLoop = nil
 	local maxspeed = 50
+	local fixedY = nil  -- фиксированная высота
 	
 	-- Находим поле для ввода скорости
 	local rightFrame = button.Parent
@@ -3202,6 +3203,11 @@ local script = G2L["67"];
 	
 		local char = player.Character
 		if char then
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.Velocity = Vector3.new(0, 0, 0)
+				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+			end
 			local humanoid = char:FindFirstChildOfClass("Humanoid")
 			if humanoid then
 				humanoid.PlatformStand = false
@@ -3211,6 +3217,7 @@ local script = G2L["67"];
 				animate.Disabled = false
 			end
 		end
+		fixedY = nil
 	end
 	
 	-- ===== ЗАПУСК =====
@@ -3230,6 +3237,9 @@ local script = G2L["67"];
 	
 		stopFly()
 	
+		-- Фиксируем высоту
+		fixedY = hrp.Position.Y
+	
 		-- Отключаем анимации
 		local animate = char:FindFirstChild("Animate")
 		if animate then
@@ -3237,6 +3247,8 @@ local script = G2L["67"];
 		end
 	
 		humanoid.PlatformStand = true
+		hrp.Velocity = Vector3.new(0, 0, 0)
+		hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 	
 		flyLoop = runService.RenderStepped:Connect(function()
 			if not isEnabled or not player.Character then
@@ -3247,34 +3259,65 @@ local script = G2L["67"];
 			local hrp = player.Character:FindFirstChild("HumanoidRootPart")
 			if not hrp then return end
 	
-			-- Движение через CFrame
-			local cam = workspace.CurrentCamera
-			local moveX = 0
-			local moveZ = 0
-			local moveY = 0
+			-- Проверяем нажатые клавиши
+			local w = uis:IsKeyDown(Enum.KeyCode.W)
+			local s = uis:IsKeyDown(Enum.KeyCode.S)
+			local a = uis:IsKeyDown(Enum.KeyCode.A)
+			local d = uis:IsKeyDown(Enum.KeyCode.D)
+			local space = uis:IsKeyDown(Enum.KeyCode.Space)
+			local shift = uis:IsKeyDown(Enum.KeyCode.LeftShift)
 	
-			if uis:IsKeyDown(Enum.KeyCode.W) then moveZ = 1 end
-			if uis:IsKeyDown(Enum.KeyCode.S) then moveZ = -1 end
-			if uis:IsKeyDown(Enum.KeyCode.A) then moveX = -1 end
-			if uis:IsKeyDown(Enum.KeyCode.D) then moveX = 1 end
-			if uis:IsKeyDown(Enum.KeyCode.Space) then moveY = 1 end
-			if uis:IsKeyDown(Enum.KeyCode.LeftShift) then moveY = -1 end
-	
-			-- Если нет движения — стоим на месте
-			if moveX == 0 and moveZ == 0 and moveY == 0 then
+			-- Если нет движения — фиксируем позицию
+			if not w and not s and not a and not d and not space and not shift then
+				hrp.Velocity = Vector3.new(0, 0, 0)
+				hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+				-- Возвращаем на фиксированную высоту
+				local pos = hrp.Position
+				hrp.Position = Vector3.new(pos.X, fixedY, pos.Z)
 				return
 			end
 	
-			-- Направление движения
+			-- Направление камеры
+			local cam = workspace.CurrentCamera
 			local forward = cam.CFrame.LookVector
 			local right = cam.CFrame.RightVector
 			local up = cam.CFrame.UpVector
 	
-			local moveVec = (forward * moveZ + right * moveX + up * moveY).Unit * maxspeed
-			local newPos = hrp.Position + moveVec
+			-- Собираем движение
+			local moveVec = Vector3.new(0, 0, 0)
+			if w then moveVec = moveVec + forward end
+			if s then moveVec = moveVec - forward end
+			if a then moveVec = moveVec - right end
+			if d then moveVec = moveVec + right end
 	
-			-- Перемещаем персонажа
-			hrp.CFrame = CFrame.new(newPos, newPos + (forward * moveZ + right * moveX).Unit)
+			-- Вертикаль (вверх/вниз)
+			if space then
+				fixedY = fixedY + maxspeed * 0.1
+			end
+			if shift then
+				fixedY = fixedY - maxspeed * 0.1
+			end
+	
+			-- Нормализуем горизонтальное движение
+			if moveVec.Magnitude > 0 then
+				moveVec = moveVec.Unit * maxspeed
+			end
+	
+			-- Применяем скорость
+			hrp.Velocity = moveVec
+			hrp.AssemblyLinearVelocity = moveVec
+	
+			-- Фиксируем высоту
+			local pos = hrp.Position
+			hrp.Position = Vector3.new(pos.X, fixedY, pos.Z)
+	
+			-- Поворачиваем персонажа
+			if moveVec.Magnitude > 0 then
+				local lookDir = Vector3.new(moveVec.X, 0, moveVec.Z).Unit
+				if lookDir.Magnitude > 0 then
+					hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + lookDir)
+				end
+			end
 		end)
 	end
 	
@@ -3286,6 +3329,7 @@ local script = G2L["67"];
 		if isEnabled then
 			startFly()
 			print("✈️ Полёт включён! Скорость: " .. maxspeed)
+			print("   WASD - движение, Пробел - вверх, Shift - вниз")
 		else
 			stopFly()
 			print("✈️ Полёт выключен!")
