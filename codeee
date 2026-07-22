@@ -3141,7 +3141,7 @@ task.spawn(C_60);
 local function C_67()
 local script = G2L["67"];
 	-- ==========================================
-	-- MISC_Fly (СТАРАЯ ЛОГИКА, БЕЗ ИНЕРЦИИ)
+	-- MISC_Fly (С АНИМАЦИЕЙ ПОЛЁТА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -3154,6 +3154,7 @@ local script = G2L["67"];
 	local bv = nil
 	local maxspeed = 50
 	local ctrl = {f = 0, b = 0, l = 0, r = 0}
+	local flyAnimTrack = nil
 	
 	-- Находим поле для ввода скорости
 	local rightFrame = button.Parent
@@ -3183,6 +3184,23 @@ local script = G2L["67"];
 			indicator.Text = "ВЫКЛ"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 		end
+	end
+	
+	-- ===== ЗАГРУЗКА АНИМАЦИИ ПОЛЁТА =====
+	local function loadFlyAnimation()
+		local char = player.Character
+		if not char then return nil end
+	
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid then return nil end
+	
+		-- Анимация полёта (Супермен)
+		local animId = "rbxassetid://1328456400"
+	
+		local anim = Instance.new("Animation")
+		anim.AnimationId = animId
+		local track = humanoid:LoadAnimation(anim)
+		return track
 	end
 	
 	-- ===== ПОЛУЧЕНИЕ СКОРОСТИ =====
@@ -3215,6 +3233,15 @@ local script = G2L["67"];
 			if animate then
 				animate.Disabled = false
 			end
+	
+			-- Останавливаем анимацию полёта
+			if flyAnimTrack then
+				flyAnimTrack:Stop()
+				flyAnimTrack = nil
+			end
+			for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+				track:Stop()
+			end
 		end
 		ctrl = {f = 0, b = 0, l = 0, r = 0}
 	end
@@ -3245,6 +3272,14 @@ local script = G2L["67"];
 		end
 	
 		humanoid.PlatformStand = true
+		humanoid.HipHeight = 0
+	
+		-- Загружаем и проигрываем анимацию полёта
+		flyAnimTrack = loadFlyAnimation()
+		if flyAnimTrack then
+			flyAnimTrack:Play()
+			flyAnimTrack:AdjustSpeed(1)
+		end
 	
 		bg = Instance.new("BodyGyro", torso)
 		bg.P = 9e4
@@ -3266,7 +3301,6 @@ local script = G2L["67"];
 			local torso = player.Character:FindFirstChild("Torso") or player.Character:FindFirstChild("UpperTorso")
 			if not torso then return end
 	
-			-- МГНОВЕННАЯ СКОРОСТЬ (БЕЗ ИНЕРЦИИ)
 			local moveX = ctrl.l + ctrl.r
 			local moveZ = ctrl.f + ctrl.b
 	
@@ -3277,10 +3311,9 @@ local script = G2L["67"];
 			if moveX ~= 0 or moveZ ~= 0 then
 				bv.velocity = (forward * moveZ + right * moveX) * maxspeed
 			else
-				bv.velocity = Vector3.new(0, 0, 0)  -- МГНОВЕННАЯ ОСТАНОВКА
+				bv.velocity = Vector3.new(0, 0, 0)
 			end
 	
-			-- Поворачиваем персонажа
 			bg.cframe = cam.CFrame
 		end)
 	end
