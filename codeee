@@ -5463,7 +5463,7 @@ task.spawn(C_c2);
 local function C_d5()
 local script = G2L["d5"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (С TROLL)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (С TROLL + INVISIBLE)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -5635,7 +5635,7 @@ local script = G2L["d5"];
 			end
 			print("✅ DA HOOD")
 	
-			-- ===== TROLL =====
+			-- ===== TROLL (ОБНОВЛЕННЫЙ) =====
 		elseif tabName == "Troll" then
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("ImageButton") and (
@@ -5645,12 +5645,13 @@ local script = G2L["d5"];
 						child.Name == "TROLL_Slap" or
 						child.Name == "TROLL_Slap2" or
 						child.Name == "TROLL_Push" or
-						child.Name == "TROLL_Push2"
+						child.Name == "TROLL_Push2" or
+						child.Name == "TROLL_Invisible"  -- 👈 ДОБАВИЛ
 					) then
 					child.Visible = true
 				end
 			end
-			print("✅ TROLL")
+			print("✅ TROLL (с Invisible)")
 	
 			-- ===== INFO =====
 		elseif tabName == "INFO" then
@@ -5673,7 +5674,7 @@ local script = G2L["d5"];
 	end
 	
 	switchTab("TELEPORT")
-	print("✅ Переключение вкладок загружено!")
+	print("✅ Переключение вкладок загружено! (TROLL_Invisible добавлен)")
 end;
 task.spawn(C_d5);
 -- StarterGui.Folder.ScreenGui.MainFrame.HotKeys
