@@ -5580,7 +5580,7 @@ task.spawn(C_bf);
 local function C_d2()
 local script = G2L["d2"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (С ОТЛАДКОЙ)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПРОСТОЙ ПОКАЗ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -5740,33 +5740,18 @@ local script = G2L["d2"];
 			end
 			print("✅ MM2")
 	
-			-- ===== ANIMATIONS =====
+			-- ===== ANIMATIONS (ПРОСТО ПОКАЗ) =====
 		elseif tabName == "Animations" then
-			print("🔍 Ищем ANIMATIONS_Choose в RightFrame...")
-			local found = false
-	
 			for _, child in pairs(rightFrame:GetChildren()) do
-				print("🔍 Найдено: " .. child.Name .. " (" .. child.ClassName .. ")")
-	
-				if child.Name == "ANIMATIONS_Choose" then
-					if child:IsA("ImageButton") or child:IsA("TextButton") then
-						child.Visible = true
-						found = true
-						print("✅ ANIMATIONS_Choose найдена и показана!")
-					end
+				if child:IsA("ImageButton") and child.Name == "ANIMATIONS_Choose" then
+					child.Visible = true
+					print("✅ ANIMATIONS_Choose показана!")
+				end
+				if child:IsA("TextButton") and child.Name == "ANIMATIONS_Choose" then
+					child.Visible = true
+					print("✅ ANIMATIONS_Choose показана!")
 				end
 			end
-	
-			if not found then
-				print("❌ ANIMATIONS_Choose НЕ НАЙДЕНА в RightFrame!")
-				print("📋 Доступные кнопки в RightFrame:")
-				for _, child in pairs(rightFrame:GetChildren()) do
-					if child:IsA("ImageButton") or child:IsA("TextButton") then
-						print("   - " .. child.Name)
-					end
-				end
-			end
-	
 			print("✅ ANIMATIONS")
 	
 			-- ===== TROLL =====
@@ -5808,7 +5793,7 @@ local script = G2L["d2"];
 	end
 	
 	switchTab("TELEPORT")
-	print("✅ Переключение вкладок загружено! (С ОТЛАДКОЙ)")
+	print("✅ Переключение вкладок загружено!")
 end;
 task.spawn(C_d2);
 -- StarterGui.Folder.ScreenGui.MainFrame.HotKeys
