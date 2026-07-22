@@ -3186,7 +3186,7 @@ local script = G2L["67"];
 		end
 	end
 	
-	-- ===== ЗАГРУЗКА АНИМАЦИИ ПОЛЁТА =====
+	-- ===== ЗАГРУЗКА АНИМАЦИИ ПОЛЁТА (ЧЕРЕЗ ANIMATOR) =====
 	local function loadFlyAnimation()
 		local char = player.Character
 		if not char then return nil end
@@ -3194,12 +3194,19 @@ local script = G2L["67"];
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid then return nil end
 	
-		-- Анимация полёта (Супермен)
-		local animId = "rbxassetid://1328456400"
+		-- Находим или создаём Animator
+		local animator = char:FindFirstChild("Animator")
+		if not animator then
+			animator = Instance.new("Animator")
+			animator.Parent = humanoid
+		end
+	
+		-- ID анимации полёта (рабочий ID)
+		local animId = "rbxassetid://1328456400"  -- полёт Супермена
 	
 		local anim = Instance.new("Animation")
 		anim.AnimationId = animId
-		local track = humanoid:LoadAnimation(anim)
+		local track = animator:LoadAnimation(anim)
 		return track
 	end
 	
@@ -3228,6 +3235,7 @@ local script = G2L["67"];
 			local humanoid = char:FindFirstChildOfClass("Humanoid")
 			if humanoid then
 				humanoid.PlatformStand = false
+				humanoid.HipHeight = 2  -- возвращаем нормальную высоту
 			end
 			local animate = char:FindFirstChild("Animate")
 			if animate then
@@ -3239,8 +3247,12 @@ local script = G2L["67"];
 				flyAnimTrack:Stop()
 				flyAnimTrack = nil
 			end
-			for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
-				track:Stop()
+			-- Останавливаем все анимации
+			local animator = char:FindFirstChild("Animator")
+			if animator then
+				for _, track in pairs(animator:GetPlayingAnimationTracks()) do
+					track:Stop()
+				end
 			end
 		end
 		ctrl = {f = 0, b = 0, l = 0, r = 0}
@@ -3279,6 +3291,9 @@ local script = G2L["67"];
 		if flyAnimTrack then
 			flyAnimTrack:Play()
 			flyAnimTrack:AdjustSpeed(1)
+			print("✈️ Анимация полёта запущена!")
+		else
+			print("⚠️ Анимация полёта не загрузилась!")
 		end
 	
 		bg = Instance.new("BodyGyro", torso)
