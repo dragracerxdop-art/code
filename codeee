@@ -3141,7 +3141,7 @@ task.spawn(C_60);
 local function C_67()
 local script = G2L["67"];
 	-- ==========================================
-	-- MISC_Fly (С АНИМАЦИЕЙ ПОЛЁТА)
+	-- MISC_Fly (С АНИМАЦИЕЙ 8175722368)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -3186,7 +3186,7 @@ local script = G2L["67"];
 		end
 	end
 	
-	-- ===== ЗАГРУЗКА АНИМАЦИИ ПОЛЁТА (ЧЕРЕЗ ANIMATOR) =====
+	-- ===== ЗАГРУЗКА АНИМАЦИИ =====
 	local function loadFlyAnimation()
 		local char = player.Character
 		if not char then return nil end
@@ -3194,18 +3194,14 @@ local script = G2L["67"];
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid then return nil end
 	
-		-- Находим или создаём Animator
-		local animator = char:FindFirstChild("Animator")
+		local animator = humanoid:FindFirstChild("Animator")
 		if not animator then
 			animator = Instance.new("Animator")
 			animator.Parent = humanoid
 		end
 	
-		-- ID анимации полёта (рабочий ID)
-		local animId = "rbxassetid://1328456400"  -- полёт Супермена
-	
 		local anim = Instance.new("Animation")
-		anim.AnimationId = animId
+		anim.AnimationId = "rbxassetid://8175722368"  -- 👈 ТВОЯ АНИМАЦИЯ
 		local track = animator:LoadAnimation(anim)
 		return track
 	end
@@ -3235,7 +3231,6 @@ local script = G2L["67"];
 			local humanoid = char:FindFirstChildOfClass("Humanoid")
 			if humanoid then
 				humanoid.PlatformStand = false
-				humanoid.HipHeight = 2  -- возвращаем нормальную высоту
 			end
 			local animate = char:FindFirstChild("Animate")
 			if animate then
@@ -3247,7 +3242,6 @@ local script = G2L["67"];
 				flyAnimTrack:Stop()
 				flyAnimTrack = nil
 			end
-			-- Останавливаем все анимации
 			local animator = char:FindFirstChild("Animator")
 			if animator then
 				for _, track in pairs(animator:GetPlayingAnimationTracks()) do
@@ -3284,16 +3278,15 @@ local script = G2L["67"];
 		end
 	
 		humanoid.PlatformStand = true
-		humanoid.HipHeight = 0
 	
-		-- Загружаем и проигрываем анимацию полёта
+		-- Загружаем анимацию полёта
 		flyAnimTrack = loadFlyAnimation()
 		if flyAnimTrack then
 			flyAnimTrack:Play()
 			flyAnimTrack:AdjustSpeed(1)
-			print("✈️ Анимация полёта запущена!")
+			print("✈️ Анимация запущена!")
 		else
-			print("⚠️ Анимация полёта не загрузилась!")
+			print("⚠️ Анимация не загрузилась!")
 		end
 	
 		bg = Instance.new("BodyGyro", torso)
