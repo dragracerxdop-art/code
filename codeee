@@ -4676,57 +4676,53 @@ task.spawn(C_ae);
 local function C_b2()
 local script = G2L["b2"];
 	-- ==========================================
-	-- TROLL_Invisible (РЕАЛЬНЫЙ ИНВИЗ)
+	-- TROLL_Invisible (АДАПТИРОВАННЫЙ ИЗ FE INVISIBLE)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	
-	local isInvisible = false
+	local invis_on = false
+	local invis_transparency = 0.75  -- 75% прозрачности (как в твоем скрипте)
 	
-	-- ====== РЕАЛЬНЫЙ ИНВИЗ ======
-	local function setRealInvisible(char, state)
-		if not char then return end
-	
-		-- Делаем полностью прозрачным ВСЁ
-		for _, part in ipairs(char:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.Transparency = state and 1 or 0
-				-- Убираем свечение/эффекты
-				if part:FindFirstChild("Highlight") then
-					part.Highlight.Enabled = not state
-				end
-			end
-			if part:IsA("Decal") or part:IsA("Texture") then
-				part.Transparency = state and 1 or 0
-			end
-		end
-	
-		-- Прячем Humanoid
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			humanoid.Visible = not state
-		end
-	
-		-- Прячем аксессуары
-		for _, accessory in ipairs(char:GetChildren()) do
-			if accessory:IsA("Accessory") then
-				local handle = accessory:FindFirstChild("Handle")
-				if handle then
-					handle.Transparency = state and 1 or 0
+	-- ====== ФУНКЦИЯ ИНВИЗА (ИЗ ТВОЕГО СКРИПТА) ======
+	local function setCharacterTransparency(transparency)
+		local character = player.Character
+		if character then
+			for _, part in pairs(character:GetDescendants()) do
+				if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+					part.Transparency = transparency
 				end
 			end
 		end
-	
-		-- ДОПОЛНИТЕЛЬНО: скрываем тени и эффекты
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if hrp then
-			hrp.LocalTransparencyModifier = state and 1 or 0
-		end
-	
-		print(state and "👻 ИНВИЗ ВКЛЮЧЕН!" or "👀 ИНВИЗ ВЫКЛЮЧЕН!")
 	end
 	
-	-- ====== НАЖАТИЕ КНОПКИ ======
+	-- ====== ИНДИКАТОР ======
+	local indicator = Instance.new("TextLabel")
+	indicator.Name = "Indicator"
+	indicator.Size = UDim2.new(1, 0, 0.4, 0)
+	indicator.Position = UDim2.new(0, 0, 0.6, 0)
+	indicator.BackgroundTransparency = 1
+	indicator.Text = "👀 ВИДИМ"
+	indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+	indicator.TextSize = 18
+	indicator.Font = Enum.Font.SourceSansBold
+	indicator.TextStrokeTransparency = 0.5
+	indicator.Parent = button
+	
+	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
+	local function updateIndicator()
+		if invis_on then
+			indicator.Text = "👻 ИНВИЗ"
+			indicator.TextColor3 = Color3.fromRGB(255, 255, 0)
+			button.BackgroundColor3 = Color3.fromRGB(50, 50, 0)
+		else
+			indicator.Text = "👀 ВИДИМ"
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+			button.BackgroundColor3 = Color3.fromRGB(0, 50, 0)
+		end
+	end
+	
+	-- ====== КНОПКА ======
 	button.MouseButton1Click:Connect(function()
 		local char = player.Character
 		if not char then
@@ -4734,25 +4730,30 @@ local script = G2L["b2"];
 			return
 		end
 	
-		isInvisible = not isInvisible
-		setRealInvisible(char, isInvisible)
+		invis_on = not invis_on
 	
-		if isInvisible then
-			button.Text = "👻"
+		if invis_on then
+			setCharacterTransparency(invis_transparency)
+			print("👻 ИНВИЗ ВКЛЮЧЕН! Прозрачность: " .. invis_transparency * 100 .. "%")
 		else
-			button.Text = "👀"
+			setCharacterTransparency(0)
+			print("👀 ИНВИЗ ВЫКЛЮЧЕН!")
 		end
+	
+		updateIndicator()
 	end)
 	
-	-- ====== ПРИ РЕСПАВНЕ ВЫКЛЮЧАЕМ ИНВИЗ ======
+	-- ====== ПРИ РЕСПАВНЕ ВЫКЛЮЧАЕМ ======
 	player.CharacterAdded:Connect(function(char)
 		task.wait(0.5)
-		if isInvisible then
-			setRealInvisible(char, true)
+		if invis_on then
+			setCharacterTransparency(invis_transparency)
+			updateIndicator()
 		end
 	end)
 	
-	print("✅ TROLL_Invisible ЗАГРУЖЕН!")
+	updateIndicator()
+	print("✅ TROLL_Invisible ЗАГРУЖЕН! (Адаптирован из FE Invisible)")
 end;
 task.spawn(C_b2);
 -- StarterGui.Folder.ScreenGui.MainFrame.RightFrame.TROLL_Slap.LocalScript
