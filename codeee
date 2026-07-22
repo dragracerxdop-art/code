@@ -1253,6 +1253,7 @@ G2L["a6"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 G2L["a7"] = Instance.new("ScrollingFrame", G2L["2"]);
 G2L["a7"]["Active"] = true;
 G2L["a7"]["BorderSizePixel"] = 0;
+G2L["a7"]["CanvasPosition"] = Vector2.new(0, 100);
 G2L["a7"]["Name"] = [[LeftFrame]];
 G2L["a7"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["a7"]["Size"] = UDim2.new(0, 149, 0, 419);
@@ -3141,7 +3142,7 @@ task.spawn(C_60);
 local function C_67()
 local script = G2L["67"];
 	-- ==========================================
-	-- MISC_Fly (С АНИМАЦИЕЙ 8175722368)
+	-- MISC_Fly (ФИНАЛЬНАЯ ВЕРСИЯ, БЕЗ АНИМАЦИИ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -3154,7 +3155,6 @@ local script = G2L["67"];
 	local bv = nil
 	local maxspeed = 50
 	local ctrl = {f = 0, b = 0, l = 0, r = 0}
-	local flyAnimTrack = nil
 	
 	-- Находим поле для ввода скорости
 	local rightFrame = button.Parent
@@ -3184,26 +3184,6 @@ local script = G2L["67"];
 			indicator.Text = "ВЫКЛ"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 		end
-	end
-	
-	-- ===== ЗАГРУЗКА АНИМАЦИИ =====
-	local function loadFlyAnimation()
-		local char = player.Character
-		if not char then return nil end
-	
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid then return nil end
-	
-		local animator = humanoid:FindFirstChild("Animator")
-		if not animator then
-			animator = Instance.new("Animator")
-			animator.Parent = humanoid
-		end
-	
-		local anim = Instance.new("Animation")
-		anim.AnimationId = "rbxassetid://8175722368"  -- 👈 ТВОЯ АНИМАЦИЯ
-		local track = animator:LoadAnimation(anim)
-		return track
 	end
 	
 	-- ===== ПОЛУЧЕНИЕ СКОРОСТИ =====
@@ -3236,18 +3216,6 @@ local script = G2L["67"];
 			if animate then
 				animate.Disabled = false
 			end
-	
-			-- Останавливаем анимацию полёта
-			if flyAnimTrack then
-				flyAnimTrack:Stop()
-				flyAnimTrack = nil
-			end
-			local animator = char:FindFirstChild("Animator")
-			if animator then
-				for _, track in pairs(animator:GetPlayingAnimationTracks()) do
-					track:Stop()
-				end
-			end
 		end
 		ctrl = {f = 0, b = 0, l = 0, r = 0}
 	end
@@ -3278,16 +3246,6 @@ local script = G2L["67"];
 		end
 	
 		humanoid.PlatformStand = true
-	
-		-- Загружаем анимацию полёта
-		flyAnimTrack = loadFlyAnimation()
-		if flyAnimTrack then
-			flyAnimTrack:Play()
-			flyAnimTrack:AdjustSpeed(1)
-			print("✈️ Анимация запущена!")
-		else
-			print("⚠️ Анимация не загрузилась!")
-		end
 	
 		bg = Instance.new("BodyGyro", torso)
 		bg.P = 9e4
