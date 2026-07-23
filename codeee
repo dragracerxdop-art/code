@@ -5486,7 +5486,7 @@ local script = G2L["bf"];
 	local hitboxSize = 5
 	local hitboxLoop = nil
 	
-	-- ====== ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ HB_Visible ======
+	-- ====== ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ======
 	_G.HitboxEnabled = false
 	
 	-- ====== ИНДИКАТОР ======
@@ -5566,16 +5566,10 @@ local script = G2L["bf"];
 				part.Size = originalSize * size
 				part.CanCollide = false
 	
-				-- 👇 ВИЗУАЛ (ЗАВИСИТ ОТ _G.HitboxVisible)
-				if _G.HitboxVisible then
-					part.Transparency = 0.5
-					part.BrickColor = BrickColor.new("Lilac")
-					part.Material = Enum.Material.Neon
-				else
-					part.Transparency = 0
-					part.BrickColor = BrickColor.new("Medium stone grey")
-					part.Material = Enum.Material.Plastic
-				end
+				-- 👇 ВСЕГДА НЕВИДИМЫЙ (Transparency = 1)
+				part.Transparency = 1
+				part.BrickColor = BrickColor.new("Medium stone grey")
+				part.Material = Enum.Material.Plastic
 			end)
 		end
 	end
@@ -5600,7 +5594,7 @@ local script = G2L["bf"];
 	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	local function toggleHitbox()
 		hitboxEnabled = not hitboxEnabled
-		_G.HitboxEnabled = hitboxEnabled  -- 👈 ПЕРЕДАЁМ СОСТОЯНИЕ
+		_G.HitboxEnabled = hitboxEnabled
 	
 		if hitboxEnabled then
 			if hitboxLoop then hitboxLoop:Disconnect() end
@@ -5608,7 +5602,7 @@ local script = G2L["bf"];
 			hitboxLoop = runService.RenderStepped:Connect(function()
 				if hitboxEnabled then applyHitbox() end
 			end)
-			print("🗡️ Хитбокс ВКЛ (размер: " .. hitboxSize .. "x)")
+			print("🗡️ Хитбокс ВКЛ (размер: " .. hitboxSize .. "x, НЕВИДИМЫЙ)")
 		else
 			if hitboxLoop then hitboxLoop:Disconnect() hitboxLoop = nil end
 			restoreHitbox()
@@ -5627,14 +5621,14 @@ local script = G2L["bf"];
 	end)
 	
 	updateIndicator()
-	print("✅ HB_Toggle загружена")
+	print("✅ HB_Toggle загружена (оружие НЕВИДИМОЕ)")
 end;
 task.spawn(C_bf);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Toggle.LocalScript
 local function C_c3()
 local script = G2L["c3"];
 	-- ==========================================
-	-- FOV_Toggle (ЖЁСТКИЙ ФИКС)
+	-- FOV_Toggle (ФИНАЛЬНЫЙ ФИКС)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -5689,12 +5683,24 @@ local script = G2L["c3"];
 		end
 	end
 	
-	-- ====== ПРИМЕНЕНИЕ FOV ======
+	-- ====== ПРИМЕНЕНИЕ FOV (БЛОКИРОВКА) ======
 	local function applyFOV()
 		local cam = workspace.CurrentCamera
 		if cam then
+			-- 👇 ПРЯМОЕ ПРИСВОЕНИЕ
 			cam.FieldOfView = fovValue
 			cam.CameraType = Enum.CameraType.Custom
+	
+			-- 👇 ДОПОЛНИТЕЛЬНАЯ БЛОКИРОВКА
+			if cam:IsA("Camera") then
+				pcall(function()
+					-- Пытаемся заблокировать через свойства
+					local fovProp = cam:FindFirstChild("FieldOfView")
+					if fovProp then
+						fovProp.Value = fovValue
+					end
+				end)
+			end
 		end
 	end
 	
@@ -5721,34 +5727,41 @@ local script = G2L["c3"];
 	
 			applyFOV()
 	
-			-- 👇 ЖЁСТКИЙ ЦИКЛ
+			-- 👇 ОСНОВНОЙ ЦИКЛ
 			fovLoop = runService.RenderStepped:Connect(function()
+				if fovEnabled then
+					applyFOV()
+				end
+			end)
+	
+			-- 👇 ДОПОЛНИТЕЛЬНЫЙ ЦИКЛ (Heartbeat)
+			local heartbeatConn = runService.Heartbeat:Connect(function()
 				if fovEnabled then
 					local cam = workspace.CurrentCamera
 					if cam and cam.FieldOfView ~= fovValue then
 						cam.FieldOfView = fovValue
-						cam.CameraType = Enum.CameraType.Custom
 					end
 				end
 			end)
+			fovLoop._heartbeat = heartbeatConn
 	
-			-- 👇 ДОПОЛНИТЕЛЬНЫЙ ПЕРЕХВАТ
+			-- 👇 ОТСЛЕЖИВАНИЕ ИЗМЕНЕНИЯ FOV
 			local cam = workspace.CurrentCamera
 			if cam then
-				-- Отслеживаем изменение FOV и возвращаем
 				local propConn = cam:GetPropertyChangedSignal("FieldOfView"):Connect(function()
 					if fovEnabled and cam.FieldOfView ~= fovValue then
 						cam.FieldOfView = fovValue
 					end
 				end)
-	
-				-- Храним связь
 				fovLoop._propConn = propConn
 			end
 	
 			print("👁️ FOV ВКЛ (" .. fovValue .. "°)")
 		else
 			if fovLoop then
+				if fovLoop._heartbeat then
+					fovLoop._heartbeat:Disconnect()
+				end
 				if fovLoop._propConn then
 					fovLoop._propConn:Disconnect()
 				end
@@ -5799,7 +5812,7 @@ local script = G2L["c3"];
 	end)
 	
 	updateIndicator()
-	print("✅ FOV_Toggle загружена (жёсткий фикс)")
+	print("✅ FOV_Toggle загружена (финальный фикс)")
 end;
 task.spawn(C_c3);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Value.LocalScript
@@ -5875,23 +5888,19 @@ local script = G2L["ce"];
 	
 		for _, part in pairs(parts) do
 			pcall(function()
-				-- Проверяем, включен ли хитбокс
-				local hitboxEnabled = _G.HitboxEnabled or false
-	
-				if hitboxEnabled then
-					if _G.HitboxVisible then
-						-- ВИДИМЫЙ
-						part.Transparency = 0.5
-						part.BrickColor = BrickColor.new("Lilac")
-						part.Material = Enum.Material.Neon
-					else
-						-- СКРЫТЫЙ (но увеличенный)
-						part.Transparency = 0
-						part.BrickColor = BrickColor.new("Medium stone grey")
-						part.Material = Enum.Material.Plastic
-					end
+				-- 👇 ВИЗУАЛ ЗАВИСИТ ОТ _G.HitboxVisible
+				if _G.HitboxVisible and _G.HitboxEnabled then
+					-- 👇 НЕОН (ВИДИМЫЙ)
+					part.Transparency = 0.5
+					part.BrickColor = BrickColor.new("Lilac")
+					part.Material = Enum.Material.Neon
+				elseif _G.HitboxEnabled then
+					-- 👇 НЕВИДИМЫЙ (но увеличенный)
+					part.Transparency = 1
+					part.BrickColor = BrickColor.new("Medium stone grey")
+					part.Material = Enum.Material.Plastic
 				else
-					-- Если хитбокс выключен — возвращаем как было
+					-- 👇 НОРМАЛЬНЫЙ
 					part.Transparency = 0
 					part.BrickColor = BrickColor.new("Medium stone grey")
 					part.Material = Enum.Material.Plastic
@@ -5931,7 +5940,7 @@ local script = G2L["ce"];
 	end)
 	
 	updateIndicator()
-	print("✅ HB_Visible загружена")
+	print("✅ HB_Visible загружена (неон)")
 end;
 task.spawn(C_ce);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
