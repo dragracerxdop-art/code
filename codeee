@@ -6229,7 +6229,7 @@ task.spawn(C_d2);
 local function C_d6()
 local script = G2L["d6"];
 	-- ==========================================
-	-- TROLL_Funnn (ПРЕДМЕТ + АНИМАЦИЯ)
+	-- TROLL_Funnn (ПРЕДМЕТ + АНИМАЦИЯ ПРИ ВЗЯТИИ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -6255,15 +6255,15 @@ local script = G2L["d6"];
 	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
 	local function updateIndicator()
 		if isActive then
-			indicator.Text = "💀 JERK"
-			indicator.TextColor3 = Color3.fromRGB(255, 0, 255)
+			indicator.Text = "🎁 ЕСТЬ"
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
 		else
 			indicator.Text = "ВЫКЛ"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 		end
 	end
 	
-	-- ====== ЗАПУСК АНИМАЦИЙ (КАК В ТВОЁМ СКРИПТЕ) ======
+	-- ====== ЗАПУСК АНИМАЦИЙ ======
 	local function startAnimations()
 		local char = player.Character
 		if not char then return end
@@ -6325,24 +6325,76 @@ local script = G2L["d6"];
 		print("💀 Jerk анимации запущены!")
 	end
 	
-	-- ====== ОСТАНОВКА ВСЕГО ======
-	local function stopAll()
-		isActive = false
-		updateIndicator()
-	
-		-- Останавливаем анимации
+	-- ====== ОСТАНОВКА АНИМАЦИЙ ======
+	local function stopAnimations()
 		for _, track in pairs(animTracks) do
 			pcall(function() track:Stop() end)
 		end
 		animTracks = {}
 	
-		-- Отключаем циклы
 		for _, conn in pairs(animConnections) do
 			pcall(function() conn:Disconnect() end)
 		end
 		animConnections = {}
+	end
 	
-		-- Удаляем предмет
+	-- ====== КОГДА БЕРУТ ПРЕДМЕТ В РУКУ ======
+	local function onEquipped()
+		if isActive then
+			startAnimations()
+			print("💀 Jerk взят в руки!")
+		end
+	end
+	
+	-- ====== КОГДА КЛАДУТ ПРЕДМЕТ ======
+	local function onUnequipped()
+		stopAnimations()
+		print("💀 Jerk убран из рук!")
+	end
+	
+	-- ====== ВЫДАЧА ПРЕДМЕТА ======
+	local function giveTool()
+		-- Останавливаем всё старое
+		stopAnimations()
+	
+		-- Удаляем старые предметы
+		local backpack = player:FindFirstChild("Backpack")
+		if backpack then
+			local old = backpack:FindFirstChild("Jerk Off")
+			if old then old:Destroy() end
+		end
+	
+		local char = player.Character
+		if char then
+			local old = char:FindFirstChild("Jerk Off")
+			if old then old:Destroy() end
+		end
+	
+		-- Создаём предмет
+		local tool = Instance.new("Tool")
+		tool.Name = "Jerk Off"
+		tool.RequiresHandle = false
+		tool.Parent = backpack or player
+	
+		-- 👇 ПОДКЛЮЧАЕМ СОБЫТИЯ
+		tool.Equipped:Connect(onEquipped)
+		tool.Unequipped:Connect(onUnequipped)
+	
+		currentTool = tool
+		isActive = true
+		updateIndicator()
+	
+		print("🎁 Предмет 'Jerk Off' выдан в инвентарь!")
+		print("💀 Возьми его в руки для анимации!")
+	end
+	
+	-- ====== УДАЛЕНИЕ ПРЕДМЕТА ======
+	local function removeTool()
+		isActive = false
+		updateIndicator()
+	
+		stopAnimations()
+	
 		if currentTool then
 			pcall(function() currentTool:Destroy() end)
 			currentTool = nil
@@ -6361,43 +6413,13 @@ local script = G2L["d6"];
 			if old then old:Destroy() end
 		end
 	
-		print("💀 Jerk остановлен!")
-	end
+		print("🗑️ Предмет удалён!")
+		}
 	
-	-- ====== ВЫДАЧА ПРЕДМЕТА ======
-	local function giveTool()
-		-- Останавливаем всё старое
-		stopAll()
-		task.wait(0.1)
-	
-		-- Удаляем старые предметы
-		local backpack = player:FindFirstChild("Backpack")
-		if backpack then
-			local old = backpack:FindFirstChild("Jerk Off")
-			if old then old:Destroy() end
-		end
-	
-		-- Создаём предмет (как в твоём скрипте)
-		local tool = Instance.new("Tool")
-		tool.Name = "Jerk Off"
-		tool.RequiresHandle = false
-		tool.Parent = backpack or player
-		currentTool = tool
-	
-		isActive = true
-		updateIndicator()
-	
-		-- Запускаем анимации
-		task.wait(0.1)
-		startAnimations()
-	
-		print("🎁 Предмет 'Jerk Off' выдан!")
-	end
-	
-	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
+		-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	local function toggleJerk()
 		if isActive then
-			stopAll()
+			removeTool()
 		else
 			giveTool()
 		end
@@ -6414,7 +6436,7 @@ local script = G2L["d6"];
 	end)
 	
 	updateIndicator()
-	print("✅ TROLL_Funnn загружена (предмет + анимация)")
+	print("✅ TROLL_Funnn загружена!")
 end;
 task.spawn(C_d6);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
