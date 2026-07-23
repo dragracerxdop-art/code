@@ -6229,13 +6229,16 @@ task.spawn(C_d2);
 local function C_d6()
 local script = G2L["d6"];
 	-- ==========================================
-	-- TROLL_Funnn (ВЫДАЧА ПРЕДМЕТА)
+	-- TROLL_Funnn (ПРЕДМЕТ + АНИМАЦИЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
+	local RunService = game:GetService("RunService")
 	
 	local isActive = false
 	local currentTool = nil
+	local animConnections = {}
+	local animTracks = {}
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -6252,49 +6255,100 @@ local script = G2L["d6"];
 	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
 	local function updateIndicator()
 		if isActive then
-			indicator.Text = "🎁 ЕСТЬ"
-			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+			indicator.Text = "💀 JERK"
+			indicator.TextColor3 = Color3.fromRGB(255, 0, 255)
 		else
 			indicator.Text = "ВЫКЛ"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 		end
 	end
 	
-	-- ====== СОЗДАНИЕ ПРЕДМЕТА (КАК В ТВОЁМ СКРИПТЕ) ======
-	local function giveTool()
-		-- Удаляем старый
-		if currentTool then
-			pcall(function() currentTool:Destroy() end)
-			currentTool = nil
+	-- ====== ЗАПУСК АНИМАЦИЙ (КАК В ТВОЁМ СКРИПТЕ) ======
+	local function startAnimations()
+		local char = player.Character
+		if not char then return end
+	
+		local hum = char:FindFirstChildOfClass("Humanoid")
+		if not hum then return end
+	
+		-- Очищаем старые
+		for _, conn in pairs(animConnections) do
+			pcall(function() conn:Disconnect() end)
 		end
+		animConnections = {}
+		animTracks = {}
 	
-		-- Удаляем существующий в бекпаке
-		local backpack = player:FindFirstChild("Backpack")
-		if backpack then
-			local old = backpack:FindFirstChild("Jerk Off")
-			if old then old:Destroy() end
-		end
+		-- АНИМАЦИЯ 1
+		local anim1 = Instance.new("Animation")
+		anim1.AnimationId = "rbxassetid://72042024"
+		local track1 = hum:LoadAnimation(anim1)
+		table.insert(animTracks, track1)
 	
-		-- Создаём предмет (точь-в-точь как в твоём скрипте)
-		local tool = Instance.new("Tool")
-		tool.Name = "Jerk Off"
-		tool.RequiresHandle = false
-		tool.Parent = backpack or player
+		-- АНИМАЦИЯ 2
+		local anim2 = Instance.new("Animation")
+		anim2.AnimationId = "rbxassetid://168268306"
+		local track2 = hum:LoadAnimation(anim2)
+		table.insert(animTracks, track2)
 	
-		currentTool = tool
-		isActive = true
-		updateIndicator()
-		print("🎁 Предмет 'Jerk Off' выдан!")
+		-- ЦИКЛ ДЛЯ АНИМАЦИИ 1
+		local conn1 = RunService.RenderStepped:Connect(function()
+			if isActive then
+				if track1.TimePosition >= 0.9 or not track1.IsPlaying then
+					track1:Play()
+					track1.TimePosition = 0.5
+				end
+			else
+				track1:Stop()
+			end
+		end)
+		table.insert(animConnections, conn1)
+	
+		-- ЦИКЛ ДЛЯ АНИМАЦИИ 2
+		local conn2 = RunService.RenderStepped:Connect(function()
+			if isActive then
+				if track2.TimePosition >= 1.001 or not track2.IsPlaying then
+					track2:Play()
+					track2.TimePosition = 1
+				end
+			else
+				track2:Stop()
+			end
+		end)
+		table.insert(animConnections, conn2)
+	
+		-- ЗАПУСКАЕМ
+		track1:Play()
+		track1.TimePosition = 0.5
+		track2:Play()
+		track2.TimePosition = 1
+	
+		print("💀 Jerk анимации запущены!")
 	end
 	
-	-- ====== УДАЛИТЬ ПРЕДМЕТ ======
-	local function removeTool()
+	-- ====== ОСТАНОВКА ВСЕГО ======
+	local function stopAll()
+		isActive = false
+		updateIndicator()
+	
+		-- Останавливаем анимации
+		for _, track in pairs(animTracks) do
+			pcall(function() track:Stop() end)
+		end
+		animTracks = {}
+	
+		-- Отключаем циклы
+		for _, conn in pairs(animConnections) do
+			pcall(function() conn:Disconnect() end)
+		end
+		animConnections = {}
+	
+		-- Удаляем предмет
 		if currentTool then
 			pcall(function() currentTool:Destroy() end)
 			currentTool = nil
 		end
 	
-		-- Удаляем все такие предметы
+		-- Удаляем все предметы с таким именем
 		local backpack = player:FindFirstChild("Backpack")
 		if backpack then
 			local old = backpack:FindFirstChild("Jerk Off")
@@ -6307,32 +6361,60 @@ local script = G2L["d6"];
 			if old then old:Destroy() end
 		end
 	
-		isActive = false
+		print("💀 Jerk остановлен!")
+	end
+	
+	-- ====== ВЫДАЧА ПРЕДМЕТА ======
+	local function giveTool()
+		-- Останавливаем всё старое
+		stopAll()
+		task.wait(0.1)
+	
+		-- Удаляем старые предметы
+		local backpack = player:FindFirstChild("Backpack")
+		if backpack then
+			local old = backpack:FindFirstChild("Jerk Off")
+			if old then old:Destroy() end
+		end
+	
+		-- Создаём предмет (как в твоём скрипте)
+		local tool = Instance.new("Tool")
+		tool.Name = "Jerk Off"
+		tool.RequiresHandle = false
+		tool.Parent = backpack or player
+		currentTool = tool
+	
+		isActive = true
 		updateIndicator()
-		print("🗑️ Предмет удалён!")
+	
+		-- Запускаем анимации
+		task.wait(0.1)
+		startAnimations()
+	
+		print("🎁 Предмет 'Jerk Off' выдан!")
 	end
 	
 	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
-	local function toggleTool()
+	local function toggleJerk()
 		if isActive then
-			removeTool()
+			stopAll()
 		else
 			giveTool()
 		end
 	end
 	
-	button.MouseButton1Click:Connect(toggleTool)
+	button.MouseButton1Click:Connect(toggleJerk)
 	
 	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
+		task.wait(1)
 		if isActive then
 			giveTool()
 		end
 	end)
 	
 	updateIndicator()
-	print("✅ TROLL_Funnn загружена!")
+	print("✅ TROLL_Funnn загружена (предмет + анимация)")
 end;
 task.spawn(C_d6);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
