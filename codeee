@@ -6229,10 +6229,11 @@ task.spawn(C_d2);
 local function C_d6()
 local script = G2L["d6"];
 	-- ==========================================
-	-- TROLL_Funnn (ПРЕДМЕТ + АНИМАЦИЯ)
+	-- TROLL_Funnn (ПРЕДМЕТ + АНИМАЦИЯ ПРИ ВЗЯТИИ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
+	local RunService = game:GetService("RunService")
 	
 	local isActive = false
 	local currentTool = nil
@@ -6252,16 +6253,18 @@ local script = G2L["d6"];
 	indicator.Font = Enum.Font.SourceSansBold
 	indicator.Parent = button
 	
+	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
 	local function updateIndicator()
 		if isActive then
-			indicator.Text = "💀 JERK"
-			indicator.TextColor3 = Color3.fromRGB(255, 0, 255)
+			indicator.Text = "🎁 ЕСТЬ"
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
 		else
 			indicator.Text = "ВЫКЛ"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 		end
 	end
 	
+	-- ====== ПРОВЕРКА R15 ======
 	local function isR15()
 		local char = player.Character
 		if not char then return false end
@@ -6270,33 +6273,40 @@ local script = G2L["d6"];
 		return hum.RigType == Enum.HumanoidRigType.R15
 	end
 	
-	local function stopJorking()
-		isJorking = false
-		if animLoop then
-			animLoop:Disconnect()
-			animLoop = nil
-		end
+	-- ====== ЗАПУСК АНИМАЦИИ ======
+	local function startJorking()
+		local char = player.Character
+		if not char then return end
+	
+		local hum = char:FindFirstChildOfClass("Humanoid")
+		if not hum then return end
+	
+		if isJorking then return end
+		isJorking = true
+	
+		-- Останавливаем старую анимацию
 		if currentTrack then
 			pcall(function() currentTrack:Stop() end)
 			currentTrack = nil
 		end
-	end
 	
-	local function startJorking()
-		local char = player.Character
-		if not char then return end
-		local hum = char:FindFirstChildOfClass("Humanoid")
-		if not hum then return end
-		if isJorking then return end
-	
-		isJorking = true
-		stopJorking()
-	
+		-- Создаём анимацию
 		local anim = Instance.new("Animation")
-		anim.AnimationId = isR15() and "rbxassetid://698251653" or "rbxassetid://72042024"
+		if isR15() then
+			anim.AnimationId = "rbxassetid://698251653"  -- R15
+		else
+			anim.AnimationId = "rbxassetid://72042024"   -- R6
+		end
+	
 		currentTrack = hum:LoadAnimation(anim)
 	
-		animLoop = game:GetService("RunService").RenderStepped:Connect(function()
+		-- Запускаем цикл
+		if animLoop then
+			animLoop:Disconnect()
+			animLoop = nil
+		end
+	
+		animLoop = RunService.RenderStepped:Connect(function()
 			if not isJorking or not currentTrack then
 				if animLoop then
 					animLoop:Disconnect()
@@ -6322,22 +6332,56 @@ local script = G2L["d6"];
 				currentTrack = nil
 			end
 	
+			-- Пересоздаём трек
 			local newAnim = Instance.new("Animation")
-			newAnim.AnimationId = isR15() and "rbxassetid://698251653" or "rbxassetid://72042024"
+			if isR15() then
+				newAnim.AnimationId = "rbxassetid://698251653"
+			else
+				newAnim.AnimationId = "rbxassetid://72042024"
+			end
 			currentTrack = hum:LoadAnimation(newAnim)
 		end)
 	end
 	
-	local function onEquipped()
-		if isActive then startJorking() end
+	-- ====== ОСТАНОВКА АНИМАЦИИ ======
+	local function stopJorking()
+		isJorking = false
+	
+		if animLoop then
+			animLoop:Disconnect()
+			animLoop = nil
+		end
+	
+		if currentTrack then
+			pcall(function() currentTrack:Stop() end)
+			currentTrack = nil
+		end
 	end
 	
+	-- ====== КОГДА БЕРУТ ПРЕДМЕТ ======
+	local function onEquipped()
+		if isActive then
+			startJorking()
+			print("💀 Jerk взят в руки!")
+		end
+	end
+	
+	-- ====== КОГДА КЛАДУТ ПРЕДМЕТ ======
 	local function onUnequipped()
 		stopJorking()
+		print("💀 Jerk убран из рук!")
 	end
 	
+	-- ====== ВЫДАЧА ПРЕДМЕТА ======
 	local function giveTool()
-		if currentTool then pcall(function() currentTool:Destroy() end) end
+		-- Останавливаем
+		stopJorking()
+	
+		-- Удаляем старые предметы
+		if currentTool then
+			pcall(function() currentTool:Destroy() end)
+			currentTool = nil
+		end
 	
 		local backpack = player:FindFirstChild("Backpack")
 		if backpack then
@@ -6351,24 +6395,30 @@ local script = G2L["d6"];
 			if old then old:Destroy() end
 		end
 	
+		-- Создаём предмет
 		local tool = Instance.new("Tool")
 		tool.Name = "Jerk Off"
-		tool.ToolTip = "jorking it"
+		tool.ToolTip = "in the stripped club. straight up 'jorking it'"
 		tool.RequiresHandle = false
 		tool.Parent = backpack or player
 	
+		-- 👇 ПОДКЛЮЧАЕМ СОБЫТИЯ
 		tool.Equipped:Connect(onEquipped)
 		tool.Unequipped:Connect(onUnequipped)
 	
 		currentTool = tool
 		isActive = true
 		updateIndicator()
+	
 		print("🎁 Предмет 'Jerk Off' выдан!")
+		print("💀 Возьми его в руки для анимации!")
 	end
 	
+	-- ====== УДАЛЕНИЕ ПРЕДМЕТА ======
 	local function removeTool()
 		isActive = false
 		updateIndicator()
+	
 		stopJorking()
 	
 		if currentTool then
@@ -6391,17 +6441,26 @@ local script = G2L["d6"];
 		print("🗑️ Предмет удалён!")
 	end
 	
+	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	local function toggleJerk()
-		if isActive then removeTool() else giveTool() end
+		if isActive then
+			removeTool()
+		else
+			giveTool()
+		end
 	end
 	
 	button.MouseButton1Click:Connect(toggleJerk)
 	
+	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(1)
-		if isActive then giveTool() end
+		if isActive then
+			giveTool()
+		end
 	end)
 	
+	-- ====== ПРИ СМЕРТИ ======
 	player.CharacterAdded:Connect(stopJorking)
 	
 	updateIndicator()
