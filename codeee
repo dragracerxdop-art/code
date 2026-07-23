@@ -6229,7 +6229,7 @@ task.spawn(C_d2);
 local function C_d6()
 local script = G2L["d6"];
 	-- ==========================================
-	-- TROLL_Funnn (ПРЕДМЕТ + АНИМАЦИЯ ПРИ ВЗЯТИИ)
+	-- TROLL_Funnn (ПРЕДМЕТ + АНИМАЦИЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -6239,7 +6239,6 @@ local script = G2L["d6"];
 	local currentTool = nil
 	local isJorking = false
 	local currentTrack = nil
-	local animLoop = nil
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -6300,62 +6299,30 @@ local script = G2L["d6"];
 	
 		currentTrack = hum:LoadAnimation(anim)
 	
-		-- Запускаем цикл
-		if animLoop then
-			animLoop:Disconnect()
-			animLoop = nil
-		end
-	
-		animLoop = RunService.RenderStepped:Connect(function()
-			if not isJorking or not currentTrack then
-				if animLoop then
-					animLoop:Disconnect()
-					animLoop = nil
-				end
-				return
-			end
-	
-			local speed = isR15() and 0.7 or 0.65
+		if currentTrack then
+			-- 👇 ЗАЦИКЛИВАЕМ АНИМАЦИЮ
+			currentTrack.Looped = true
+			currentTrack.Priority = Enum.AnimationPriority.Action
 			currentTrack:Play()
+	
+			-- 👇 СТАВИМ СКОРОСТЬ
+			local speed = isR15() and 0.7 or 0.65
 			currentTrack:AdjustSpeed(speed)
-			currentTrack.TimePosition = 0.6
 	
-			task.wait(0.1)
-	
-			local targetTime = isR15() and 0.7 or 0.65
-			while currentTrack and currentTrack.TimePosition < targetTime do
-				task.wait(0.1)
-			end
-	
-			if currentTrack then
-				currentTrack:Stop()
-				currentTrack = nil
-			end
-	
-			-- Пересоздаём трек
-			local newAnim = Instance.new("Animation")
-			if isR15() then
-				newAnim.AnimationId = "rbxassetid://698251653"
-			else
-				newAnim.AnimationId = "rbxassetid://72042024"
-			end
-			currentTrack = hum:LoadAnimation(newAnim)
-		end)
+			print("💀 Jerk анимация запущена!")
+		end
 	end
 	
 	-- ====== ОСТАНОВКА АНИМАЦИИ ======
 	local function stopJorking()
 		isJorking = false
 	
-		if animLoop then
-			animLoop:Disconnect()
-			animLoop = nil
-		end
-	
 		if currentTrack then
 			pcall(function() currentTrack:Stop() end)
 			currentTrack = nil
 		end
+	
+		print("💀 Jerk анимация остановлена!")
 	end
 	
 	-- ====== КОГДА БЕРУТ ПРЕДМЕТ ======
@@ -6398,7 +6365,7 @@ local script = G2L["d6"];
 		-- Создаём предмет
 		local tool = Instance.new("Tool")
 		tool.Name = "Jerk Off"
-		tool.ToolTip = "in the stripped club. straight up 'jorking it'"
+		tool.ToolTip = "jorking it"
 		tool.RequiresHandle = false
 		tool.Parent = backpack or player
 	
