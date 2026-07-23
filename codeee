@@ -4888,7 +4888,7 @@ task.spawn(C_af);
 local function C_b3()
 local script = G2L["b3"];
 	-- ==========================================
-	-- TROLL_Invisible (100% НЕВИДИМЫЙ БЛОК)
+	-- TROLL_Invisible (СИДЕНЬЕ ПОД ЗЕМЛЕЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -4906,7 +4906,7 @@ local script = G2L["b3"];
 		if invis_on then
 			-- Делаем персонажа прозрачным
 			for _, part in pairs(char:GetDescendants()) do
-				if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+				if part:IsA("BasePart") then
 					part.Transparency = 0.75
 				end
 			end
@@ -4919,7 +4919,7 @@ local script = G2L["b3"];
 				pcall(function() char:MoveTo(seatTeleportPosition) end)
 				task.wait(0.05)
 	
-				-- 👇 СОЗДАЁМ НЕВИДИМОЕ СИДЕНЬЕ
+				-- 👇 СОЗДАЁМ СИДЕНЬЕ ПОД ПЕРСОНАЖЕМ
 				seat = Instance.new('Seat')
 				seat.Parent = workspace
 				seat.Anchored = false
@@ -4927,18 +4927,21 @@ local script = G2L["b3"];
 				seat.Name = 'invischair'
 				seat.Transparency = 1
 				seat.Size = Vector3.new(0.01, 0.01, 0.01)  -- 👈 МИКРОСКОПИЧЕСКИЙ
-				seat.BrickColor = BrickColor.new("Really black")  -- 👈 ЧЕРНЫЙ (невидимый)
-				seat.Material = Enum.Material.SmoothPlastic  -- 👈 БЕЗ ОТРАЖЕНИЙ
-				seat.Position = seatTeleportPosition
+				seat.BrickColor = BrickColor.new("Really black")
+				seat.Material = Enum.Material.SmoothPlastic
 	
-				-- 👇 УДАЛЯЕМ ВСЕ ЭФФЕКТЫ (HIGHLIGHT, UIStroke и т.д.)
+				-- 👇 СТАВИМ СИДЕНЬЕ ПОД ПЕРСОНАЖЕМ (НА 5000 ЕДИНИЦ ВНИЗ)
+				local underPos = Vector3.new(savedpos.X, savedpos.Y - 5000, savedpos.Z)
+				seat.Position = underPos
+	
+				-- 👇 УДАЛЯЕМ ВСЕ ЭФФЕКТЫ
 				for _, child in pairs(seat:GetChildren()) do
 					if child:IsA("Highlight") or child:IsA("UIStroke") or child:IsA("SelectionBox") then
 						child:Destroy()
 					end
 				end
 	
-				-- 👇 ВЕЛД (ПРИВЯЗКА К ТОРСУ)
+				-- 👇 ПРИВЯЗЫВАЕМ СИДЕНЬЕ К ТОРСУ (НО ПОД ЗЕМЛЕЙ)
 				local Weld = Instance.new("Weld")
 				Weld.Part0 = seat
 				local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
@@ -4946,12 +4949,19 @@ local script = G2L["b3"];
 					Weld.Part1 = torso
 					Weld.Parent = seat
 					task.wait()
-					pcall(function() seat.CFrame = savedpos end)
+	
+					-- 👇 СИДЕНЬЕ ВСЕГДА ПОД ПЕРСОНАЖЕМ
+					local newCFrame = CFrame.new(
+						savedpos.X,
+						savedpos.Y - 5000,
+						savedpos.Z
+					)
+					pcall(function() seat.CFrame = newCFrame end)
 				end
 			end
 	
 			button.Text = "Инвиз Вкл"
-			print("👻 ИНВИЗ ВКЛ!")
+			print("👻 ИНВИЗ ВКЛ! (сиденье под землей)")
 		else
 			-- Возвращаем видимость
 			for _, part in pairs(char:GetDescendants()) do
@@ -4966,7 +4976,6 @@ local script = G2L["b3"];
 				seat = nil
 			end
 	
-			-- Дополнительная очистка
 			local inv = workspace:FindFirstChild('invischair')
 			if inv then
 				pcall(function() inv:Destroy() end)
@@ -4977,7 +4986,7 @@ local script = G2L["b3"];
 		end
 	end)
 	
-	-- 👇 ДОПОЛНИТЕЛЬНАЯ ОЧИСТКА (ЕСЛИ ЧТО-ТО ОСТАЛОСЬ)
+	-- 👇 АВТОМАТИЧЕСКАЯ ОЧИСТКА
 	task.spawn(function()
 		while true do
 			task.wait(1)
@@ -4988,7 +4997,7 @@ local script = G2L["b3"];
 		end
 	end)
 	
-	print("✅ TROLL_Invisible (100% невидимый блок) загружен!")
+	print("✅ TROLL_Invisible (сиденье под землей) загружен!")
 end;
 task.spawn(C_b3);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Slap.LocalScript
