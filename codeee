@@ -5630,7 +5630,7 @@ task.spawn(C_bf);
 local function C_c3()
 local script = G2L["c3"];
 	-- ==========================================
-	-- FOV_Toggle (ТОЧНАЯ КОПИЯ ИЗ HBE)
+	-- FOV_Toggle (ЖЁСТКИЙ ФИКС)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -5662,12 +5662,14 @@ local script = G2L["c3"];
 		fovValue = tonumber(fovBox.Text) or 70
 		fovValue = math.clamp(fovValue, 70, 120)
 	
-		-- Когда меняют поле
 		fovBox:GetPropertyChangedSignal("Text"):Connect(function()
 			local val = tonumber(fovBox.Text)
 			if val then
 				fovValue = math.clamp(val, 70, 120)
 				fovBox.Text = tostring(fovValue)
+				if fovEnabled then
+					applyFOV()
+				end
 			end
 		end)
 	end
@@ -5683,7 +5685,7 @@ local script = G2L["c3"];
 		end
 	end
 	
-	-- ====== ПРИМЕНЕНИЕ FOV (ТОЧНО КАК В HBE) ======
+	-- ====== ПРИМЕНЕНИЕ FOV ======
 	local function applyFOV()
 		local cam = workspace.CurrentCamera
 		if cam then
@@ -5706,28 +5708,46 @@ local script = G2L["c3"];
 		fovEnabled = not fovEnabled
 	
 		if fovEnabled then
-			-- Сохраняем оригинальный FOV
 			originalFov = workspace.CurrentCamera.FieldOfView
 	
-			-- Закрываем старый цикл
 			if fovLoop then
 				fovLoop:Disconnect()
 				fovLoop = nil
 			end
 	
-			-- Применяем
 			applyFOV()
 	
-			-- 👇 ТОЧНЫЙ ЦИКЛ ИЗ HBE
+			-- 👇 ЖЁСТКИЙ ЦИКЛ
 			fovLoop = runService.RenderStepped:Connect(function()
 				if fovEnabled then
-					applyFOV()
+					local cam = workspace.CurrentCamera
+					if cam and cam.FieldOfView ~= fovValue then
+						cam.FieldOfView = fovValue
+						cam.CameraType = Enum.CameraType.Custom
+					end
 				end
 			end)
+	
+			-- 👇 ДОПОЛНИТЕЛЬНЫЙ ПЕРЕХВАТ
+			local cam = workspace.CurrentCamera
+			if cam then
+				-- Отслеживаем изменение FOV и возвращаем
+				local propConn = cam:GetPropertyChangedSignal("FieldOfView"):Connect(function()
+					if fovEnabled and cam.FieldOfView ~= fovValue then
+						cam.FieldOfView = fovValue
+					end
+				end)
+	
+				-- Храним связь
+				fovLoop._propConn = propConn
+			end
 	
 			print("👁️ FOV ВКЛ (" .. fovValue .. "°)")
 		else
 			if fovLoop then
+				if fovLoop._propConn then
+					fovLoop._propConn:Disconnect()
+				end
 				fovLoop:Disconnect()
 				fovLoop = nil
 			end
@@ -5740,7 +5760,7 @@ local script = G2L["c3"];
 	
 	button.MouseButton1Click:Connect(toggleFOV)
 	
-	-- ====== ПРИ РЕСПАВНЕ (КАК В HBE) ======
+	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
 		if fovEnabled then
@@ -5748,8 +5768,34 @@ local script = G2L["c3"];
 		end
 	end)
 	
+	-- ====== ПРИ СМЕНЕ КАМЕРЫ ======
+	workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+		if fovEnabled then
+			task.wait(0.1)
+			local cam = workspace.CurrentCamera
+			if cam then
+				cam.FieldOfView = fovValue
+				cam.CameraType = Enum.CameraType.Custom
+	
+				-- Переподключаем отслеживание
+				local propConn = cam:GetPropertyChangedSignal("FieldOfView"):Connect(function()
+					if fovEnabled and cam.FieldOfView ~= fovValue then
+						cam.FieldOfView = fovValue
+					end
+				end)
+	
+				if fovLoop then
+					if fovLoop._propConn then
+						fovLoop._propConn:Disconnect()
+					end
+					fovLoop._propConn = propConn
+				end
+			end
+		end
+	end)
+	
 	updateIndicator()
-	print("✅ FOV_Toggle загружена (точная копия HBE)")
+	print("✅ FOV_Toggle загружена (жёсткий фикс)")
 end;
 task.spawn(C_c3);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Value.LocalScript
@@ -5763,7 +5809,6 @@ local script = G2L["ca"];
 	textBox.PlaceholderText = "FOV (70-120)"
 	textBox.Text = "70"
 	
-	-- ====== КОГДА МЕНЯЮТ ======
 	textBox:GetPropertyChangedSignal("Text"):Connect(function()
 		local val = tonumber(textBox.Text)
 		if val then
