@@ -5828,26 +5828,26 @@ local script = G2L["ce"];
 		return parts
 	end
 	
-	-- ====== ПРИМЕНЕНИЕ ВИЗУАЛА ======
+	-- ====== ПРИМЕНЕНИЕ ВИЗУАЛА (ТЕМНО-ФИОЛЕТОВЫЙ) ======
 	local function applyVisual()
 		local parts = findWeaponParts()
 	
 		for _, part in pairs(parts) do
 			pcall(function()
 				if _G.HitboxVisible and _G.HitboxEnabled then
-					-- 👇 ТЕМНО-ФИОЛЕТОВЫЙ (RGB: 75, 0, 130)
+					-- 👇 ТЕМНО-ФИОЛЕТОВЫЙ НЕОН
 					part.Transparency = 0.4
-					part.Color = Color3.fromRGB(75, 0, 130)
+					part.BrickColor = BrickColor.new("Really dark purple")  -- ТЕМНО-ФИОЛЕТОВЫЙ
 					part.Material = Enum.Material.Neon
 				elseif _G.HitboxEnabled then
 					-- НЕВИДИМЫЙ (но увеличенный)
 					part.Transparency = 1
-					part.Color = Color3.fromRGB(128, 128, 128)
+					part.BrickColor = BrickColor.new("Medium stone grey")
 					part.Material = Enum.Material.Plastic
 				else
 					-- НОРМАЛЬНЫЙ
 					part.Transparency = 0
-					part.Color = Color3.fromRGB(128, 128, 128)
+					part.BrickColor = BrickColor.new("Medium stone grey")
 					part.Material = Enum.Material.Plastic
 				end
 			end)
