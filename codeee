@@ -6229,7 +6229,7 @@ task.spawn(C_d2);
 local function C_d6()
 local script = G2L["d6"];
 	-- ==========================================
-	-- TROLL_Funnn (СЕРЕДИНА АНИМАЦИИ)
+	-- TROLL_Funnn (БЫСТРАЯ + РУКА У ТЕЛА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -6304,12 +6304,12 @@ local script = G2L["d6"];
 			return
 		end
 	
-		-- 👇 СКОРОСТЬ: 0.8 (быстрая)
-		local speed = isR15() and 0.8 or 0.75
+		-- 👇 БЫСТРАЯ СКОРОСТЬ
+		local speed = isR15() and 1.0 or 0.95
 		currentTrack:Play()
 		currentTrack:AdjustSpeed(speed)
-		-- 👇 НАЧАЛО С 0.4
-		currentTrack.TimePosition = 0.4
+		-- 👇 СТАРТ С 0.3
+		currentTrack.TimePosition = 0.3
 	
 		animLoop = RunService.RenderStepped:Connect(function()
 			if not isJorking or not currentTrack then
@@ -6320,14 +6320,13 @@ local script = G2L["d6"];
 				return
 			end
 	
-			-- 👇 ЗАКАНЧИВАЕМ НА 0.85 (чуть меньше 0.9)
-			local maxTime = isR15() and 0.85 or 0.85
+			-- 👇 КОНЕЦ НА 0.65 (РУКА У ТЕЛА)
+			local maxTime = isR15() and 0.65 or 0.65
 			if currentTrack.TimePosition >= maxTime then
 				currentTrack:Stop()
 				currentTrack:Play()
 				currentTrack:AdjustSpeed(speed)
-				-- 👇 ПЕРЕЗАПУСК С 0.4
-				currentTrack.TimePosition = 0.4
+				currentTrack.TimePosition = 0.3
 			end
 		end)
 	end
@@ -6423,7 +6422,7 @@ local script = G2L["d6"];
 	player.CharacterAdded:Connect(stopJorking)
 	
 	updateIndicator()
-	print("✅ TROLL_Funnn загружена (середина анимации)")
+	print("✅ TROLL_Funnn загружена (быстрая, рука у тела)")
 end;
 task.spawn(C_d6);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
