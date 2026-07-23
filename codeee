@@ -12,6 +12,7 @@ local G2L = {};
 
 -- StarterGui.Folder.PurpHub
 G2L["1"] = Instance.new("ScreenGui", game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"));
+G2L["1"]["Enabled"] = false;
 G2L["1"]["Name"] = [[PurpHub]];
 G2L["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling;
 G2L["1"]["ResetOnSpawn"] = false;
@@ -2169,351 +2170,207 @@ task.spawn(C_1b);
 local function C_1f()
 local script = G2L["1f"];
 	-- ==========================================
-	-- ANIMATIONS_Choose (ОТКРЫВАЕТ ТВОЙ GUI)
+	-- ТЕСТОВЫЙ GUI (ТОЛЬКО ЗОМБИ)
 	-- ==========================================
-	local button = script.Parent
 	local player = game.Players.LocalPlayer
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "AnimationsGUI"
+	gui.Parent = player:WaitForChild("PlayerGui")
+	gui.Enabled = false  -- Скрыт по умолчанию
 	
-	local isOpen = false
-	local gui = nil
+	local frame = Instance.new("Frame")
+	frame.Parent = gui
+	frame.Size = UDim2.new(0, 240, 0, 432)
+	frame.Position = UDim2.new(0.25959, 0, 0.06854, 0)
+	frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	frame.BorderSizePixel = 0
+	frame.Active = true
+	frame.Draggable = true
 	
-	button.MouseButton1Click:Connect(function()
-		-- Если GUI еще не создан - создаем
-		if not gui then
-			-- ====== ТВОЙ GUI ИЗ "GUI TO LUA" ======
-			local G2L = {};
+	-- Обводка фрейма
+	local frameStroke = Instance.new("UIStroke")
+	frameStroke.Parent = frame
+	frameStroke.Thickness = 2
+	frameStroke.Color = Color3.fromRGB(180, 4, 255)
 	
-			G2L["1"] = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"));
-			G2L["1"]["Name"] = [[AnimationsGUI]];
-			G2L["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling;
-			G2L["1"]["Enabled"] = false;  -- 👈 СКРЫТ ПО УМОЛЧАНИЮ
+	-- Заголовок
+	local title = Instance.new("TextLabel")
+	title.Parent = frame
+	title.Size = UDim2.new(0, 200, 0, 27)
+	title.Position = UDim2.new(0.08333, 0, 0, 0)
+	title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	title.Text = "Animations"
+	title.TextColor3 = Color3.fromRGB(180, 4, 255)
+	title.TextSize = 14
+	title.FontFace = Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+	title.BorderSizePixel = 0
 	
-			G2L["2"] = Instance.new("Frame", G2L["1"]);
-			G2L["2"]["BorderSizePixel"] = 0;
-			G2L["2"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["2"]["Size"] = UDim2.new(0, 240, 0, 432);
-			G2L["2"]["Position"] = UDim2.new(0.25959, 0, 0.06854, 0);
-			G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+	-- ScrollingFrame
+	local scroll = Instance.new("ScrollingFrame")
+	scroll.Parent = frame
+	scroll.Size = UDim2.new(0, 224, 0, 380)
+	scroll.Position = UDim2.new(0.0375, 0, 0.08102, 0)
+	scroll.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	scroll.BorderSizePixel = 0
+	scroll.ScrollBarThickness = 1
+	scroll.Active = true
 	
-			G2L["3"] = Instance.new("ScrollingFrame", G2L["2"]);
-			G2L["3"]["Active"] = true;
-			G2L["3"]["BorderSizePixel"] = 0;
-			G2L["3"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["3"]["Size"] = UDim2.new(0, 224, 0, 380);
-			G2L["3"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["3"]["Position"] = UDim2.new(0.0375, 0, 0.08102, 0);
-			G2L["3"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["3"]["ScrollBarThickness"] = 1;
+	-- Обводка ScrollingFrame
+	local scrollStroke = Instance.new("UIStroke")
+	scrollStroke.Parent = scroll
+	scrollStroke.Thickness = 2
+	scrollStroke.Color = Color3.fromRGB(180, 4, 255)
 	
-			G2L["4"] = Instance.new("UIStroke", G2L["3"]);
-			G2L["4"]["Thickness"] = 2;
-			G2L["4"]["Color"] = Color3.fromRGB(180, 4, 255);
+	-- ====== ТЕСТОВАЯ КНОПКА ZOMBIE_ANIM (РАБОТАЕТ) ======
+	local zombieBtn = Instance.new("TextButton")
+	zombieBtn.Parent = scroll
+	zombieBtn.Size = UDim2.new(0, 200, 0, 24)
+	zombieBtn.Position = UDim2.new(0.04911, 0, 0.02431, 0)
+	zombieBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	zombieBtn.Text = "🧟 ZOMBIE (ТЕСТ)"
+	zombieBtn.TextColor3 = Color3.fromRGB(0, 255, 0)  -- Зеленый для теста
+	zombieBtn.TextSize = 14
+	zombieBtn.BorderSizePixel = 0
+	zombieBtn.FontFace = Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 	
-			G2L["5"] = Instance.new("TextButton", G2L["3"]);
-			G2L["5"]["BorderSizePixel"] = 0;
-			G2L["5"]["TextSize"] = 14;
-			G2L["5"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
-			G2L["5"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["5"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
-			G2L["5"]["Size"] = UDim2.new(0, 200, 0, 24);
-			G2L["5"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["5"]["Text"] = [[Zombie/Зомби]];
-			G2L["5"]["Name"] = [[ZOMBIE_ANIM]];
-			G2L["5"]["Position"] = UDim2.new(0.04911, 0, 0.02431, 0);
+	local zombieStroke = Instance.new("UIStroke")
+	zombieStroke.Parent = zombieBtn
+	zombieStroke.Thickness = 2
+	zombieStroke.Color = Color3.fromRGB(0, 255, 0)  -- Зеленая обводка
 	
-			G2L["6"] = Instance.new("UIStroke", G2L["5"]);
-			G2L["6"]["Thickness"] = 2;
-			G2L["6"]["Color"] = Color3.fromRGB(180, 4, 255);
-			G2L["6"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
+	-- ====== КОД ДЛЯ ZOMBIE (РАБОЧИЙ) ======
+	local pack = {
+		Idle = "619535834",
+		Walk = "619537468",
+		Run = "619536621",
+		Jump = "619536283",
+		Fall = "619535616",
+		Climb = "619535091",
+		Swim = "619537096",
+	}
 	
-			G2L["7"] = Instance.new("LocalScript", G2L["5"]);
+	local currentTracks = {}
 	
-			G2L["8"] = Instance.new("TextButton", G2L["3"]);
-			G2L["8"]["BorderSizePixel"] = 0;
-			G2L["8"]["TextSize"] = 14;
-			G2L["8"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
-			G2L["8"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["8"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
-			G2L["8"]["Size"] = UDim2.new(0, 200, 0, 24);
-			G2L["8"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["8"]["Text"] = [[Toy/Игрушечный]];
-			G2L["8"]["Name"] = [[TOY_ANIM]];
-			G2L["8"]["Position"] = UDim2.new(0.04911, 0, 0.06366, 0);
-	
-			G2L["9"] = Instance.new("UIStroke", G2L["8"]);
-			G2L["9"]["Thickness"] = 2;
-			G2L["9"]["Color"] = Color3.fromRGB(180, 4, 255);
-			G2L["9"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
-	
-			G2L["a"] = Instance.new("LocalScript", G2L["8"]);
-	
-			G2L["b"] = Instance.new("TextButton", G2L["3"]);
-			G2L["b"]["BorderSizePixel"] = 0;
-			G2L["b"]["TextSize"] = 14;
-			G2L["b"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
-			G2L["b"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["b"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
-			G2L["b"]["Size"] = UDim2.new(0, 200, 0, 24);
-			G2L["b"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["b"]["Text"] = [[SuperHero/Супер Герой]];
-			G2L["b"]["Name"] = [[HERO_ANIM]];
-			G2L["b"]["Position"] = UDim2.new(0.04911, 0, 0.14005, 0);
-	
-			G2L["c"] = Instance.new("UIStroke", G2L["b"]);
-			G2L["c"]["Thickness"] = 2;
-			G2L["c"]["Color"] = Color3.fromRGB(180, 4, 255);
-			G2L["c"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
-	
-			G2L["d"] = Instance.new("LocalScript", G2L["b"]);
-	
-			G2L["e"] = Instance.new("TextButton", G2L["3"]);
-			G2L["e"]["BorderSizePixel"] = 0;
-			G2L["e"]["TextSize"] = 14;
-			G2L["e"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
-			G2L["e"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["e"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
-			G2L["e"]["Size"] = UDim2.new(0, 200, 0, 24);
-			G2L["e"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["e"]["Text"] = [[Robot/Робот]];
-			G2L["e"]["Name"] = [[ROBOT_ANIM]];
-			G2L["e"]["Position"] = UDim2.new(0.04911, 0, 0.10185, 0);
-	
-			G2L["f"] = Instance.new("UIStroke", G2L["e"]);
-			G2L["f"]["Thickness"] = 2;
-			G2L["f"]["Color"] = Color3.fromRGB(180, 4, 255);
-			G2L["f"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
-	
-			G2L["10"] = Instance.new("LocalScript", G2L["e"]);
-	
-			G2L["11"] = Instance.new("TextButton", G2L["3"]);
-			G2L["11"]["BorderSizePixel"] = 0;
-			G2L["11"]["TextSize"] = 14;
-			G2L["11"]["TextColor3"] = Color3.fromRGB(41, 22, 255);
-			G2L["11"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["11"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
-			G2L["11"]["Size"] = UDim2.new(0, 200, 0, 24);
-			G2L["11"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["11"]["Text"] = [[Остановить Анимации]];
-			G2L["11"]["Name"] = [[STOP_ANIM]];
-			G2L["11"]["Position"] = UDim2.new(0.04911, 0, 0.1794, 0);
-	
-			G2L["12"] = Instance.new("UIStroke", G2L["11"]);
-			G2L["12"]["Thickness"] = 2;
-			G2L["12"]["Color"] = Color3.fromRGB(180, 4, 255);
-			G2L["12"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
-	
-			G2L["13"] = Instance.new("LocalScript", G2L["11"]);
-	
-			G2L["14"] = Instance.new("UIStroke", G2L["2"]);
-			G2L["14"]["Thickness"] = 2;
-			G2L["14"]["Color"] = Color3.fromRGB(180, 4, 255);
-	
-			G2L["15"] = Instance.new("TextLabel", G2L["2"]);
-			G2L["15"]["BorderSizePixel"] = 0;
-			G2L["15"]["TextSize"] = 14;
-			G2L["15"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["15"]["FontFace"] = Font.new([[rbxasset://fonts/families/Michroma.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
-			G2L["15"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
-			G2L["15"]["Size"] = UDim2.new(0, 200, 0, 27);
-			G2L["15"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-			G2L["15"]["Text"] = [[Animations]];
-			G2L["15"]["Position"] = UDim2.new(0.08333, 0, 0, 0);
-	
-			-- ====== КОДЫ ДЛЯ КНОПОК (ТВОИ) ======
-			local function C_7()
-				local script = G2L["7"];
-				local button = script.Parent
-				local player = game.Players.LocalPlayer
-	
-				local pack = {
-					Walk = "6165401727",
-					Run = "6165404579",
-					Jump = "6165409370",
-					Fall = "6165412564",
-					Idle = "6165398516",
-				}
-	
-				local currentTracks = {}
-	
-				local function applyPack()
-					local char = player.Character
-					if not char then return end
-					local humanoid = char:FindFirstChildOfClass("Humanoid")
-					if not humanoid then return end
-					for _, track in ipairs(currentTracks) do pcall(function() track:Stop() end) end
-					currentTracks = {}
-					local animator = humanoid:FindFirstChild("Animator")
-					if not animator then animator = Instance.new("Animator", humanoid) task.wait(0.1) end
-					for name, id in pairs(pack) do
-						pcall(function()
-							local anim = Instance.new("Animation")
-							anim.AnimationId = "rbxassetid://" .. id
-							local track = animator:LoadAnimation(anim)
-							if track then track.Looped = true track.Priority = Enum.AnimationPriority.Core track:Play() table.insert(currentTracks, track) end
-						end)
-					end
-					print("🧟 ПАК ЗОМБИ ПРИМЕНЁН!")
-				end
-				button.MouseButton1Click:Connect(applyPack)
-				player.CharacterAdded:Connect(function() task.wait(0.5) if #currentTracks > 0 then applyPack() end end)
-			end
-			task.spawn(C_7);
-	
-			local function C_a()
-				local script = G2L["a"];
-				local button = script.Parent
-				local player = game.Players.LocalPlayer
-	
-				local pack = {
-					Walk = "6165420011",
-					Run = "6165423769",
-					Jump = "6165427105",
-					Fall = "6165430565",
-					Idle = "6165417904",
-				}
-	
-				local currentTracks = {}
-	
-				local function applyPack()
-					local char = player.Character
-					if not char then return end
-					local humanoid = char:FindFirstChildOfClass("Humanoid")
-					if not humanoid then return end
-					for _, track in ipairs(currentTracks) do pcall(function() track:Stop() end) end
-					currentTracks = {}
-					local animator = humanoid:FindFirstChild("Animator")
-					if not animator then animator = Instance.new("Animator", humanoid) task.wait(0.1) end
-					for name, id in pairs(pack) do
-						pcall(function()
-							local anim = Instance.new("Animation")
-							anim.AnimationId = "rbxassetid://" .. id
-							local track = animator:LoadAnimation(anim)
-							if track then track.Looped = true track.Priority = Enum.AnimationPriority.Core track:Play() table.insert(currentTracks, track) end
-						end)
-					end
-					print("🧸 ПАК ИГРУШЕЧНЫЙ ПРИМЕНЁН!")
-				end
-				button.MouseButton1Click:Connect(applyPack)
-				player.CharacterAdded:Connect(function() task.wait(0.5) if #currentTracks > 0 then applyPack() end end)
-			end
-			task.spawn(C_a);
-	
-			local function C_d()
-				local script = G2L["d"];
-				local button = script.Parent
-				local player = game.Players.LocalPlayer
-	
-				local pack = {
-					Walk = "6165484393",
-					Run = "6165489036",
-					Jump = "6165493573",
-					Fall = "6165497216",
-					Idle = "6165482347",
-				}
-	
-				local currentTracks = {}
-	
-				local function applyPack()
-					local char = player.Character
-					if not char then return end
-					local humanoid = char:FindFirstChildOfClass("Humanoid")
-					if not humanoid then return end
-					for _, track in ipairs(currentTracks) do pcall(function() track:Stop() end) end
-					currentTracks = {}
-					local animator = humanoid:FindFirstChild("Animator")
-					if not animator then animator = Instance.new("Animator", humanoid) task.wait(0.1) end
-					for name, id in pairs(pack) do
-						pcall(function()
-							local anim = Instance.new("Animation")
-							anim.AnimationId = "rbxassetid://" .. id
-							local track = animator:LoadAnimation(anim)
-							if track then track.Looped = true track.Priority = Enum.AnimationPriority.Core track:Play() table.insert(currentTracks, track) end
-						end)
-					end
-					print("🦸 ПАК СУПЕРГЕРОЙ ПРИМЕНЁН!")
-				end
-				button.MouseButton1Click:Connect(applyPack)
-				player.CharacterAdded:Connect(function() task.wait(0.5) if #currentTracks > 0 then applyPack() end end)
-			end
-			task.spawn(C_d);
-	
-			local function C_10()
-				local script = G2L["10"];
-				local button = script.Parent
-				local player = game.Players.LocalPlayer
-	
-				local pack = {
-					Walk = "6165436548",
-					Run = "6165440279",
-					Jump = "6165445423",
-					Fall = "6165448082",
-					Idle = "6165434436",
-				}
-	
-				local currentTracks = {}
-	
-				local function applyPack()
-					local char = player.Character
-					if not char then return end
-					local humanoid = char:FindFirstChildOfClass("Humanoid")
-					if not humanoid then return end
-					for _, track in ipairs(currentTracks) do pcall(function() track:Stop() end) end
-					currentTracks = {}
-					local animator = humanoid:FindFirstChild("Animator")
-					if not animator then animator = Instance.new("Animator", humanoid) task.wait(0.1) end
-					for name, id in pairs(pack) do
-						pcall(function()
-							local anim = Instance.new("Animation")
-							anim.AnimationId = "rbxassetid://" .. id
-							local track = animator:LoadAnimation(anim)
-							if track then track.Looped = true track.Priority = Enum.AnimationPriority.Core track:Play() table.insert(currentTracks, track) end
-						end)
-					end
-					print("🤖 ПАК РОБОТ ПРИМЕНЁН!")
-				end
-				button.MouseButton1Click:Connect(applyPack)
-				player.CharacterAdded:Connect(function() task.wait(0.5) if #currentTracks > 0 then applyPack() end end)
-			end
-			task.spawn(C_10);
-	
-			local function C_13()
-				local script = G2L["13"];
-				local button = script.Parent
-				local player = game.Players.LocalPlayer
-	
-				button.MouseButton1Click:Connect(function()
-					local char = player.Character
-					if char then
-						local humanoid = char:FindFirstChildOfClass("Humanoid")
-						if humanoid then
-							local animator = humanoid:FindFirstChild("Animator")
-							if animator then
-								for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
-									pcall(function() track:Stop() end)
-								end
-								print("🛑 ВСЕ ПАКИ ВЫКЛЮЧЕНЫ!")
-							end
-						end
-					end
-				end)
-			end
-			task.spawn(C_13);
-	
-			gui = G2L["1"]
+	local function applyZombiePack()
+		local char = player.Character
+		if not char then
+			print("❌ Персонаж не найден!")
+			return
 		end
 	
-		-- Открываем/закрываем GUI
-		isOpen = not isOpen
-		gui.Enabled = isOpen
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid then
+			print("❌ Humanoid не найден!")
+			return
+		end
 	
-		if isOpen then
-			button.Text = "✕ Закрыть анимации"
-		else
-			button.Text = "🎬 Анимации"
+		for _, track in ipairs(currentTracks) do
+			pcall(function() track:Stop() end)
+		end
+		currentTracks = {}
+	
+		local animator = humanoid:FindFirstChild("Animator")
+		if not animator then
+			animator = Instance.new("Animator")
+			animator.Parent = humanoid
+			task.wait(0.1)
+		end
+	
+		print("🧟 Применяю пак ЗОМБИ...")
+	
+		local loadedCount = 0
+		for name, id in pairs(pack) do
+			pcall(function()
+				local anim = Instance.new("Animation")
+				anim.AnimationId = "rbxassetid://" .. id
+				local track = animator:LoadAnimation(anim)
+				if track then
+					track.Looped = true
+					track.Priority = Enum.AnimationPriority.Core
+					track:Play()
+					table.insert(currentTracks, track)
+					loadedCount = loadedCount + 1
+					print("   ✅ " .. name .. " загружена!")
+				end
+			end)
+		end
+	
+		print("🧟 Загружено анимаций: " .. loadedCount .. "/" .. #pack)
+	end
+	
+	zombieBtn.MouseButton1Click:Connect(applyZombiePack)
+	
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5)
+		if #currentTracks > 0 then
+			applyZombiePack()
 		end
 	end)
 	
-	print("✅ ANIMATIONS_Choose загружена!")
+	-- ====== ОСТАЛЬНЫЕ КНОПКИ (ЗАГЛУШКИ) ======
+	local function createDummyButton(name, text, yPos)
+		local btn = Instance.new("TextButton")
+		btn.Parent = scroll
+		btn.Size = UDim2.new(0, 200, 0, 24)
+		btn.Position = UDim2.new(0.04911, 0, 0, yPos)
+		btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+		btn.Text = "⏳ " .. text .. " (скоро)"
+		btn.TextColor3 = Color3.fromRGB(100, 100, 100)
+		btn.TextSize = 14
+		btn.BorderSizePixel = 0
+		btn.FontFace = Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+	
+		local stroke = Instance.new("UIStroke")
+		stroke.Parent = btn
+		stroke.Thickness = 2
+		stroke.Color = Color3.fromRGB(100, 100, 100)
+	
+		btn.MouseButton1Click:Connect(function()
+			print("⏳ Кнопка " .. name .. " пока не работает (ждем ID)")
+		end)
+	
+		return btn
+	end
+	
+	createDummyButton("TOY_ANIM", "Toy/Игрушечный", 0.06366)
+	createDummyButton("ROBOT_ANIM", "Robot/Робот", 0.10185)
+	createDummyButton("HERO_ANIM", "SuperHero/Супер Герой", 0.14005)
+	
+	-- Кнопка STOP (работает)
+	local stopBtn = Instance.new("TextButton")
+	stopBtn.Parent = scroll
+	stopBtn.Size = UDim2.new(0, 200, 0, 24)
+	stopBtn.Position = UDim2.new(0.04911, 0, 0.1794, 0)
+	stopBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	stopBtn.Text = "❌ Остановить Анимации"
+	stopBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+	stopBtn.TextSize = 14
+	stopBtn.BorderSizePixel = 0
+	stopBtn.FontFace = Font.new("rbxasset://fonts/families/Michroma.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+	
+	local stopStroke = Instance.new("UIStroke")
+	stopStroke.Parent = stopBtn
+	stopStroke.Thickness = 2
+	stopStroke.Color = Color3.fromRGB(255, 50, 50)
+	
+	stopBtn.MouseButton1Click:Connect(function()
+		local char = player.Character
+		if char then
+			local humanoid = char:FindFirstChildOfClass("Humanoid")
+			if humanoid then
+				local animator = humanoid:FindFirstChild("Animator")
+				if animator then
+					for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+						pcall(function() track:Stop() end)
+					end
+					print("🛑 ВСЕ АНИМАЦИИ ОСТАНОВЛЕНЫ!")
+				end
+			end
+		end
+	end)
+	
+	print("✅ ТЕСТОВЫЙ GUI ЗАГРУЖЕН!")
+	print("🧟 Нажми на кнопку ZOMBIE (зеленую) чтобы проверить!")
 end;
 task.spawn(C_1f);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TELEPORT_ToggleList.LocalScript
