@@ -6229,15 +6229,13 @@ task.spawn(C_d2);
 local function C_d6()
 local script = G2L["d6"];
 	-- ==========================================
-	-- TROLL_Jerk (ДРОЧКА РУКОЙ)
+	-- TROLL_Funnn (ПРОСТО ДАЁТ ПРЕДМЕТ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
-	local RunService = game:GetService("RunService")
 	
 	local isActive = false
-	local jerkLoop = nil
-	local originalCFrames = {}
+	local currentTool = nil
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -6254,161 +6252,67 @@ local script = G2L["d6"];
 	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
 	local function updateIndicator()
 		if isActive then
-			indicator.Text = "💀 JERK"
-			indicator.TextColor3 = Color3.fromRGB(255, 0, 255)
+			indicator.Text = "🎁 ЕСТЬ"
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
 		else
 			indicator.Text = "ВЫКЛ"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 		end
 	end
 	
-	-- ====== ПОИСК РУК ======
-	local function getArmParts(char)
-		local parts = {}
-	
-		-- Ищем правую руку
-		local arm = char:FindFirstChild("RightArm") or char:FindFirstChild("RightUpperArm")
-		if arm and arm:IsA("BasePart") then
-			table.insert(parts, arm)
+	-- ====== СОЗДАНИЕ ПРЕДМЕТА ======
+	local function giveTool()
+		-- Удаляем старый предмет
+		if currentTool then
+			pcall(function() currentTool:Destroy() end)
+			currentTool = nil
 		end
 	
-		-- Ищем левую руку
-		local arm2 = char:FindFirstChild("LeftArm") or char:FindFirstChild("LeftUpperArm")
-		if arm2 and arm2:IsA("BasePart") then
-			table.insert(parts, arm2)
-		end
+		-- Создаём новый
+		local tool = Instance.new("Tool")
+		tool.Name = "Jerk Off"
+		tool.RequiresHandle = false
+		tool.Parent = player.Backpack
 	
-		-- Если не нашли руки, ищем любые части с именем Arm
-		if #parts == 0 then
-			for _, part in pairs(char:GetDescendants()) do
-				if part:IsA("BasePart") and (part.Name:lower():find("arm") or part.Name:lower():find("hand")) then
-					table.insert(parts, part)
-				end
-			end
-		end
-	
-		return parts
-	end
-	
-	-- ====== ДРОЧКА РУКОЙ ======
-	local function applyJerk()
-		local char = player.Character
-		if not char then return end
-	
-		local parts = getArmParts(char)
-		if #parts == 0 then return end
-	
-		-- Дёргаем только одну руку (правую, если есть)
-		local arm = parts[1]
-		if not arm then return end
-	
-		pcall(function()
-			if not originalCFrames[arm] then
-				originalCFrames[arm] = arm.CFrame
-			end
-	
-			-- Движение вверх-вниз
-			local time = tick()
-			local speed = 8  -- Скорость дрочки
-			local amplitude = 0.3  -- Амплитуда
-	
-			local offsetY = math.sin(time * speed) * amplitude
-			local offsetX = math.sin(time * speed * 0.5) * 0.1
-	
-			arm.CFrame = originalCFrames[arm] * CFrame.new(offsetX, offsetY, 0) * CFrame.Angles(0, 0, math.sin(time * speed) * 0.1)
-		end)
-	end
-	
-	-- ====== ВОССТАНОВЛЕНИЕ ======
-	local function restoreJerk()
-		for part, originalCFrame in pairs(originalCFrames) do
-			if part and part.Parent then
-				pcall(function()
-					part.CFrame = originalCFrame
-				end)
-			end
-		end
-		originalCFrames = {}
-	end
-	
-	-- ====== ЗАПУСК ======
-	local function startJerk()
-		if isActive then return end
-	
-		local char = player.Character
-		if not char then
-			print("❌ Нет персонажа!")
-			return
-		end
-	
-		local parts = getArmParts(char)
-		if #parts == 0 then
-			print("❌ Руки не найдены!")
-			return
-		end
-	
+		currentTool = tool
 		isActive = true
 		updateIndicator()
 	
-		print("💀 Jerk ВКЛЮЧЕН!")
-	
-		if jerkLoop then
-			jerkLoop:Disconnect()
-			jerkLoop = nil
-		end
-	
-		jerkLoop = RunService.RenderStepped:Connect(function()
-			if not isActive then
-				if jerkLoop then
-					jerkLoop:Disconnect()
-					jerkLoop = nil
-				end
-				return
-			end
-	
-			if not player.Character then
-				stopJerk()
-				return
-			end
-	
-			applyJerk()
-		end)
+		print("🎁 Предмет 'Jerk Off' выдан!")
 	end
 	
-	-- ====== ОСТАНОВКА ======
-	local function stopJerk()
+	-- ====== УДАЛИТЬ ПРЕДМЕТ ======
+	local function removeTool()
+		if currentTool then
+			pcall(function() currentTool:Destroy() end)
+			currentTool = nil
+		end
 		isActive = false
 		updateIndicator()
-	
-		if jerkLoop then
-			jerkLoop:Disconnect()
-			jerkLoop = nil
-		end
-	
-		restoreJerk()
-		print("💀 Jerk ВЫКЛЮЧЕН!")
+		print("🗑️ Предмет удалён!")
 	end
 	
 	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
-	local function toggleJerk()
+	local function toggleTool()
 		if isActive then
-			stopJerk()
+			removeTool()
 		else
-			startJerk()
+			giveTool()
 		end
 	end
 	
-	button.MouseButton1Click:Connect(toggleJerk)
+	button.MouseButton1Click:Connect(toggleTool)
 	
 	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
+		task.wait(0.5)
 		if isActive then
-			stopJerk()
+			giveTool()
 		end
 	end)
 	
 	updateIndicator()
-	print("✅ TROLL_Jerk загружена (дрочка рукой)!")
+	print("✅ TROLL_Funnn загружена (выдаёт предмет)")
 end;
 task.spawn(C_d6);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
