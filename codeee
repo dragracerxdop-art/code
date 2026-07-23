@@ -5781,7 +5781,7 @@ task.spawn(C_cd);
 local function C_e0()
 local script = G2L["e0"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ + Zo Wip)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ФИНАЛЬНАЯ ВЕРСИЯ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -5980,7 +5980,7 @@ local script = G2L["e0"];
 		elseif tabName == "Zo Wip" then
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("ImageButton") and (
-					child.Name == "ZO_Hitbox" or
+					child.Name == "Z0_Hitbox" or          -- 👈 С ЦИФРОЙ 0
 						child.Name == "ZO_HitboxVisible" or
 						child.Name == "ZO_FOV"
 					) then
@@ -5988,7 +5988,7 @@ local script = G2L["e0"];
 				end
 				if child:IsA("TextBox") and (
 					child.Name == "ZO_HitboxSize" or
-						child.Name == "ZO_FOVValue"
+						child.Name == "ZO_FOWValue"          -- 👈 FOW (С W)
 					) then
 					child.Visible = true
 				end
@@ -6010,7 +6010,7 @@ local script = G2L["e0"];
 	end
 	
 	switchTab("TELEPORT")
-	print("✅ Переключение вкладок загружено! (Zo Wip обновлена)")
+	print("✅ Переключение вкладок загружено!")
 end;
 task.spawn(C_e0);
 -- StarterGui.Folder.PurpHub.MainFrame.HotKeys
