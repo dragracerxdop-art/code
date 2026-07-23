@@ -5787,7 +5787,7 @@ task.spawn(C_ca);
 local function C_ce()
 local script = G2L["ce"];
 	-- ==========================================
-	-- HB_Visible (ВКЛ/ВЫКЛ ВИЗУАЛА - С ЦИКЛОМ)
+	-- HB_Visible (ВКЛ/ВЫКЛ ВИЗУАЛА - ТЕМНО-ФИОЛЕТОВЫЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -5835,9 +5835,9 @@ local script = G2L["ce"];
 		for _, part in pairs(parts) do
 			pcall(function()
 				if _G.HitboxVisible and _G.HitboxEnabled then
-					-- ВИДИМЫЙ НЕОН
+					-- 👇 ТЕМНО-ФИОЛЕТОВЫЙ НЕОН
 					part.Transparency = 0.5
-					part.BrickColor = BrickColor.new("Lilac")
+					part.BrickColor = BrickColor.new("Really dark purple")  -- ТЕМНО-ФИОЛЕТОВЫЙ
 					part.Material = Enum.Material.Neon
 				elseif _G.HitboxEnabled then
 					-- НЕВИДИМЫЙ (но увеличенный)
@@ -5888,7 +5888,7 @@ local script = G2L["ce"];
 			startVisualLoop()
 		end
 	
-		print(_G.HitboxVisible and "👁️ Хитбокс ВИДИМ" or "👁️ Хитбокс СКРЫТ")
+		print(_G.HitboxVisible and "👁️ Хитбокс ВИДИМ (темно-фиолетовый)" or "👁️ Хитбокс СКРЫТ")
 	end
 	
 	button.MouseButton1Click:Connect(toggleVisible)
@@ -5911,7 +5911,7 @@ local script = G2L["ce"];
 	startVisualLoop()
 	updateIndicator()
 	
-	print("✅ HB_Visible загружена (с циклом)")
+	print("✅ HB_Visible загружена (темно-фиолетовый неон)")
 end;
 task.spawn(C_ce);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
