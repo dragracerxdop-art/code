@@ -5630,7 +5630,7 @@ task.spawn(C_bf);
 local function C_c3()
 local script = G2L["c3"];
 	-- ==========================================
-	-- FOV_Toggle (ВКЛ/ВЫКЛ FOV - БЕЗ МЕРЦАНИЯ)
+	-- FOV_Toggle (ФИКС ДЁРГАНИЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -5716,16 +5716,32 @@ local script = G2L["c3"];
 	
 			applyFOV()
 	
-			-- 👇 ИСПОЛЬЗУЕМ RenderStepped (как в HBE)
+			-- 👇 ИСПОЛЬЗУЕМ RenderStepped + Heartbeat (ДВОЙНАЯ ЗАЩИТА)
 			fovLoop = runService.RenderStepped:Connect(function()
 				if fovEnabled then
 					applyFOV()
 				end
 			end)
 	
+			-- 👇 ДОПОЛНИТЕЛЬНЫЙ ЦИКЛ ДЛЯ ПЕРЕСТРАХОВКИ
+			local heartbeatConn = runService.Heartbeat:Connect(function()
+				if fovEnabled then
+					local cam = workspace.CurrentCamera
+					if cam and cam.FieldOfView ~= fovValue then
+						cam.FieldOfView = fovValue
+					end
+				end
+			end)
+	
+			-- Сохраняем оба цикла
+			fovLoop._heartbeat = heartbeatConn
+	
 			print("👁️ FOV ВКЛЮЧЕН (" .. fovValue .. "°)")
 		else
 			if fovLoop then
+				if fovLoop._heartbeat then
+					fovLoop._heartbeat:Disconnect()
+				end
 				fovLoop:Disconnect()
 				fovLoop = nil
 			end
@@ -5755,7 +5771,7 @@ local script = G2L["c3"];
 	end)
 	
 	updateIndicator()
-	print("✅ FOV_Toggle загружена (RenderStepped)")
+	print("✅ FOV_Toggle загружена (двойная защита)")
 end;
 task.spawn(C_c3);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Value.LocalScript
@@ -5812,14 +5828,42 @@ local script = G2L["ca"];
 	
 		if fovEnabled then
 			originalFov = workspace.CurrentCamera.FieldOfView
-			if fovLoop then fovLoop:Disconnect() end
+			if fovLoop then 
+				if fovLoop._heartbeat then
+					fovLoop._heartbeat:Disconnect()
+				end
+				fovLoop:Disconnect() 
+			end
+	
 			applyFOV()
+	
+			-- 👇 ДВА ЦИКЛА ДЛЯ СТАБИЛЬНОСТИ
 			fovLoop = runService.RenderStepped:Connect(function()
-				if fovEnabled then applyFOV() end
+				if fovEnabled then
+					applyFOV()
+				end
 			end)
+	
+			local heartbeatConn = runService.Heartbeat:Connect(function()
+				if fovEnabled then
+					local cam = workspace.CurrentCamera
+					if cam and cam.FieldOfView ~= fovValue then
+						cam.FieldOfView = fovValue
+					end
+				end
+			end)
+	
+			fovLoop._heartbeat = heartbeatConn
+	
 			print("👁️ FOV ВКЛЮЧЕН (" .. fovValue .. "°)")
 		else
-			if fovLoop then fovLoop:Disconnect() fovLoop = nil end
+			if fovLoop then
+				if fovLoop._heartbeat then
+					fovLoop._heartbeat:Disconnect()
+				end
+				fovLoop:Disconnect()
+				fovLoop = nil
+			end
 			restoreFOV()
 			print("👁️ FOV ВЫКЛЮЧЕН")
 		end
@@ -5837,7 +5881,7 @@ local script = G2L["ca"];
 		end
 	end)
 	
-	print("✅ FOV_Value загружена (RenderStepped)")
+	print("✅ FOV_Value загружена (двойная защита)")
 end;
 task.spawn(C_ca);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.HB_Visible.LocalScript
