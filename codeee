@@ -1398,7 +1398,7 @@ G2L["bb"] = Instance.new("LocalScript", G2L["b8"]);
 
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_Hitbox
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.HB_Toggle
 G2L["bc"] = Instance.new("ImageButton", G2L["d"]);
 G2L["bc"]["BorderSizePixel"] = 0;
 G2L["bc"]["Visible"] = false;
@@ -1406,28 +1406,28 @@ G2L["bc"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["bc"]["Image"] = [[rbxassetid://88047994739792]];
 G2L["bc"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["bc"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["bc"]["Name"] = [[ZO_Hitbox]];
+G2L["bc"]["Name"] = [[HB_Toggle]];
 G2L["bc"]["Position"] = UDim2.new(0.02557, 0, 0.01975, 0);
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_Hitbox.UICorner
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.HB_Toggle.UICorner
 G2L["bd"] = Instance.new("UICorner", G2L["bc"]);
 G2L["bd"]["CornerRadius"] = UDim.new(0, 25);
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_Hitbox.UIStroke
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.HB_Toggle.UIStroke
 G2L["be"] = Instance.new("UIStroke", G2L["bc"]);
 G2L["be"]["Thickness"] = 3;
 G2L["be"]["Color"] = Color3.fromRGB(180, 4, 255);
 G2L["be"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_Hitbox.LocalScript
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.HB_Toggle.LocalScript
 G2L["bf"] = Instance.new("LocalScript", G2L["bc"]);
 
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_FOV
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Toggle
 G2L["c0"] = Instance.new("ImageButton", G2L["d"]);
 G2L["c0"]["BorderSizePixel"] = 0;
 G2L["c0"]["Visible"] = false;
@@ -1435,31 +1435,31 @@ G2L["c0"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["c0"]["Image"] = [[rbxassetid://113730015165417]];
 G2L["c0"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["c0"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["c0"]["Name"] = [[ZO_FOV]];
+G2L["c0"]["Name"] = [[FOV_Toggle]];
 G2L["c0"]["Position"] = UDim2.new(0.02557, 0, 0.11538, 0);
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_FOV.UICorner
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Toggle.UICorner
 G2L["c1"] = Instance.new("UICorner", G2L["c0"]);
 G2L["c1"]["CornerRadius"] = UDim.new(0, 25);
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_FOV.UIStroke
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Toggle.UIStroke
 G2L["c2"] = Instance.new("UIStroke", G2L["c0"]);
 G2L["c2"]["Thickness"] = 3;
 G2L["c2"]["Color"] = Color3.fromRGB(180, 4, 255);
 G2L["c2"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_FOV.LocalScript
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Toggle.LocalScript
 G2L["c3"] = Instance.new("LocalScript", G2L["c0"]);
 
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_HitboxSize
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.HB_Size
 G2L["c4"] = Instance.new("TextBox", G2L["d"]);
 G2L["c4"]["CursorPosition"] = -1;
-G2L["c4"]["Name"] = [[ZO_HitboxSize]];
+G2L["c4"]["Name"] = [[HB_Size]];
 G2L["c4"]["BorderSizePixel"] = 0;
 G2L["c4"]["TextSize"] = 14;
 G2L["c4"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
@@ -1471,22 +1471,22 @@ G2L["c4"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["c4"]["Text"] = [[]];
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_HitboxSize.UIStroke
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.HB_Size.UIStroke
 G2L["c5"] = Instance.new("UIStroke", G2L["c4"]);
 G2L["c5"]["Thickness"] = 3;
 G2L["c5"]["Color"] = Color3.fromRGB(180, 4, 255);
 G2L["c5"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_HitboxSize.UICorner
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.HB_Size.UICorner
 G2L["c6"] = Instance.new("UICorner", G2L["c4"]);
 G2L["c6"]["CornerRadius"] = UDim.new(0, 25);
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_FOVValue
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Value
 G2L["c7"] = Instance.new("TextBox", G2L["d"]);
 G2L["c7"]["CursorPosition"] = -1;
-G2L["c7"]["Name"] = [[ZO_FOVValue]];
+G2L["c7"]["Name"] = [[FOV_Value]];
 G2L["c7"]["BorderSizePixel"] = 0;
 G2L["c7"]["TextSize"] = 14;
 G2L["c7"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
@@ -1498,24 +1498,24 @@ G2L["c7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["c7"]["Text"] = [[]];
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_FOVValue.UIStroke
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Value.UIStroke
 G2L["c8"] = Instance.new("UIStroke", G2L["c7"]);
 G2L["c8"]["Thickness"] = 3;
 G2L["c8"]["Color"] = Color3.fromRGB(180, 4, 255);
 G2L["c8"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_FOVValue.UICorner
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Value.UICorner
 G2L["c9"] = Instance.new("UICorner", G2L["c7"]);
 G2L["c9"]["CornerRadius"] = UDim.new(0, 25);
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_FOVValue.LocalScript
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Value.LocalScript
 G2L["ca"] = Instance.new("LocalScript", G2L["c7"]);
 
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_HitboxVisible
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.HB_Visible
 G2L["cb"] = Instance.new("ImageButton", G2L["d"]);
 G2L["cb"]["BorderSizePixel"] = 0;
 G2L["cb"]["Visible"] = false;
@@ -1523,23 +1523,23 @@ G2L["cb"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["cb"]["Image"] = [[rbxassetid://73883731756918]];
 G2L["cb"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["cb"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["cb"]["Name"] = [[ZO_HitboxVisible]];
+G2L["cb"]["Name"] = [[HB_Visible]];
 G2L["cb"]["Position"] = UDim2.new(0.02557, 0, 0.21206, 0);
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_HitboxVisible.UICorner
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.HB_Visible.UICorner
 G2L["cc"] = Instance.new("UICorner", G2L["cb"]);
 G2L["cc"]["CornerRadius"] = UDim.new(0, 25);
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_HitboxVisible.UIStroke
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.HB_Visible.UIStroke
 G2L["cd"] = Instance.new("UIStroke", G2L["cb"]);
 G2L["cd"]["Thickness"] = 3;
 G2L["cd"]["Color"] = Color3.fromRGB(180, 4, 255);
 G2L["cd"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_HitboxVisible.LocalScript
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.HB_Visible.LocalScript
 G2L["ce"] = Instance.new("LocalScript", G2L["cb"]);
 
 
@@ -5472,7 +5472,7 @@ local script = G2L["bb"];
 	print("✅ КНОПКА ЗАГРУЖЕНА!")
 end;
 task.spawn(C_bb);
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_Hitbox.LocalScript
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.HB_Toggle.LocalScript
 local function C_bf()
 local script = G2L["bf"];
 	-- ==========================================
@@ -5593,7 +5593,7 @@ local script = G2L["bf"];
 	print("✅ Z0_Hitbox загружена")
 end;
 task.spawn(C_bf);
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_FOV.LocalScript
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Toggle.LocalScript
 local function C_c3()
 local script = G2L["c3"];
 	-- ==========================================
@@ -5648,7 +5648,7 @@ local script = G2L["c3"];
 	print("✅ ZO_FOV загружена")
 end;
 task.spawn(C_c3);
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_FOVValue.LocalScript
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Value.LocalScript
 local function C_ca()
 local script = G2L["ca"];
 	-- ==========================================
@@ -5731,7 +5731,7 @@ local script = G2L["ca"];
 	print("✅ ZO_FOWValue загружена (ввод FOV)")
 end;
 task.spawn(C_ca);
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ZO_HitboxVisible.LocalScript
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.HB_Visible.LocalScript
 local function C_ce()
 local script = G2L["ce"];
 	-- ==========================================
@@ -5788,7 +5788,7 @@ task.spawn(C_ce);
 local function C_e1()
 local script = G2L["e1"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ФИНАЛЬНАЯ ВЕРСИЯ)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (НОВЫЕ ИМЕНА)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -5983,19 +5983,19 @@ local script = G2L["e1"];
 			end
 			print("✅ INFO")
 	
-			-- ===== ZO WIP =====
+			-- ===== ZO WIP (НОВЫЕ ИМЕНА) =====
 		elseif tabName == "Zo Wip" then
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("ImageButton") and (
-					child.Name == "Z0_Hitbox" or
-						child.Name == "ZO_HitboxVisible" or
-						child.Name == "ZO_FOV"
+					child.Name == "HB_Toggle" or
+						child.Name == "HB_Visible" or
+						child.Name == "FOV_Toggle"
 					) then
 					child.Visible = true
 				end
 				if child:IsA("TextBox") and (
-					child.Name == "ZO_HitboxSize" or
-						child.Name == "ZO_FOWValue"
+					child.Name == "HB_Size" or
+						child.Name == "FOV_Value"
 					) then
 					child.Visible = true
 				end
@@ -6017,7 +6017,7 @@ local script = G2L["e1"];
 	end
 	
 	switchTab("TELEPORT")
-	print("✅ Переключение вкладок загружено!")
+	print("✅ Переключение вкладок загружено! (Zo Wip с новыми именами)")
 end;
 task.spawn(C_e1);
 -- StarterGui.Folder.PurpHub.MainFrame.HotKeys
