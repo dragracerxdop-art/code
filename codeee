@@ -6229,7 +6229,7 @@ task.spawn(C_d2);
 local function C_d6()
 local script = G2L["d6"];
 	-- ==========================================
-	-- TROLL_Funnn (СУПЕР БЫСТРО + СУПЕР КОРОТКО)
+	-- TROLL_Funnn (ЕЩЁ КОРОЧЕ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -6304,7 +6304,6 @@ local script = G2L["d6"];
 			return
 		end
 	
-		-- 👇 ЕЩЁ БЫСТРЕЕ
 		local speed = isR15() and 2.5 or 2.2
 		currentTrack:Play()
 		currentTrack:AdjustSpeed(speed)
@@ -6319,8 +6318,8 @@ local script = G2L["d6"];
 				return
 			end
 	
-			-- 👇 ЕЩЁ КОРОЧЕ
-			local maxTime = isR15() and 0.52 or 0.52
+			-- 👇 ЕЩЁ КОРОЧЕ (0.5)
+			local maxTime = isR15() and 0.5 or 0.5
 			if currentTrack.TimePosition >= maxTime then
 				currentTrack:Stop()
 				currentTrack:Play()
@@ -6421,7 +6420,7 @@ local script = G2L["d6"];
 	player.CharacterAdded:Connect(stopJorking)
 	
 	updateIndicator()
-	print("✅ TROLL_Funnn загружена (супер быстро + супер коротко)")
+	print("✅ TROLL_Funnn загружена (конец 0.5)")
 end;
 task.spawn(C_d6);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
