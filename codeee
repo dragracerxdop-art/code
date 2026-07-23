@@ -7,7 +7,7 @@
  Y888P  ~Y8888P' Y888888P      888888D      Y88888P ~Y8888P' YP   YP  CONVERTER 
 ]=]
 
--- Instances: 215 | Scripts: 40 | Modules: 0 | Tags: 0
+-- Instances: 212 | Scripts: 40 | Modules: 0 | Tags: 0
 local G2L = {};
 
 -- StarterGui.Folder.PurpHub
@@ -1558,41 +1558,19 @@ G2L["d1"]["Thickness"] = 3;
 G2L["d1"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
--- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Animations
-G2L["d2"] = Instance.new("ImageButton", G2L["bc"]);
-G2L["d2"]["BorderSizePixel"] = 0;
-G2L["d2"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["d2"]["Image"] = [[rbxassetid://116489487891186]];
-G2L["d2"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["d2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["d2"]["Name"] = [[Animations]];
-G2L["d2"]["Position"] = UDim2.new(0, 0, 0.515, 0);
-
-
--- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Animations.UICorner
-G2L["d3"] = Instance.new("UICorner", G2L["d2"]);
-G2L["d3"]["CornerRadius"] = UDim.new(0, 25);
-
-
--- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Animations.UIStroke
-G2L["d4"] = Instance.new("UIStroke", G2L["d2"]);
-G2L["d4"]["Thickness"] = 3;
-G2L["d4"]["Color"] = Color3.fromRGB(180, 4, 255);
-
-
 -- StarterGui.Folder.PurpHub.MainFrame.HotKeys
-G2L["d5"] = Instance.new("LocalScript", G2L["2"]);
-G2L["d5"]["Name"] = [[HotKeys]];
+G2L["d2"] = Instance.new("LocalScript", G2L["2"]);
+G2L["d2"]["Name"] = [[HotKeys]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.ESP
-G2L["d6"] = Instance.new("LocalScript", G2L["2"]);
-G2L["d6"]["Name"] = [[ESP]];
+G2L["d3"] = Instance.new("LocalScript", G2L["2"]);
+G2L["d3"]["Name"] = [[ESP]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.AntiFling
-G2L["d7"] = Instance.new("LocalScript", G2L["2"]);
-G2L["d7"]["Name"] = [[AntiFling]];
+G2L["d4"] = Instance.new("LocalScript", G2L["2"]);
+G2L["d4"]["Name"] = [[AntiFling]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.CLose\Open.LocalScript
@@ -5288,7 +5266,7 @@ task.spawn(C_bb);
 local function C_ce()
 local script = G2L["ce"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (БЕЗ КНОПКИ ANIMATIONS_Choose)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (БЕЗ ANIMATIONS)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -5299,17 +5277,13 @@ local script = G2L["ce"];
 		return
 	end
 	
-	-- ===== ИЩЕМ toggleListBtn И playerList =====
+	-- ===== ИЩЕМ toggleListBtn =====
 	local toggleListBtn = nil
-	local playerList = nil
 	
 	local function findInParent(parent)
 		for _, child in pairs(parent:GetChildren()) do
 			if child:IsA("ImageButton") and child.Name == "TELEPORT_ToggleList" then
 				toggleListBtn = child
-			end
-			if child:IsA("ScrollingFrame") and child.Name == "PlayerList" then
-				playerList = child
 			end
 			if child:IsA("Frame") or child:IsA("ScrollingFrame") then
 				findInParent(child)
@@ -5448,10 +5422,17 @@ local script = G2L["ce"];
 			end
 			print("✅ MM2")
 	
-			-- ===== ANIMATIONS (ПУСТАЯ ВКЛАДКА, БЕЗ КНОПКИ) =====
-		elseif tabName == "Animations" then
-			-- Ничего не показываем
-			print("✅ ANIMATIONS (пустая вкладка)")
+			-- ===== DA HOOD =====
+		elseif tabName == "Da Hood" then
+			for _, child in pairs(rightFrame:GetChildren()) do
+				if child:IsA("ImageButton") and (
+					child.Name == "DaHood_AutoFarm" or
+						child.Name == "DaHood_RapidFire"
+					) then
+					child.Visible = true
+				end
+			end
+			print("✅ DA HOOD")
 	
 			-- ===== TROLL =====
 		elseif tabName == "Troll" then
@@ -5479,6 +5460,8 @@ local script = G2L["ce"];
 				end
 			end
 			print("✅ INFO")
+		else
+			print("❌ Неизвестная вкладка: " .. tabName)
 		end
 	end
 	
@@ -5492,12 +5475,12 @@ local script = G2L["ce"];
 	end
 	
 	switchTab("TELEPORT")
-	print("✅ Переключение вкладок загружено! (ANIMATIONS_Choose удалена)")
+	print("✅ Переключение вкладок загружено! (ANIMATIONS удалена)")
 end;
 task.spawn(C_ce);
 -- StarterGui.Folder.PurpHub.MainFrame.HotKeys
-local function C_d5()
-local script = G2L["d5"];
+local function C_d2()
+local script = G2L["d2"];
 	-- ==========================================
 	-- ГОРЯЧИЕ КЛАВИШИ (Ctrl + ЛКМ)
 	-- ==========================================
@@ -5591,10 +5574,10 @@ local script = G2L["d5"];
 	print("   Ctrl + ЛКМ → удаление (CTRL+DEL)")
 	print("   Ctrl + ЛКМ → телепорт в точку клика (CTRL+CLICK)")
 end;
-task.spawn(C_d5);
+task.spawn(C_d2);
 -- StarterGui.Folder.PurpHub.MainFrame.ESP
-local function C_d6()
-local script = G2L["d6"];
+local function C_d3()
+local script = G2L["d3"];
 	-- ==========================================
 	-- ОПТИМИЗИРОВАННЫЙ ESP (БЕЗ ЛАГОВ)
 	-- ==========================================
@@ -5718,10 +5701,10 @@ local script = G2L["d6"];
 	
 	print("✅ Оптимизированный ESP загружен!")
 end;
-task.spawn(C_d6);
+task.spawn(C_d3);
 -- StarterGui.Folder.PurpHub.MainFrame.AntiFling
-local function C_d7()
-local script = G2L["d7"];
+local function C_d4()
+local script = G2L["d4"];
 	-- ==========================================
 	-- АНТИ-ФЛИНГ (ОТКЛЮЧЕНИЕ СТОЛКНОВЕНИЙ)
 	-- ==========================================
@@ -5792,6 +5775,6 @@ local script = G2L["d7"];
 	
 	print("✅ Анти-флинг загружен! Используй toggleAntiFling()")
 end;
-task.spawn(C_d7);
+task.spawn(C_d4);
 
 return G2L["1"], require;
