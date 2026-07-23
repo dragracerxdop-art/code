@@ -5486,6 +5486,7 @@ local script = G2L["bf"];
 	local hitboxSize = 5
 	local hitboxLoop = nil
 	
+	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
 	indicator.Size = UDim2.new(1, 0, 0.3, 0)
@@ -5526,7 +5527,7 @@ local script = G2L["bf"];
 		end
 	end
 	
-	-- ====== ПОИСК ОРУЖИЯ (blade) ======
+	-- ====== ПОИСК ОРУЖИЯ ======
 	local function findWeaponParts()
 		local parts = {}
 		local char = player.Character
@@ -5562,17 +5563,15 @@ local script = G2L["bf"];
 				part.Size = originalSize * size
 				part.CanCollide = false
 	
-				-- 👇 ВИДИМОСТЬ
+				-- 👇 ВИДИМОСТЬ (ЗАВИСИТ ОТ _G.HitboxVisible)
 				if _G.HitboxVisible then
 					part.Transparency = 0.5
 					part.BrickColor = BrickColor.new("Lilac")
 					part.Material = Enum.Material.Neon
 				else
 					part.Transparency = 0
-					if originalSize then
-						part.BrickColor = BrickColor.new("Medium stone grey")
-						part.Material = Enum.Material.Plastic
-					end
+					part.BrickColor = BrickColor.new("Medium stone grey")
+					part.Material = Enum.Material.Plastic
 				end
 			end)
 		end
@@ -5617,13 +5616,14 @@ local script = G2L["bf"];
 	
 	button.MouseButton1Click:Connect(toggleHitbox)
 	
+	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
 		if hitboxEnabled then applyHitbox() end
 	end)
 	
 	updateIndicator()
-	print("✅ HB_Toggle загружена (увеличение оружия)")
+	print("✅ HB_Toggle загружена")
 end;
 task.spawn(C_bf);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Toggle.LocalScript
@@ -5825,13 +5825,15 @@ task.spawn(C_ca);
 local function C_ce()
 local script = G2L["ce"];
 	-- ==========================================
-	-- HB_Visible (ВКЛ/ВЫКЛ ВИДИМОСТИ)
+	-- HB_Visible (ВКЛ/ВЫКЛ ВИДИМОСТИ ХИТБОКСА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	
+	-- ====== ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ======
 	_G.HitboxVisible = false
 	
+	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
 	indicator.Size = UDim2.new(1, 0, 0.3, 0)
@@ -5843,6 +5845,7 @@ local script = G2L["ce"];
 	indicator.Font = Enum.Font.SourceSansBold
 	indicator.Parent = button
 	
+	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
 	local function updateIndicator()
 		if _G.HitboxVisible then
 			indicator.Text = "ВИДИМ"
@@ -5853,13 +5856,62 @@ local script = G2L["ce"];
 		end
 	end
 	
+	-- ====== ПОИСК ОРУЖИЯ ======
+	local function findWeaponParts()
+		local parts = {}
+		local char = player.Character
+		if not char then return parts end
+	
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") or part:IsA("MeshPart") then
+				local partName = part.Name:lower()
+				local parentName = part.Parent and part.Parent.Name or ""
+	
+				if (partName == "blade" or partName == "handle") and parentName == "HandleSaved" then
+					table.insert(parts, part)
+				end
+			end
+		end
+		return parts
+	end
+	
+	-- ====== ПРИМЕНЕНИЕ ВИДИМОСТИ ======
+	local function applyVisibility()
+		local parts = findWeaponParts()
+	
+		for _, part in pairs(parts) do
+			pcall(function()
+				if _G.HitboxVisible then
+					part.Transparency = 0.5
+					part.BrickColor = BrickColor.new("Lilac")
+					part.Material = Enum.Material.Neon
+				else
+					part.Transparency = 0
+					part.BrickColor = BrickColor.new("Medium stone grey")
+					part.Material = Enum.Material.Plastic
+				end
+			end)
+		end
+	end
+	
+	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	local function toggleVisible()
 		_G.HitboxVisible = not _G.HitboxVisible
+		applyVisibility()
 		updateIndicator()
+	
 		print(_G.HitboxVisible and "👁️ Хитбокс ВИДИМ" or "👁️ Хитбокс СКРЫТ")
 	end
 	
 	button.MouseButton1Click:Connect(toggleVisible)
+	
+	-- ====== ПРИ РЕСПАВНЕ ======
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5)
+		if _G.HitboxVisible then
+			applyVisibility()
+		end
+	end)
 	
 	updateIndicator()
 	print("✅ HB_Visible загружена")
