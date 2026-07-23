@@ -5486,6 +5486,9 @@ local script = G2L["bf"];
 	local hitboxSize = 5
 	local hitboxLoop = nil
 	
+	-- ====== ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ HB_Visible ======
+	_G.HitboxEnabled = false
+	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
@@ -5563,7 +5566,7 @@ local script = G2L["bf"];
 				part.Size = originalSize * size
 				part.CanCollide = false
 	
-				-- 👇 ВИДИМОСТЬ (ЗАВИСИТ ОТ _G.HitboxVisible)
+				-- 👇 ВИЗУАЛ (ЗАВИСИТ ОТ _G.HitboxVisible)
 				if _G.HitboxVisible then
 					part.Transparency = 0.5
 					part.BrickColor = BrickColor.new("Lilac")
@@ -5597,6 +5600,7 @@ local script = G2L["bf"];
 	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	local function toggleHitbox()
 		hitboxEnabled = not hitboxEnabled
+		_G.HitboxEnabled = hitboxEnabled  -- 👈 ПЕРЕДАЁМ СОСТОЯНИЕ
 	
 		if hitboxEnabled then
 			if hitboxLoop then hitboxLoop:Disconnect() end
@@ -5825,10 +5829,11 @@ task.spawn(C_ca);
 local function C_ce()
 local script = G2L["ce"];
 	-- ==========================================
-	-- HB_Visible (ВКЛ/ВЫКЛ ВИДИМОСТИ ХИТБОКСА)
+	-- HB_Visible (ВКЛ/ВЫКЛ ВИЗУАЛА ХИТБОКСА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
+	local runService = game:GetService("RunService")
 	
 	-- ====== ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ======
 	_G.HitboxVisible = false
@@ -5844,17 +5849,6 @@ local script = G2L["ce"];
 	indicator.TextSize = 14
 	indicator.Font = Enum.Font.SourceSansBold
 	indicator.Parent = button
-	
-	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
-	local function updateIndicator()
-		if _G.HitboxVisible then
-			indicator.Text = "ВИДИМ"
-			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-		else
-			indicator.Text = "СКРЫТ"
-			indicator.TextColor3 = Color3.fromRGB(255, 165, 0)
-		end
-	end
 	
 	-- ====== ПОИСК ОРУЖИЯ ======
 	local function findWeaponParts()
@@ -5875,17 +5869,29 @@ local script = G2L["ce"];
 		return parts
 	end
 	
-	-- ====== ПРИМЕНЕНИЕ ВИДИМОСТИ ======
-	local function applyVisibility()
+	-- ====== ПРИМЕНЕНИЕ ВИЗУАЛА ======
+	local function applyVisual()
 		local parts = findWeaponParts()
 	
 		for _, part in pairs(parts) do
 			pcall(function()
-				if _G.HitboxVisible then
-					part.Transparency = 0.5
-					part.BrickColor = BrickColor.new("Lilac")
-					part.Material = Enum.Material.Neon
+				-- Проверяем, включен ли хитбокс
+				local hitboxEnabled = _G.HitboxEnabled or false
+	
+				if hitboxEnabled then
+					if _G.HitboxVisible then
+						-- ВИДИМЫЙ
+						part.Transparency = 0.5
+						part.BrickColor = BrickColor.new("Lilac")
+						part.Material = Enum.Material.Neon
+					else
+						-- СКРЫТЫЙ (но увеличенный)
+						part.Transparency = 0
+						part.BrickColor = BrickColor.new("Medium stone grey")
+						part.Material = Enum.Material.Plastic
+					end
 				else
+					-- Если хитбокс выключен — возвращаем как было
 					part.Transparency = 0
 					part.BrickColor = BrickColor.new("Medium stone grey")
 					part.Material = Enum.Material.Plastic
@@ -5894,10 +5900,21 @@ local script = G2L["ce"];
 		end
 	end
 	
+	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
+	local function updateIndicator()
+		if _G.HitboxVisible then
+			indicator.Text = "ВИДИМ"
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+		else
+			indicator.Text = "СКРЫТ"
+			indicator.TextColor3 = Color3.fromRGB(255, 165, 0)
+		end
+	end
+	
 	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	local function toggleVisible()
 		_G.HitboxVisible = not _G.HitboxVisible
-		applyVisibility()
+		applyVisual()
 		updateIndicator()
 	
 		print(_G.HitboxVisible and "👁️ Хитбокс ВИДИМ" or "👁️ Хитбокс СКРЫТ")
@@ -5909,7 +5926,7 @@ local script = G2L["ce"];
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
 		if _G.HitboxVisible then
-			applyVisibility()
+			applyVisual()
 		end
 	end)
 	
