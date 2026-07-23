@@ -5287,7 +5287,7 @@ task.spawn(C_bb);
 local function C_ce()
 local script = G2L["ce"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (БЕЗ КНОПКИ ANIMATIONS_Choose)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (РАБОЧАЯ ВЕРСИЯ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -5298,17 +5298,13 @@ local script = G2L["ce"];
 		return
 	end
 	
-	-- ===== ИЩЕМ toggleListBtn И playerList =====
+	-- ===== ИЩЕМ toggleListBtn =====
 	local toggleListBtn = nil
-	local playerList = nil
 	
 	local function findInParent(parent)
 		for _, child in pairs(parent:GetChildren()) do
 			if child:IsA("ImageButton") and child.Name == "TELEPORT_ToggleList" then
 				toggleListBtn = child
-			end
-			if child:IsA("ScrollingFrame") and child.Name == "PlayerList" then
-				playerList = child
 			end
 			if child:IsA("Frame") or child:IsA("ScrollingFrame") then
 				findInParent(child)
@@ -5459,11 +5455,6 @@ local script = G2L["ce"];
 			end
 			print("✅ DA HOOD")
 	
-			-- ===== ANIMATIONS (ВКЛАДКА ЕСТЬ, НО КНОПКИ НЕТ) =====
-		elseif tabName == "Animations" then
-			-- 👈 НИЧЕГО НЕ ПОКАЗЫВАЕМ (вкладка пустая)
-			print("✅ ANIMATIONS (пустая вкладка)")
-	
 			-- ===== TROLL =====
 		elseif tabName == "Troll" then
 			for _, child in pairs(rightFrame:GetChildren()) do
@@ -5502,7 +5493,7 @@ local script = G2L["ce"];
 	end
 	
 	switchTab("TELEPORT")
-	print("✅ Переключение вкладок загружено! (ANIMATIONS_Choose удалена)")
+	print("✅ Переключение вкладок загружено!")
 end;
 task.spawn(C_ce);
 -- StarterGui.Folder.ScreenGui.MainFrame.HotKeys
