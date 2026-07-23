@@ -6229,7 +6229,7 @@ task.spawn(C_d2);
 local function C_d6()
 local script = G2L["d6"];
 	-- ==========================================
-	-- TROLL_Funnn (БЫСТРАЯ + РУКА У ТЕЛА)
+	-- TROLL_Funnn (ОЧЕНЬ БЫСТРАЯ + РУКА КАСАЕТСЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -6304,11 +6304,10 @@ local script = G2L["d6"];
 			return
 		end
 	
-		-- 👇 БЫСТРАЯ СКОРОСТЬ
-		local speed = isR15() and 1.0 or 0.95
+		-- 👇 ОЧЕНЬ БЫСТРАЯ СКОРОСТЬ
+		local speed = isR15() and 1.8 or 1.6
 		currentTrack:Play()
 		currentTrack:AdjustSpeed(speed)
-		-- 👇 СТАРТ С 0.3
 		currentTrack.TimePosition = 0.3
 	
 		animLoop = RunService.RenderStepped:Connect(function()
@@ -6320,8 +6319,8 @@ local script = G2L["d6"];
 				return
 			end
 	
-			-- 👇 КОНЕЦ НА 0.65 (РУКА У ТЕЛА)
-			local maxTime = isR15() and 0.65 or 0.65
+			-- 👇 КОНЕЦ НА 0.55 (РУКА КАСАЕТСЯ ТЕЛА)
+			local maxTime = isR15() and 0.55 or 0.55
 			if currentTrack.TimePosition >= maxTime then
 				currentTrack:Stop()
 				currentTrack:Play()
@@ -6422,7 +6421,7 @@ local script = G2L["d6"];
 	player.CharacterAdded:Connect(stopJorking)
 	
 	updateIndicator()
-	print("✅ TROLL_Funnn загружена (быстрая, рука у тела)")
+	print("✅ TROLL_Funnn загружена (очень быстрая, рука касается)")
 end;
 task.spawn(C_d6);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
