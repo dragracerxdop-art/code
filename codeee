@@ -5476,7 +5476,7 @@ task.spawn(C_bb);
 local function C_bf()
 local script = G2L["bf"];
 	-- ==========================================
-	-- HB_Toggle (ВКЛ/ВЫКЛ РАБОТЫ ХИТБОКСА)
+	-- HB_Toggle (ТОЛЬКО УВЕЛИЧЕНИЕ ОРУЖИЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -5485,8 +5485,6 @@ local script = G2L["bf"];
 	local hitboxEnabled = false
 	local hitboxSize = 5
 	local hitboxLoop = nil
-	
-	-- ====== ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ======
 	_G.HitboxEnabled = false
 	
 	-- ====== ИНДИКАТОР ======
@@ -5504,11 +5502,9 @@ local script = G2L["bf"];
 	-- ====== ПОЛЕ ДЛЯ РАЗМЕРА ======
 	local rightFrame = button.Parent
 	local sizeBox = rightFrame:FindFirstChild("HB_Size")
-	
 	if sizeBox then
 		sizeBox.PlaceholderText = "Размер (1-7)"
 		sizeBox.Text = tostring(hitboxSize)
-	
 		sizeBox:GetPropertyChangedSignal("Text"):Connect(function()
 			local val = tonumber(sizeBox.Text)
 			if val then
@@ -5535,12 +5531,10 @@ local script = G2L["bf"];
 		local parts = {}
 		local char = player.Character
 		if not char then return parts end
-	
 		for _, part in pairs(char:GetDescendants()) do
 			if part:IsA("BasePart") or part:IsA("MeshPart") then
 				local partName = part.Name:lower()
 				local parentName = part.Parent and part.Parent.Name or ""
-	
 				if (partName == "blade" or partName == "handle") and parentName == "HandleSaved" then
 					table.insert(parts, part)
 				end
@@ -5549,11 +5543,10 @@ local script = G2L["bf"];
 		return parts
 	end
 	
-	-- ====== ПРИМЕНЕНИЕ ХИТБОКСА ======
+	-- ====== ПРИМЕНЕНИЕ (ТОЛЬКО РАЗМЕР) ======
 	local function applyHitbox()
 		local size = math.clamp(hitboxSize, 1, 7)
 		local parts = findWeaponParts()
-	
 		for _, part in pairs(parts) do
 			pcall(function()
 				local originalSize = part:GetAttribute("OriginalSize")
@@ -5561,8 +5554,6 @@ local script = G2L["bf"];
 					part:SetAttribute("OriginalSize", part.Size)
 					originalSize = part.Size
 				end
-	
-				-- 👇 ТОЛЬКО УВЕЛИЧИВАЕМ, НЕ МЕНЯЕМ ЦВЕТ!
 				part.Size = originalSize * size
 				part.CanCollide = false
 			end)
@@ -5590,7 +5581,6 @@ local script = G2L["bf"];
 	local function toggleHitbox()
 		hitboxEnabled = not hitboxEnabled
 		_G.HitboxEnabled = hitboxEnabled
-	
 		if hitboxEnabled then
 			if hitboxLoop then hitboxLoop:Disconnect() end
 			applyHitbox()
@@ -5603,20 +5593,18 @@ local script = G2L["bf"];
 			restoreHitbox()
 			print("🗡️ Хитбокс ВЫКЛ")
 		end
-	
 		updateIndicator()
 	end
 	
 	button.MouseButton1Click:Connect(toggleHitbox)
 	
-	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
 		if hitboxEnabled then applyHitbox() end
 	end)
 	
 	updateIndicator()
-	print("✅ HB_Toggle загружена (только увеличение, цвет меняет HB_Visible)")
+	print("✅ HB_Toggle загружена (только увеличение)")
 end;
 task.spawn(C_bf);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Toggle.LocalScript
@@ -5791,7 +5779,6 @@ local script = G2L["ce"];
 	local player = game.Players.LocalPlayer
 	local runService = game:GetService("RunService")
 	
-	-- ====== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ======
 	_G.HitboxVisible = false
 	local visualLoop = nil
 	
@@ -5812,12 +5799,10 @@ local script = G2L["ce"];
 		local parts = {}
 		local char = player.Character
 		if not char then return parts end
-	
 		for _, part in pairs(char:GetDescendants()) do
 			if part:IsA("BasePart") or part:IsA("MeshPart") then
 				local partName = part.Name:lower()
 				local parentName = part.Parent and part.Parent.Name or ""
-	
 				if (partName == "blade" or partName == "handle") and parentName == "HandleSaved" then
 					table.insert(parts, part)
 				end
@@ -5826,24 +5811,23 @@ local script = G2L["ce"];
 		return parts
 	end
 	
-	-- ====== ПРИМЕНЕНИЕ ВИЗУАЛА (ТЕМНО-ФИОЛЕТОВЫЙ) ======
+	-- ====== ПРИМЕНЕНИЕ ВИЗУАЛА ======
 	local function applyVisual()
 		local parts = findWeaponParts()
-	
 		for _, part in pairs(parts) do
 			pcall(function()
+				-- Если хитбокс включен И видимость включена
 				if _G.HitboxVisible and _G.HitboxEnabled then
-					-- 👇 ТЕМНО-ФИОЛЕТОВЫЙ НЕОН
 					part.Transparency = 0.4
-					part.BrickColor = BrickColor.new("Really dark purple")  -- ТЕМНО-ФИОЛЕТОВЫЙ
+					part.BrickColor = BrickColor.new("Really dark purple")
 					part.Material = Enum.Material.Neon
+					-- Если хитбокс включен, но видимость выключена
 				elseif _G.HitboxEnabled then
-					-- НЕВИДИМЫЙ (но увеличенный)
 					part.Transparency = 1
 					part.BrickColor = BrickColor.new("Medium stone grey")
 					part.Material = Enum.Material.Plastic
+					-- Если хитбокс выключен
 				else
-					-- НОРМАЛЬНЫЙ
 					part.Transparency = 0
 					part.BrickColor = BrickColor.new("Medium stone grey")
 					part.Material = Enum.Material.Plastic
@@ -5863,13 +5847,12 @@ local script = G2L["ce"];
 		end
 	end
 	
-	-- ====== ЗАПУСК ЦИКЛА ======
+	-- ====== ЦИКЛ ======
 	local function startVisualLoop()
 		if visualLoop then
 			visualLoop:Disconnect()
 			visualLoop = nil
 		end
-	
 		visualLoop = runService.RenderStepped:Connect(function()
 			applyVisual()
 		end)
@@ -5880,11 +5863,9 @@ local script = G2L["ce"];
 		_G.HitboxVisible = not _G.HitboxVisible
 		applyVisual()
 		updateIndicator()
-	
 		if not visualLoop then
 			startVisualLoop()
 		end
-	
 		print(_G.HitboxVisible and "👁️ Хитбокс ВИДИМ (темно-фиолетовый)" or "👁️ Хитбокс СКРЫТ")
 	end
 	
@@ -5903,10 +5884,8 @@ local script = G2L["ce"];
 		startVisualLoop()
 	end)
 	
-	-- ====== ЗАПУСК ЦИКЛА ПРИ СТАРТЕ ======
 	startVisualLoop()
 	updateIndicator()
-	
 	print("✅ HB_Visible загружена (темно-фиолетовый неон)")
 end;
 task.spawn(C_ce);
