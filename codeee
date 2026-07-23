@@ -5476,7 +5476,7 @@ task.spawn(C_bb);
 local function C_bf()
 local script = G2L["bf"];
 	-- ==========================================
-	-- Z0_Hitbox (ВКЛ/ВЫКЛ РАБОТЫ)
+	-- HB_Toggle (ВКЛ/ВЫКЛ РАБОТЫ ХИТБОКСА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -5497,8 +5497,9 @@ local script = G2L["bf"];
 	indicator.Font = Enum.Font.SourceSansBold
 	indicator.Parent = button
 	
+	-- ====== ПОЛЕ ДЛЯ РАЗМЕРА ======
 	local rightFrame = button.Parent
-	local sizeBox = rightFrame:FindFirstChild("ZO_HitboxSize")
+	local sizeBox = rightFrame:FindFirstChild("HB_Size")
 	
 	if sizeBox then
 		sizeBox.PlaceholderText = "Размер (1-7)"
@@ -5514,6 +5515,7 @@ local script = G2L["bf"];
 		end)
 	end
 	
+	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
 	local function updateIndicator()
 		if hitboxEnabled then
 			indicator.Text = "ВКЛ"
@@ -5524,61 +5526,92 @@ local script = G2L["bf"];
 		end
 	end
 	
+	-- ====== ПОИСК ОРУЖИЯ (blade) ======
+	local function findWeaponParts()
+		local parts = {}
+		local char = player.Character
+		if not char then return parts end
+	
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") or part:IsA("MeshPart") then
+				local partName = part.Name:lower()
+				local parentName = part.Parent and part.Parent.Name or ""
+	
+				if (partName == "blade" or partName == "handle") and parentName == "HandleSaved" then
+					table.insert(parts, part)
+				end
+			end
+		end
+		return parts
+	end
+	
+	-- ====== ПРИМЕНЕНИЕ ХИТБОКСА ======
 	local function applyHitbox()
 		local size = math.clamp(hitboxSize, 1, 7)
-		for _, plr in pairs(game.Players:GetPlayers()) do
-			if plr ~= player and plr.Character then
-				local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
-				if hrp then
-					pcall(function()
-						hrp.Size = Vector3.new(size, size, size)
-						hrp.CanCollide = false
-						if _G.HitboxVisible then
-							hrp.Transparency = 0.5
-							hrp.BrickColor = BrickColor.new("Lilac")
-							hrp.Material = Enum.Material.Neon
-						else
-							hrp.Transparency = 1
-							hrp.BrickColor = BrickColor.new("Medium stone grey")
-							hrp.Material = Enum.Material.Plastic
-						end
-					end)
+		local parts = findWeaponParts()
+	
+		for _, part in pairs(parts) do
+			pcall(function()
+				local originalSize = part:GetAttribute("OriginalSize")
+				if not originalSize then
+					part:SetAttribute("OriginalSize", part.Size)
+					originalSize = part.Size
 				end
-			end
+	
+				-- 👇 УВЕЛИЧИВАЕМ ОРУЖИЕ
+				part.Size = originalSize * size
+				part.CanCollide = false
+	
+				-- 👇 ВИДИМОСТЬ
+				if _G.HitboxVisible then
+					part.Transparency = 0.5
+					part.BrickColor = BrickColor.new("Lilac")
+					part.Material = Enum.Material.Neon
+				else
+					part.Transparency = 0
+					if originalSize then
+						part.BrickColor = BrickColor.new("Medium stone grey")
+						part.Material = Enum.Material.Plastic
+					end
+				end
+			end)
 		end
 	end
 	
+	-- ====== ВОССТАНОВЛЕНИЕ ======
 	local function restoreHitbox()
-		for _, plr in pairs(game.Players:GetPlayers()) do
-			if plr ~= player and plr.Character then
-				local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
-				if hrp then
-					pcall(function()
-						hrp.Size = Vector3.new(2, 2, 1)
-						hrp.Transparency = 1
-						hrp.BrickColor = BrickColor.new("Medium stone grey")
-						hrp.Material = Enum.Material.Plastic
-						hrp.CanCollide = false
-					end)
+		local parts = findWeaponParts()
+		for _, part in pairs(parts) do
+			pcall(function()
+				local originalSize = part:GetAttribute("OriginalSize")
+				if originalSize then
+					part.Size = originalSize
 				end
-			end
+				part.Transparency = 0
+				part.BrickColor = BrickColor.new("Medium stone grey")
+				part.Material = Enum.Material.Plastic
+				part.CanCollide = false
+			end)
 		end
 	end
 	
+	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	local function toggleHitbox()
 		hitboxEnabled = not hitboxEnabled
+	
 		if hitboxEnabled then
 			if hitboxLoop then hitboxLoop:Disconnect() end
 			applyHitbox()
 			hitboxLoop = runService.RenderStepped:Connect(function()
 				if hitboxEnabled then applyHitbox() end
 			end)
-			print("🟣 Хитбокс ВКЛ (размер: " .. hitboxSize .. ")")
+			print("🗡️ Хитбокс ВКЛ (размер: " .. hitboxSize .. "x)")
 		else
 			if hitboxLoop then hitboxLoop:Disconnect() hitboxLoop = nil end
 			restoreHitbox()
-			print("🟣 Хитбокс ВЫКЛ")
+			print("🗡️ Хитбокс ВЫКЛ")
 		end
+	
 		updateIndicator()
 	end
 	
@@ -5590,19 +5623,24 @@ local script = G2L["bf"];
 	end)
 	
 	updateIndicator()
-	print("✅ Z0_Hitbox загружена")
+	print("✅ HB_Toggle загружена (увеличение оружия)")
 end;
 task.spawn(C_bf);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Toggle.LocalScript
 local function C_c3()
 local script = G2L["c3"];
 	-- ==========================================
-	-- ZO_FOV (ВКЛ/ВЫКЛ FOV)
+	-- FOV_Toggle (ВКЛ/ВЫКЛ FOV - КАК В HBE)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
+	local runService = game:GetService("RunService")
+	local camera = workspace.CurrentCamera
 	
 	local fovEnabled = false
+	local fovValue = 70
+	local fovLoop = nil
+	local originalFov = 70
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -5616,6 +5654,25 @@ local script = G2L["c3"];
 	indicator.Font = Enum.Font.SourceSansBold
 	indicator.Parent = button
 	
+	-- ====== ПОЛЕ ДЛЯ FOV ======
+	local rightFrame = button.Parent
+	local fovBox = rightFrame:FindFirstChild("FOV_Value")
+	
+	if fovBox then
+		fovBox.PlaceholderText = "FOV (70-120)"
+		fovBox.Text = tostring(fovValue)
+	
+		fovBox:GetPropertyChangedSignal("Text"):Connect(function()
+			local val = tonumber(fovBox.Text)
+			if val then
+				fovValue = math.clamp(val, 70, 120)
+				fovBox.Text = tostring(fovValue)
+				if fovEnabled then applyFOV() end
+				print("👁️ FOV установлен: " .. fovValue .. "°")
+			end
+		end)
+	end
+	
 	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
 	local function updateIndicator()
 		if fovEnabled then
@@ -5627,32 +5684,88 @@ local script = G2L["c3"];
 		end
 	end
 	
+	-- ====== ПРИМЕНЕНИЕ FOV (КАК В HBE) ======
+	local function applyFOV()
+		if fovEnabled then
+			local cam = workspace.CurrentCamera
+			if cam then
+				cam.FieldOfView = fovValue
+				cam.CameraType = Enum.CameraType.Custom
+			end
+		end
+	end
+	
+	-- ====== ВОССТАНОВЛЕНИЕ ======
+	local function restoreFOV()
+		local cam = workspace.CurrentCamera
+		if cam then
+			cam.FieldOfView = originalFov
+			cam.CameraType = Enum.CameraType.Custom
+		end
+	end
+	
 	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	local function toggleFOV()
 		fovEnabled = not fovEnabled
 	
-		-- Вызываем функцию из поля ZO_FOWValue
-		local rightFrame = button.Parent
-		local fovBox = rightFrame:FindFirstChild("ZO_FOWValue")
-		if fovBox and fovBox.toggleFOV then
-			fovBox.toggleFOV(fovEnabled)
+		if fovEnabled then
+			-- Сохраняем оригинальный FOV
+			originalFov = workspace.CurrentCamera.FieldOfView
+	
+			if fovLoop then
+				fovLoop:Disconnect()
+				fovLoop = nil
+			end
+	
+			applyFOV()
+	
+			-- 👇 ЦИКЛ КАК В HBE (Heartbeat)
+			fovLoop = runService.Heartbeat:Connect(function()
+				if fovEnabled then
+					applyFOV()
+				end
+			end)
+	
+			print("👁️ FOV ВКЛЮЧЕН (" .. fovValue .. "°)")
+		else
+			if fovLoop then
+				fovLoop:Disconnect()
+				fovLoop = nil
+			end
+			restoreFOV()
+			print("👁️ FOV ВЫКЛЮЧЕН")
 		end
 	
 		updateIndicator()
-		print(fovEnabled and "👁️ FOV ВКЛ" or "👁️ FOV ВЫКЛ")
 	end
 	
 	button.MouseButton1Click:Connect(toggleFOV)
 	
+	-- ====== ПРИ РЕСПАВНЕ ======
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5)
+		if fovEnabled then
+			applyFOV()
+		end
+	end)
+	
+	-- ====== ОТСЛЕЖИВАНИЕ СМЕНЫ КАМЕРЫ ======
+	workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+		if fovEnabled then
+			task.wait(0.1)
+			applyFOV()
+		end
+	end)
+	
 	updateIndicator()
-	print("✅ ZO_FOV загружена")
+	print("✅ FOV_Toggle загружена (как в HBE)")
 end;
 task.spawn(C_c3);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Value.LocalScript
 local function C_ca()
 local script = G2L["ca"];
 	-- ==========================================
-	-- ZO_FOWValue (TextBox - ВВОД FOV)
+	-- FOV_Value (TextBox - ВВОД FOV)
 	-- ==========================================
 	local textBox = script.Parent
 	local player = game.Players.LocalPlayer
@@ -5664,7 +5777,6 @@ local script = G2L["ca"];
 	local fovLoop = nil
 	local originalFov = 70
 	
-	-- ====== ПЕРВОНАЧАЛЬНОЕ ЗНАЧЕНИЕ ======
 	textBox.PlaceholderText = "FOV (70-120)"
 	textBox.Text = tostring(fovValue)
 	
@@ -5699,7 +5811,7 @@ local script = G2L["ca"];
 		end
 	end
 	
-	-- ====== ФУНКЦИЯ ВКЛЮЧЕНИЯ FOV (ДЛЯ КНОПКИ ZO_FOV) ======
+	-- ====== ФУНКЦИЯ ДЛЯ КНОПКИ ======
 	function toggleFOV(state)
 		if state == nil then
 			fovEnabled = not fovEnabled
@@ -5728,22 +5840,28 @@ local script = G2L["ca"];
 		if fovEnabled then applyFOV() end
 	end)
 	
-	print("✅ ZO_FOWValue загружена (ввод FOV)")
+	-- ====== ОТСЛЕЖИВАНИЕ СМЕНЫ КАМЕРЫ ======
+	workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+		if fovEnabled then
+			task.wait(0.1)
+			applyFOV()
+		end
+	end)
+	
+	print("✅ FOV_Value загружена")
 end;
 task.spawn(C_ca);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.HB_Visible.LocalScript
 local function C_ce()
 local script = G2L["ce"];
 	-- ==========================================
-	-- ZO_HitboxVisible (ВКЛ/ВЫКЛ ВИДИМОСТИ)
+	-- HB_Visible (ВКЛ/ВЫКЛ ВИДИМОСТИ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	
-	-- ====== ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ======
 	_G.HitboxVisible = false
 	
-	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
 	indicator.Size = UDim2.new(1, 0, 0.3, 0)
@@ -5755,7 +5873,6 @@ local script = G2L["ce"];
 	indicator.Font = Enum.Font.SourceSansBold
 	indicator.Parent = button
 	
-	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
 	local function updateIndicator()
 		if _G.HitboxVisible then
 			indicator.Text = "ВИДИМ"
@@ -5766,22 +5883,16 @@ local script = G2L["ce"];
 		end
 	end
 	
-	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	local function toggleVisible()
 		_G.HitboxVisible = not _G.HitboxVisible
 		updateIndicator()
-	
-		if _G.HitboxVisible then
-			print("👁️ Хитбокс ВИДИМ")
-		else
-			print("👁️ Хитбокс СКРЫТ")
-		end
+		print(_G.HitboxVisible and "👁️ Хитбокс ВИДИМ" or "👁️ Хитбокс СКРЫТ")
 	end
 	
 	button.MouseButton1Click:Connect(toggleVisible)
 	
 	updateIndicator()
-	print("✅ ZO_HitboxVisible загружена (вкл/выкл видимость)")
+	print("✅ HB_Visible загружена")
 end;
 task.spawn(C_ce);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
