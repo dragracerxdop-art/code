@@ -5476,7 +5476,7 @@ task.spawn(C_bb);
 local function C_bf()
 local script = G2L["bf"];
 	-- ==========================================
-	-- HB_Toggle (ВКЛ/ВЫКЛ РАБОТЫ - С ЦИКЛОМ)
+	-- HB_Toggle (ВКЛ/ВЫКЛ РАБОТЫ ХИТБОКСА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -5562,11 +5562,9 @@ local script = G2L["bf"];
 					originalSize = part.Size
 				end
 	
-				-- УВЕЛИЧИВАЕМ
+				-- 👇 ТОЛЬКО УВЕЛИЧИВАЕМ, НЕ МЕНЯЕМ ЦВЕТ!
 				part.Size = originalSize * size
 				part.CanCollide = false
-	
-				-- ВИЗУАЛ (будет применён HB_Visible)
 			end)
 		end
 	end
@@ -5618,7 +5616,7 @@ local script = G2L["bf"];
 	end)
 	
 	updateIndicator()
-	print("✅ HB_Toggle загружена")
+	print("✅ HB_Toggle загружена (только увеличение, цвет меняет HB_Visible)")
 end;
 task.spawn(C_bf);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Toggle.LocalScript
