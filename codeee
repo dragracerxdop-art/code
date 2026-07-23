@@ -5799,10 +5799,12 @@ local script = G2L["ce"];
 		local parts = {}
 		local char = player.Character
 		if not char then return parts end
+	
 		for _, part in pairs(char:GetDescendants()) do
 			if part:IsA("BasePart") or part:IsA("MeshPart") then
 				local partName = part.Name:lower()
 				local parentName = part.Parent and part.Parent.Name or ""
+	
 				if (partName == "blade" or partName == "handle") and parentName == "HandleSaved" then
 					table.insert(parts, part)
 				end
@@ -5811,25 +5813,26 @@ local script = G2L["ce"];
 		return parts
 	end
 	
-	-- ====== ПРИМЕНЕНИЕ ВИЗУАЛА ======
+	-- ====== ПРИМЕНЕНИЕ ВИЗУАЛА (ТЕМНО-ФИОЛЕТОВЫЙ) ======
 	local function applyVisual()
 		local parts = findWeaponParts()
+	
 		for _, part in pairs(parts) do
 			pcall(function()
-				-- Если хитбокс включен И видимость включена
 				if _G.HitboxVisible and _G.HitboxEnabled then
+					-- 👇 ТЕМНО-ФИОЛЕТОВЫЙ (RGB: 75, 0, 130)
 					part.Transparency = 0.4
-					part.BrickColor = BrickColor.new("Really dark purple")
+					part.Color = Color3.fromRGB(75, 0, 130)
 					part.Material = Enum.Material.Neon
-					-- Если хитбокс включен, но видимость выключена
 				elseif _G.HitboxEnabled then
+					-- НЕВИДИМЫЙ (но увеличенный)
 					part.Transparency = 1
-					part.BrickColor = BrickColor.new("Medium stone grey")
+					part.Color = Color3.fromRGB(128, 128, 128)
 					part.Material = Enum.Material.Plastic
-					-- Если хитбокс выключен
 				else
+					-- НОРМАЛЬНЫЙ
 					part.Transparency = 0
-					part.BrickColor = BrickColor.new("Medium stone grey")
+					part.Color = Color3.fromRGB(128, 128, 128)
 					part.Material = Enum.Material.Plastic
 				end
 			end)
@@ -5847,12 +5850,13 @@ local script = G2L["ce"];
 		end
 	end
 	
-	-- ====== ЦИКЛ ======
+	-- ====== ЗАПУСК ЦИКЛА ======
 	local function startVisualLoop()
 		if visualLoop then
 			visualLoop:Disconnect()
 			visualLoop = nil
 		end
+	
 		visualLoop = runService.RenderStepped:Connect(function()
 			applyVisual()
 		end)
@@ -5863,9 +5867,11 @@ local script = G2L["ce"];
 		_G.HitboxVisible = not _G.HitboxVisible
 		applyVisual()
 		updateIndicator()
+	
 		if not visualLoop then
 			startVisualLoop()
 		end
+	
 		print(_G.HitboxVisible and "👁️ Хитбокс ВИДИМ (темно-фиолетовый)" or "👁️ Хитбокс СКРЫТ")
 	end
 	
@@ -5884,8 +5890,10 @@ local script = G2L["ce"];
 		startVisualLoop()
 	end)
 	
+	-- ====== ЗАПУСК ЦИКЛА ПРИ СТАРТЕ ======
 	startVisualLoop()
 	updateIndicator()
+	
 	print("✅ HB_Visible загружена (темно-фиолетовый неон)")
 end;
 task.spawn(C_ce);
