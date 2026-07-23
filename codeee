@@ -4888,7 +4888,7 @@ task.spawn(C_af);
 local function C_b3()
 local script = G2L["b3"];
 	-- ==========================================
-	-- TROLL_Invisible (FE INVISIBLE СТИЛЬ)
+	-- TROLL_Invisible (БЕЗ ВИДИМОГО БЛОКА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -4903,7 +4903,7 @@ local script = G2L["b3"];
 		invis_on = not invis_on
 	
 		if invis_on then
-			-- Метод из твоего скрипта
+			-- Делаем персонажа прозрачным
 			for _, part in pairs(char:GetDescendants()) do
 				if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
 					part.Transparency = 0.75
@@ -4923,7 +4923,8 @@ local script = G2L["b3"];
 				Seat.Anchored = false
 				Seat.CanCollide = false
 				Seat.Name = 'invischair'
-				Seat.Transparency = 1
+				Seat.Transparency = 1  -- 👈 УЖЕ НЕВИДИМЫЙ
+				Seat.Size = Vector3.new(0.1, 0.1, 0.1)  -- 👈 МАЛЕНЬКИЙ (на всякий случай)
 				Seat.Position = seatTeleportPosition
 	
 				local Weld = Instance.new("Weld")
@@ -4940,13 +4941,14 @@ local script = G2L["b3"];
 			button.Text = "Инвиз Вкл"
 			print("👻 ИНВИЗ ВКЛ!")
 		else
-			-- Отключаем
+			-- Возвращаем видимость
 			for _, part in pairs(char:GetDescendants()) do
 				if part:IsA("BasePart") then
 					part.Transparency = 0
 				end
 			end
 	
+			-- Удаляем сиденье
 			local inv = workspace:FindFirstChild('invischair')
 			if inv then
 				pcall(function() inv:Destroy() end)
@@ -4957,7 +4959,7 @@ local script = G2L["b3"];
 		end
 	end)
 	
-	print("✅ FE INVISIBLE СТИЛЬ ЗАГРУЖЕН!")
+	print("✅ TROLL_Invisible (без блока) загружен!")
 end;
 task.spawn(C_b3);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Slap.LocalScript
