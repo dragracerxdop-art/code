@@ -5788,7 +5788,7 @@ task.spawn(C_ce);
 local function C_e1()
 local script = G2L["e1"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ФИНАЛЬНАЯ ВЕРСИЯ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -6017,7 +6017,7 @@ local script = G2L["e1"];
 	end
 	
 	switchTab("TELEPORT")
-	print("✅ Переключение вкладок загружено! (Zo Wip обновлена)")
+	print("✅ Переключение вкладок загружено!")
 end;
 task.spawn(C_e1);
 -- StarterGui.Folder.PurpHub.MainFrame.HotKeys
