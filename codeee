@@ -7,7 +7,7 @@
  Y888P  ~Y8888P' Y888888P      888888D      Y88888P ~Y8888P' YP   YP  CONVERTER 
 ]=]
 
--- Instances: 238 | Scripts: 45 | Modules: 0 | Tags: 0
+-- Instances: 242 | Scripts: 46 | Modules: 0 | Tags: 0
 local G2L = {};
 
 -- StarterGui.Folder.PurpHub
@@ -100,6 +100,7 @@ G2L["c"] = Instance.new("LocalScript", G2L["2"]);
 G2L["d"] = Instance.new("ScrollingFrame", G2L["2"]);
 G2L["d"]["Active"] = true;
 G2L["d"]["BorderSizePixel"] = 0;
+G2L["d"]["CanvasPosition"] = Vector2.new(0, 300);
 G2L["d"]["Name"] = [[RightFrame]];
 G2L["d"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["d"]["Size"] = UDim2.new(0, 352, 0, 420);
@@ -180,6 +181,7 @@ G2L["17"] = Instance.new("LocalScript", G2L["14"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_AutoFarm
 G2L["18"] = Instance.new("ImageButton", G2L["d"]);
 G2L["18"]["BorderSizePixel"] = 0;
+G2L["18"]["Visible"] = false;
 G2L["18"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["18"]["Image"] = [[rbxassetid://127936962150252]];
 G2L["18"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -493,7 +495,6 @@ G2L["43"] = Instance.new("LocalScript", G2L["40"]);
 G2L["44"] = Instance.new("ScrollingFrame", G2L["d"]);
 G2L["44"]["Active"] = true;
 G2L["44"]["BorderSizePixel"] = 0;
-G2L["44"]["CanvasPosition"] = Vector2.new(0, 200);
 G2L["44"]["Name"] = [[MISC_PlayerList]];
 G2L["44"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["44"]["Size"] = UDim2.new(0, 172, 0, 158);
@@ -851,6 +852,7 @@ G2L["73"] = Instance.new("LocalScript", G2L["70"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_CheckRoles
 G2L["74"] = Instance.new("ImageButton", G2L["d"]);
 G2L["74"]["BorderSizePixel"] = 0;
+G2L["74"]["Visible"] = false;
 G2L["74"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["74"]["Image"] = [[rbxassetid://138062329634192]];
 G2L["74"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -877,6 +879,7 @@ G2L["77"] = Instance.new("LocalScript", G2L["74"]);
 
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_Roles
 G2L["78"] = Instance.new("Frame", G2L["d"]);
+G2L["78"]["Visible"] = false;
 G2L["78"]["BorderSizePixel"] = 0;
 G2L["78"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["78"]["Size"] = UDim2.new(0, 265, 0, 158);
@@ -949,6 +952,7 @@ G2L["80"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_ESP
 G2L["81"] = Instance.new("ImageButton", G2L["d"]);
 G2L["81"]["BorderSizePixel"] = 0;
+G2L["81"]["Visible"] = false;
 G2L["81"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["81"]["Image"] = [[rbxassetid://103019120424174]];
 G2L["81"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -976,6 +980,7 @@ G2L["84"] = Instance.new("LocalScript", G2L["81"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_GunESP
 G2L["85"] = Instance.new("ImageButton", G2L["d"]);
 G2L["85"]["BorderSizePixel"] = 0;
+G2L["85"]["Visible"] = false;
 G2L["85"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["85"]["Image"] = [[rbxassetid://84784920557317]];
 G2L["85"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -1003,6 +1008,7 @@ G2L["88"] = Instance.new("LocalScript", G2L["85"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_PickUpGun
 G2L["89"] = Instance.new("ImageButton", G2L["d"]);
 G2L["89"]["BorderSizePixel"] = 0;
+G2L["89"]["Visible"] = false;
 G2L["89"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["89"]["Image"] = [[rbxassetid://96970545749565]];
 G2L["89"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -1568,203 +1574,232 @@ G2L["d2"] = Instance.new("LocalScript", G2L["cf"]);
 
 
 
--- StarterGui.Folder.PurpHub.MainFrame.LeftFrame
-G2L["d3"] = Instance.new("ScrollingFrame", G2L["2"]);
-G2L["d3"]["Active"] = true;
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Funnn
+G2L["d3"] = Instance.new("ImageButton", G2L["d"]);
 G2L["d3"]["BorderSizePixel"] = 0;
-G2L["d3"]["CanvasPosition"] = Vector2.new(0, 200);
-G2L["d3"]["Name"] = [[LeftFrame]];
-G2L["d3"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["d3"]["Size"] = UDim2.new(0, 149, 0, 419);
-G2L["d3"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["d3"]["Position"] = UDim2.new(-0.00018, 0, 0.12682, 0);
+G2L["d3"]["Visible"] = false;
+G2L["d3"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["d3"]["Image"] = [[rbxassetid://115989295858264]];
+G2L["d3"]["Size"] = UDim2.new(0, 149, 0, 73);
 G2L["d3"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["d3"]["ScrollBarThickness"] = 0;
+G2L["d3"]["Name"] = [[TROLL_Funnn]];
+G2L["d3"]["Position"] = UDim2.new(0.514, 0, 0.392, 0);
 
 
--- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.UICorner
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Funnn.UICorner
 G2L["d4"] = Instance.new("UICorner", G2L["d3"]);
 G2L["d4"]["CornerRadius"] = UDim.new(0, 25);
 
 
--- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.UIStroke
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Funnn.UIStroke
 G2L["d5"] = Instance.new("UIStroke", G2L["d3"]);
 G2L["d5"]["Thickness"] = 3;
 G2L["d5"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["d5"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
+
+
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Funnn.LocalScript
+G2L["d6"] = Instance.new("LocalScript", G2L["d3"]);
+
+
+
+-- StarterGui.Folder.PurpHub.MainFrame.LeftFrame
+G2L["d7"] = Instance.new("ScrollingFrame", G2L["2"]);
+G2L["d7"]["Active"] = true;
+G2L["d7"]["BorderSizePixel"] = 0;
+G2L["d7"]["CanvasPosition"] = Vector2.new(0, 100);
+G2L["d7"]["Name"] = [[LeftFrame]];
+G2L["d7"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["d7"]["Size"] = UDim2.new(0, 149, 0, 419);
+G2L["d7"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["d7"]["Position"] = UDim2.new(-0.00018, 0, 0.12682, 0);
+G2L["d7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["d7"]["ScrollBarThickness"] = 0;
+
+
+-- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.UICorner
+G2L["d8"] = Instance.new("UICorner", G2L["d7"]);
+G2L["d8"]["CornerRadius"] = UDim.new(0, 25);
+
+
+-- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.UIStroke
+G2L["d9"] = Instance.new("UIStroke", G2L["d7"]);
+G2L["d9"]["Thickness"] = 3;
+G2L["d9"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.ESP
-G2L["d6"] = Instance.new("ImageButton", G2L["d3"]);
-G2L["d6"]["BorderSizePixel"] = 0;
-G2L["d6"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["d6"]["Image"] = [[rbxassetid://115832341179452]];
-G2L["d6"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["d6"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["d6"]["Name"] = [[ESP]];
+G2L["da"] = Instance.new("ImageButton", G2L["d7"]);
+G2L["da"]["BorderSizePixel"] = 0;
+G2L["da"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["da"]["Image"] = [[rbxassetid://115832341179452]];
+G2L["da"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["da"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["da"]["Name"] = [[ESP]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.ESP.UICorner
-G2L["d7"] = Instance.new("UICorner", G2L["d6"]);
-G2L["d7"]["CornerRadius"] = UDim.new(0, 25);
+G2L["db"] = Instance.new("UICorner", G2L["da"]);
+G2L["db"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.ESP.UIStroke
-G2L["d8"] = Instance.new("UIStroke", G2L["d6"]);
-G2L["d8"]["Thickness"] = 3;
-G2L["d8"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["dc"] = Instance.new("UIStroke", G2L["da"]);
+G2L["dc"]["Thickness"] = 3;
+G2L["dc"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Troll
-G2L["d9"] = Instance.new("ImageButton", G2L["d3"]);
-G2L["d9"]["BorderSizePixel"] = 0;
-G2L["d9"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["d9"]["Image"] = [[rbxassetid://86069927634963]];
-G2L["d9"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["d9"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["d9"]["Name"] = [[Troll]];
-G2L["d9"]["Position"] = UDim2.new(0, 0, 0.34304, 0);
+G2L["dd"] = Instance.new("ImageButton", G2L["d7"]);
+G2L["dd"]["BorderSizePixel"] = 0;
+G2L["dd"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["dd"]["Image"] = [[rbxassetid://86069927634963]];
+G2L["dd"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["dd"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["dd"]["Name"] = [[Troll]];
+G2L["dd"]["Position"] = UDim2.new(0, 0, 0.34304, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Troll.UICorner
-G2L["da"] = Instance.new("UICorner", G2L["d9"]);
-G2L["da"]["CornerRadius"] = UDim.new(0, 25);
+G2L["de"] = Instance.new("UICorner", G2L["dd"]);
+G2L["de"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Troll.UIStroke
-G2L["db"] = Instance.new("UIStroke", G2L["d9"]);
-G2L["db"]["Thickness"] = 3;
-G2L["db"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["df"] = Instance.new("UIStroke", G2L["dd"]);
+G2L["df"]["Thickness"] = 3;
+G2L["df"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MISC
-G2L["dc"] = Instance.new("ImageButton", G2L["d3"]);
-G2L["dc"]["BorderSizePixel"] = 0;
-G2L["dc"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["dc"]["Image"] = [[rbxassetid://113127774037849]];
-G2L["dc"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["dc"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["dc"]["Name"] = [[MISC]];
-G2L["dc"]["Position"] = UDim2.new(0, 0, 0.25676, 0);
+G2L["e0"] = Instance.new("ImageButton", G2L["d7"]);
+G2L["e0"]["BorderSizePixel"] = 0;
+G2L["e0"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["e0"]["Image"] = [[rbxassetid://113127774037849]];
+G2L["e0"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["e0"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["e0"]["Name"] = [[MISC]];
+G2L["e0"]["Position"] = UDim2.new(0, 0, 0.25676, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MISC.UICorner
-G2L["dd"] = Instance.new("UICorner", G2L["dc"]);
-G2L["dd"]["CornerRadius"] = UDim.new(0, 25);
+G2L["e1"] = Instance.new("UICorner", G2L["e0"]);
+G2L["e1"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MISC.UIStroke
-G2L["de"] = Instance.new("UIStroke", G2L["dc"]);
-G2L["de"]["Thickness"] = 3;
-G2L["de"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["e2"] = Instance.new("UIStroke", G2L["e0"]);
+G2L["e2"]["Thickness"] = 3;
+G2L["e2"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SPECTATE
-G2L["df"] = Instance.new("ImageButton", G2L["d3"]);
-G2L["df"]["BorderSizePixel"] = 0;
-G2L["df"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["df"]["Image"] = [[rbxassetid://88668758714272]];
-G2L["df"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["df"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["df"]["Name"] = [[SPECTATE]];
-G2L["df"]["Position"] = UDim2.new(0, 0, 0.17152, 0);
+G2L["e3"] = Instance.new("ImageButton", G2L["d7"]);
+G2L["e3"]["BorderSizePixel"] = 0;
+G2L["e3"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["e3"]["Image"] = [[rbxassetid://88668758714272]];
+G2L["e3"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["e3"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["e3"]["Name"] = [[SPECTATE]];
+G2L["e3"]["Position"] = UDim2.new(0, 0, 0.17152, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SPECTATE.UICorner
-G2L["e0"] = Instance.new("UICorner", G2L["df"]);
-G2L["e0"]["CornerRadius"] = UDim.new(0, 25);
+G2L["e4"] = Instance.new("UICorner", G2L["e3"]);
+G2L["e4"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SPECTATE.UIStroke
-G2L["e1"] = Instance.new("UIStroke", G2L["df"]);
-G2L["e1"]["Thickness"] = 3;
-G2L["e1"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["e5"] = Instance.new("UIStroke", G2L["e3"]);
+G2L["e5"]["Thickness"] = 3;
+G2L["e5"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.TELEPORT
-G2L["e2"] = Instance.new("ImageButton", G2L["d3"]);
-G2L["e2"]["BorderSizePixel"] = 0;
-G2L["e2"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["e2"]["Image"] = [[rbxassetid://111184600011102]];
-G2L["e2"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["e2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["e2"]["Name"] = [[TELEPORT]];
-G2L["e2"]["Position"] = UDim2.new(0, 0, 0.08628, 0);
+G2L["e6"] = Instance.new("ImageButton", G2L["d7"]);
+G2L["e6"]["BorderSizePixel"] = 0;
+G2L["e6"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["e6"]["Image"] = [[rbxassetid://111184600011102]];
+G2L["e6"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["e6"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["e6"]["Name"] = [[TELEPORT]];
+G2L["e6"]["Position"] = UDim2.new(0, 0, 0.08628, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.TELEPORT.UICorner
-G2L["e3"] = Instance.new("UICorner", G2L["e2"]);
-G2L["e3"]["CornerRadius"] = UDim.new(0, 25);
-
-
--- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.TELEPORT.UIStroke
-G2L["e4"] = Instance.new("UIStroke", G2L["e2"]);
-G2L["e4"]["Thickness"] = 3;
-G2L["e4"]["Color"] = Color3.fromRGB(180, 4, 255);
-
-
--- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
-G2L["e5"] = Instance.new("LocalScript", G2L["d3"]);
-G2L["e5"]["Name"] = [[SwitchTabs]];
-
-
--- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MM2
-G2L["e6"] = Instance.new("ImageButton", G2L["d3"]);
-G2L["e6"]["BorderSizePixel"] = 0;
-G2L["e6"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["e6"]["Image"] = [[rbxassetid://88896945785744]];
-G2L["e6"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["e6"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["e6"]["Name"] = [[MM2]];
-G2L["e6"]["Position"] = UDim2.new(0, 0, 0.429, 0);
-
-
--- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MM2.UICorner
 G2L["e7"] = Instance.new("UICorner", G2L["e6"]);
 G2L["e7"]["CornerRadius"] = UDim.new(0, 25);
 
 
--- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MM2.UIStroke
+-- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.TELEPORT.UIStroke
 G2L["e8"] = Instance.new("UIStroke", G2L["e6"]);
 G2L["e8"]["Thickness"] = 3;
 G2L["e8"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
+-- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
+G2L["e9"] = Instance.new("LocalScript", G2L["d7"]);
+G2L["e9"]["Name"] = [[SwitchTabs]];
+
+
+-- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MM2
+G2L["ea"] = Instance.new("ImageButton", G2L["d7"]);
+G2L["ea"]["BorderSizePixel"] = 0;
+G2L["ea"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["ea"]["Image"] = [[rbxassetid://88896945785744]];
+G2L["ea"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["ea"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["ea"]["Name"] = [[MM2]];
+G2L["ea"]["Position"] = UDim2.new(0, 0, 0.429, 0);
+
+
+-- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MM2.UICorner
+G2L["eb"] = Instance.new("UICorner", G2L["ea"]);
+G2L["eb"]["CornerRadius"] = UDim.new(0, 25);
+
+
+-- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MM2.UIStroke
+G2L["ec"] = Instance.new("UIStroke", G2L["ea"]);
+G2L["ec"]["Thickness"] = 3;
+G2L["ec"]["Color"] = Color3.fromRGB(180, 4, 255);
+
+
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Zo Wip
-G2L["e9"] = Instance.new("ImageButton", G2L["d3"]);
-G2L["e9"]["BorderSizePixel"] = 0;
-G2L["e9"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["e9"]["Image"] = [[rbxassetid://94848246522699]];
-G2L["e9"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["e9"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["e9"]["Name"] = [[Zo Wip]];
-G2L["e9"]["Position"] = UDim2.new(0, 0, 0.515, 0);
+G2L["ed"] = Instance.new("ImageButton", G2L["d7"]);
+G2L["ed"]["BorderSizePixel"] = 0;
+G2L["ed"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["ed"]["Image"] = [[rbxassetid://94848246522699]];
+G2L["ed"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["ed"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["ed"]["Name"] = [[Zo Wip]];
+G2L["ed"]["Position"] = UDim2.new(0, 0, 0.515, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Zo Wip.UICorner
-G2L["ea"] = Instance.new("UICorner", G2L["e9"]);
-G2L["ea"]["CornerRadius"] = UDim.new(0, 25);
+G2L["ee"] = Instance.new("UICorner", G2L["ed"]);
+G2L["ee"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Zo Wip.UIStroke
-G2L["eb"] = Instance.new("UIStroke", G2L["e9"]);
-G2L["eb"]["Thickness"] = 3;
-G2L["eb"]["Color"] = Color3.fromRGB(180, 4, 255);
-G2L["eb"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
+G2L["ef"] = Instance.new("UIStroke", G2L["ed"]);
+G2L["ef"]["Thickness"] = 3;
+G2L["ef"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["ef"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.HotKeys
-G2L["ec"] = Instance.new("LocalScript", G2L["2"]);
-G2L["ec"]["Name"] = [[HotKeys]];
+G2L["f0"] = Instance.new("LocalScript", G2L["2"]);
+G2L["f0"]["Name"] = [[HotKeys]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.ESP
-G2L["ed"] = Instance.new("LocalScript", G2L["2"]);
-G2L["ed"]["Name"] = [[ESP]];
+G2L["f1"] = Instance.new("LocalScript", G2L["2"]);
+G2L["f1"]["Name"] = [[ESP]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.AntiFling
-G2L["ee"] = Instance.new("LocalScript", G2L["2"]);
-G2L["ee"]["Name"] = [[AntiFling]];
+G2L["f2"] = Instance.new("LocalScript", G2L["2"]);
+G2L["f2"]["Name"] = [[AntiFling]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.CLose\Open.LocalScript
@@ -6190,11 +6225,197 @@ local script = G2L["d2"];
 	print("✅ TROLL_Back загружена (ТОГГЛ-РЕЖИМ)")
 end;
 task.spawn(C_d2);
--- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
-local function C_e5()
-local script = G2L["e5"];
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Funnn.LocalScript
+local function C_d6()
+local script = G2L["d6"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ + TROLL_Back)
+	-- TROLL_Jerk (ДРОЧКА РУКОЙ)
+	-- ==========================================
+	local button = script.Parent
+	local player = game.Players.LocalPlayer
+	local RunService = game:GetService("RunService")
+	
+	local isActive = false
+	local jerkLoop = nil
+	local originalCFrames = {}
+	
+	-- ====== ИНДИКАТОР ======
+	local indicator = Instance.new("TextLabel")
+	indicator.Name = "Indicator"
+	indicator.Size = UDim2.new(1, 0, 0.3, 0)
+	indicator.Position = UDim2.new(0, 0, 0.7, 0)
+	indicator.BackgroundTransparency = 1
+	indicator.Text = "ВЫКЛ"
+	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+	indicator.TextSize = 14
+	indicator.Font = Enum.Font.SourceSansBold
+	indicator.Parent = button
+	
+	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
+	local function updateIndicator()
+		if isActive then
+			indicator.Text = "💀 JERK"
+			indicator.TextColor3 = Color3.fromRGB(255, 0, 255)
+		else
+			indicator.Text = "ВЫКЛ"
+			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+		end
+	end
+	
+	-- ====== ПОИСК РУК ======
+	local function getArmParts(char)
+		local parts = {}
+	
+		-- Ищем правую руку
+		local arm = char:FindFirstChild("RightArm") or char:FindFirstChild("RightUpperArm")
+		if arm and arm:IsA("BasePart") then
+			table.insert(parts, arm)
+		end
+	
+		-- Ищем левую руку
+		local arm2 = char:FindFirstChild("LeftArm") or char:FindFirstChild("LeftUpperArm")
+		if arm2 and arm2:IsA("BasePart") then
+			table.insert(parts, arm2)
+		end
+	
+		-- Если не нашли руки, ищем любые части с именем Arm
+		if #parts == 0 then
+			for _, part in pairs(char:GetDescendants()) do
+				if part:IsA("BasePart") and (part.Name:lower():find("arm") or part.Name:lower():find("hand")) then
+					table.insert(parts, part)
+				end
+			end
+		end
+	
+		return parts
+	end
+	
+	-- ====== ДРОЧКА РУКОЙ ======
+	local function applyJerk()
+		local char = player.Character
+		if not char then return end
+	
+		local parts = getArmParts(char)
+		if #parts == 0 then return end
+	
+		-- Дёргаем только одну руку (правую, если есть)
+		local arm = parts[1]
+		if not arm then return end
+	
+		pcall(function()
+			if not originalCFrames[arm] then
+				originalCFrames[arm] = arm.CFrame
+			end
+	
+			-- Движение вверх-вниз
+			local time = tick()
+			local speed = 8  -- Скорость дрочки
+			local amplitude = 0.3  -- Амплитуда
+	
+			local offsetY = math.sin(time * speed) * amplitude
+			local offsetX = math.sin(time * speed * 0.5) * 0.1
+	
+			arm.CFrame = originalCFrames[arm] * CFrame.new(offsetX, offsetY, 0) * CFrame.Angles(0, 0, math.sin(time * speed) * 0.1)
+		end)
+	end
+	
+	-- ====== ВОССТАНОВЛЕНИЕ ======
+	local function restoreJerk()
+		for part, originalCFrame in pairs(originalCFrames) do
+			if part and part.Parent then
+				pcall(function()
+					part.CFrame = originalCFrame
+				end)
+			end
+		end
+		originalCFrames = {}
+	end
+	
+	-- ====== ЗАПУСК ======
+	local function startJerk()
+		if isActive then return end
+	
+		local char = player.Character
+		if not char then
+			print("❌ Нет персонажа!")
+			return
+		end
+	
+		local parts = getArmParts(char)
+		if #parts == 0 then
+			print("❌ Руки не найдены!")
+			return
+		end
+	
+		isActive = true
+		updateIndicator()
+	
+		print("💀 Jerk ВКЛЮЧЕН!")
+	
+		if jerkLoop then
+			jerkLoop:Disconnect()
+			jerkLoop = nil
+		end
+	
+		jerkLoop = RunService.RenderStepped:Connect(function()
+			if not isActive then
+				if jerkLoop then
+					jerkLoop:Disconnect()
+					jerkLoop = nil
+				end
+				return
+			end
+	
+			if not player.Character then
+				stopJerk()
+				return
+			end
+	
+			applyJerk()
+		end)
+	end
+	
+	-- ====== ОСТАНОВКА ======
+	local function stopJerk()
+		isActive = false
+		updateIndicator()
+	
+		if jerkLoop then
+			jerkLoop:Disconnect()
+			jerkLoop = nil
+		end
+	
+		restoreJerk()
+		print("💀 Jerk ВЫКЛЮЧЕН!")
+	end
+	
+	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
+	local function toggleJerk()
+		if isActive then
+			stopJerk()
+		else
+			startJerk()
+		end
+	end
+	
+	button.MouseButton1Click:Connect(toggleJerk)
+	
+	-- ====== ПРИ РЕСПАВНЕ ======
+	player.CharacterAdded:Connect(function()
+		if isActive then
+			stopJerk()
+		end
+	end)
+	
+	updateIndicator()
+	print("✅ TROLL_Jerk загружена (дрочка рукой)!")
+end;
+task.spawn(C_d6);
+-- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
+local function C_e9()
+local script = G2L["e9"];
+	-- ==========================================
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -6374,7 +6595,8 @@ local script = G2L["e5"];
 						child.Name == "TROLL_Push" or
 						child.Name == "TROLL_Push2" or
 						child.Name == "TROLL_Invisible" or
-						child.Name == "TROLL_Back"
+						child.Name == "TROLL_Back" or
+						child.Name == "TROLL_Funnn"
 					) then
 					child.Visible = true
 				end
@@ -6424,12 +6646,12 @@ local script = G2L["e5"];
 	end
 	
 	switchTab("TELEPORT")
-	print("✅ Переключение вкладок загружено! (TROLL_Back добавлена)")
+	print("✅ Переключение вкладок загружено! (TROLL_Funnn добавлена)")
 end;
-task.spawn(C_e5);
+task.spawn(C_e9);
 -- StarterGui.Folder.PurpHub.MainFrame.HotKeys
-local function C_ec()
-local script = G2L["ec"];
+local function C_f0()
+local script = G2L["f0"];
 	-- ==========================================
 	-- ГОРЯЧИЕ КЛАВИШИ (Ctrl + ЛКМ)
 	-- ==========================================
@@ -6523,10 +6745,10 @@ local script = G2L["ec"];
 	print("   Ctrl + ЛКМ → удаление (CTRL+DEL)")
 	print("   Ctrl + ЛКМ → телепорт в точку клика (CTRL+CLICK)")
 end;
-task.spawn(C_ec);
+task.spawn(C_f0);
 -- StarterGui.Folder.PurpHub.MainFrame.ESP
-local function C_ed()
-local script = G2L["ed"];
+local function C_f1()
+local script = G2L["f1"];
 	-- ==========================================
 	-- ОПТИМИЗИРОВАННЫЙ ESP (БЕЗ ЛАГОВ)
 	-- ==========================================
@@ -6650,10 +6872,10 @@ local script = G2L["ed"];
 	
 	print("✅ Оптимизированный ESP загружен!")
 end;
-task.spawn(C_ed);
+task.spawn(C_f1);
 -- StarterGui.Folder.PurpHub.MainFrame.AntiFling
-local function C_ee()
-local script = G2L["ee"];
+local function C_f2()
+local script = G2L["f2"];
 	-- ==========================================
 	-- АНТИ-ФЛИНГ (ОТКЛЮЧЕНИЕ СТОЛКНОВЕНИЙ)
 	-- ==========================================
@@ -6724,6 +6946,6 @@ local script = G2L["ee"];
 	
 	print("✅ Анти-флинг загружен! Используй toggleAntiFling()")
 end;
-task.spawn(C_ee);
+task.spawn(C_f2);
 
 return G2L["1"], require;
