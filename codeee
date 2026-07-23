@@ -6229,7 +6229,7 @@ task.spawn(C_d2);
 local function C_d6()
 local script = G2L["d6"];
 	-- ==========================================
-	-- TROLL_Funnn (ПРЕДМЕТ + АНИМАЦИЯ)
+	-- TROLL_Funnn (ДЛИННАЯ ДРОЧКА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -6239,6 +6239,7 @@ local script = G2L["d6"];
 	local currentTool = nil
 	local isJorking = false
 	local currentTrack = nil
+	local animLoop = nil
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -6255,8 +6256,8 @@ local script = G2L["d6"];
 	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
 	local function updateIndicator()
 		if isActive then
-			indicator.Text = "🎁 ЕСТЬ"
-			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+			indicator.Text = "💀 JERK"
+			indicator.TextColor3 = Color3.fromRGB(255, 0, 255)
 		else
 			indicator.Text = "ВЫКЛ"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
@@ -6283,10 +6284,15 @@ local script = G2L["d6"];
 		if isJorking then return end
 		isJorking = true
 	
-		-- Останавливаем старую анимацию
+		-- Останавливаем старую
 		if currentTrack then
 			pcall(function() currentTrack:Stop() end)
 			currentTrack = nil
+		end
+	
+		if animLoop then
+			animLoop:Disconnect()
+			animLoop = nil
 		end
 	
 		-- Создаём анимацию
@@ -6299,33 +6305,56 @@ local script = G2L["d6"];
 	
 		currentTrack = hum:LoadAnimation(anim)
 	
-		if currentTrack then
-			-- 👇 ЗАЦИКЛИВАЕМ АНИМАЦИЮ
-			currentTrack.Looped = true
-			currentTrack.Priority = Enum.AnimationPriority.Action
-			currentTrack:Play()
-	
-			-- 👇 СТАВИМ СКОРОСТЬ
-			local speed = isR15() and 0.7 or 0.65
-			currentTrack:AdjustSpeed(speed)
-	
-			print("💀 Jerk анимация запущена!")
+		if not currentTrack then
+			isJorking = false
+			return
 		end
+	
+		-- 👇 МЕДЛЕННАЯ СКОРОСТЬ (0.3 вместо 0.7)
+		local speed = isR15() and 0.3 or 0.25
+		currentTrack:Play()
+		currentTrack:AdjustSpeed(speed)
+		currentTrack.TimePosition = 0.5
+	
+		-- 👇 ЦИКЛ ДЛЯ ПЛАВНОЙ ДРОЧКИ
+		animLoop = RunService.RenderStepped:Connect(function()
+			if not isJorking or not currentTrack then
+				if animLoop then
+					animLoop:Disconnect()
+					animLoop = nil
+				end
+				return
+			end
+	
+			-- Если анимация почти закончилась — перезапускаем
+			local maxTime = isR15() and 0.95 or 0.9
+			if currentTrack.TimePosition >= maxTime then
+				currentTrack:Stop()
+				currentTrack:Play()
+				currentTrack:AdjustSpeed(speed)
+				currentTrack.TimePosition = 0.4
+			end
+		end)
+	
+		print("💀 Jerk анимация запущена! (медленная)")
 	end
 	
-	-- ====== ОСТАНОВКА АНИМАЦИИ ======
+	-- ====== ОСТАНОВКА ======
 	local function stopJorking()
 		isJorking = false
+	
+		if animLoop then
+			animLoop:Disconnect()
+			animLoop = nil
+		end
 	
 		if currentTrack then
 			pcall(function() currentTrack:Stop() end)
 			currentTrack = nil
 		end
-	
-		print("💀 Jerk анимация остановлена!")
 	end
 	
-	-- ====== КОГДА БЕРУТ ПРЕДМЕТ ======
+	-- ====== КОГДА БЕРУТ ======
 	local function onEquipped()
 		if isActive then
 			startJorking()
@@ -6333,7 +6362,7 @@ local script = G2L["d6"];
 		end
 	end
 	
-	-- ====== КОГДА КЛАДУТ ПРЕДМЕТ ======
+	-- ====== КОГДА КЛАДУТ ======
 	local function onUnequipped()
 		stopJorking()
 		print("💀 Jerk убран из рук!")
@@ -6341,10 +6370,8 @@ local script = G2L["d6"];
 	
 	-- ====== ВЫДАЧА ПРЕДМЕТА ======
 	local function giveTool()
-		-- Останавливаем
 		stopJorking()
 	
-		-- Удаляем старые предметы
 		if currentTool then
 			pcall(function() currentTool:Destroy() end)
 			currentTool = nil
@@ -6362,14 +6389,12 @@ local script = G2L["d6"];
 			if old then old:Destroy() end
 		end
 	
-		-- Создаём предмет
 		local tool = Instance.new("Tool")
 		tool.Name = "Jerk Off"
 		tool.ToolTip = "jorking it"
 		tool.RequiresHandle = false
 		tool.Parent = backpack or player
 	
-		-- 👇 ПОДКЛЮЧАЕМ СОБЫТИЯ
 		tool.Equipped:Connect(onEquipped)
 		tool.Unequipped:Connect(onUnequipped)
 	
@@ -6378,14 +6403,12 @@ local script = G2L["d6"];
 		updateIndicator()
 	
 		print("🎁 Предмет 'Jerk Off' выдан!")
-		print("💀 Возьми его в руки для анимации!")
 	end
 	
-	-- ====== УДАЛЕНИЕ ПРЕДМЕТА ======
+	-- ====== УДАЛЕНИЕ ======
 	local function removeTool()
 		isActive = false
 		updateIndicator()
-	
 		stopJorking()
 	
 		if currentTool then
@@ -6410,28 +6433,20 @@ local script = G2L["d6"];
 	
 	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	local function toggleJerk()
-		if isActive then
-			removeTool()
-		else
-			giveTool()
-		end
+		if isActive then removeTool() else giveTool() end
 	end
 	
 	button.MouseButton1Click:Connect(toggleJerk)
 	
-	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(1)
-		if isActive then
-			giveTool()
-		end
+		if isActive then giveTool() end
 	end)
 	
-	-- ====== ПРИ СМЕРТИ ======
 	player.CharacterAdded:Connect(stopJorking)
 	
 	updateIndicator()
-	print("✅ TROLL_Funnn загружена!")
+	print("✅ TROLL_Funnn загружена (длинная дрочка)")
 end;
 task.spawn(C_d6);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
