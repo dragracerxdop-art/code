@@ -5835,19 +5835,19 @@ local script = G2L["ce"];
 		for _, part in pairs(parts) do
 			pcall(function()
 				if _G.HitboxVisible and _G.HitboxEnabled then
-					-- 👇 ТЕМНО-ФИОЛЕТОВЫЙ НЕОН
-					part.Transparency = 0.5
-					part.BrickColor = BrickColor.new("Really dark purple")  -- ТЕМНО-ФИОЛЕТОВЫЙ
+					-- 👇 ТЕМНО-ФИОЛЕТОВЫЙ (RGB: 75, 0, 130)
+					part.Transparency = 0.4
+					part.Color = Color3.fromRGB(75, 0, 130)
 					part.Material = Enum.Material.Neon
 				elseif _G.HitboxEnabled then
 					-- НЕВИДИМЫЙ (но увеличенный)
 					part.Transparency = 1
-					part.BrickColor = BrickColor.new("Medium stone grey")
+					part.Color = Color3.fromRGB(128, 128, 128)
 					part.Material = Enum.Material.Plastic
 				else
 					-- НОРМАЛЬНЫЙ
 					part.Transparency = 0
-					part.BrickColor = BrickColor.new("Medium stone grey")
+					part.Color = Color3.fromRGB(128, 128, 128)
 					part.Material = Enum.Material.Plastic
 				end
 			end)
@@ -5883,7 +5883,6 @@ local script = G2L["ce"];
 		applyVisual()
 		updateIndicator()
 	
-		-- 👇 ЗАПУСКАЕМ ЦИКЛ ЕСЛИ НЕ ЗАПУЩЕН
 		if not visualLoop then
 			startVisualLoop()
 		end
@@ -5899,7 +5898,6 @@ local script = G2L["ce"];
 		if _G.HitboxVisible then
 			applyVisual()
 		end
-		-- Перезапускаем цикл
 		if visualLoop then
 			visualLoop:Disconnect()
 			visualLoop = nil
