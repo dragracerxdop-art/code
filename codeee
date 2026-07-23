@@ -4888,13 +4888,14 @@ task.spawn(C_af);
 local function C_b3()
 local script = G2L["b3"];
 	-- ==========================================
-	-- TROLL_Invisible (БЕЗ ВИДИМОГО БЛОКА)
+	-- TROLL_Invisible (100% НЕВИДИМЫЙ БЛОК)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	
 	local invis_on = false
 	local seatTeleportPosition = Vector3.new(-25.95, 400, 3537.55)
+	local seat = nil
 	
 	button.MouseButton1Click:Connect(function()
 		local char = player.Character
@@ -4918,23 +4919,34 @@ local script = G2L["b3"];
 				pcall(function() char:MoveTo(seatTeleportPosition) end)
 				task.wait(0.05)
 	
-				local Seat = Instance.new('Seat')
-				Seat.Parent = workspace
-				Seat.Anchored = false
-				Seat.CanCollide = false
-				Seat.Name = 'invischair'
-				Seat.Transparency = 1  -- 👈 УЖЕ НЕВИДИМЫЙ
-				Seat.Size = Vector3.new(0.1, 0.1, 0.1)  -- 👈 МАЛЕНЬКИЙ (на всякий случай)
-				Seat.Position = seatTeleportPosition
+				-- 👇 СОЗДАЁМ НЕВИДИМОЕ СИДЕНЬЕ
+				seat = Instance.new('Seat')
+				seat.Parent = workspace
+				seat.Anchored = false
+				seat.CanCollide = false
+				seat.Name = 'invischair'
+				seat.Transparency = 1
+				seat.Size = Vector3.new(0.01, 0.01, 0.01)  -- 👈 МИКРОСКОПИЧЕСКИЙ
+				seat.BrickColor = BrickColor.new("Really black")  -- 👈 ЧЕРНЫЙ (невидимый)
+				seat.Material = Enum.Material.SmoothPlastic  -- 👈 БЕЗ ОТРАЖЕНИЙ
+				seat.Position = seatTeleportPosition
 	
+				-- 👇 УДАЛЯЕМ ВСЕ ЭФФЕКТЫ (HIGHLIGHT, UIStroke и т.д.)
+				for _, child in pairs(seat:GetChildren()) do
+					if child:IsA("Highlight") or child:IsA("UIStroke") or child:IsA("SelectionBox") then
+						child:Destroy()
+					end
+				end
+	
+				-- 👇 ВЕЛД (ПРИВЯЗКА К ТОРСУ)
 				local Weld = Instance.new("Weld")
-				Weld.Part0 = Seat
+				Weld.Part0 = seat
 				local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
 				if torso then
 					Weld.Part1 = torso
-					Weld.Parent = Seat
+					Weld.Parent = seat
 					task.wait()
-					pcall(function() Seat.CFrame = savedpos end)
+					pcall(function() seat.CFrame = savedpos end)
 				end
 			end
 	
@@ -4949,6 +4961,12 @@ local script = G2L["b3"];
 			end
 	
 			-- Удаляем сиденье
+			if seat then
+				pcall(function() seat:Destroy() end)
+				seat = nil
+			end
+	
+			-- Дополнительная очистка
 			local inv = workspace:FindFirstChild('invischair')
 			if inv then
 				pcall(function() inv:Destroy() end)
@@ -4959,7 +4977,18 @@ local script = G2L["b3"];
 		end
 	end)
 	
-	print("✅ TROLL_Invisible (без блока) загружен!")
+	-- 👇 ДОПОЛНИТЕЛЬНАЯ ОЧИСТКА (ЕСЛИ ЧТО-ТО ОСТАЛОСЬ)
+	task.spawn(function()
+		while true do
+			task.wait(1)
+			local inv = workspace:FindFirstChild('invischair')
+			if inv and not invis_on then
+				pcall(function() inv:Destroy() end)
+			end
+		end
+	end)
+	
+	print("✅ TROLL_Invisible (100% невидимый блок) загружен!")
 end;
 task.spawn(C_b3);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Slap.LocalScript
