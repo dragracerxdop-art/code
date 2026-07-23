@@ -5630,7 +5630,7 @@ task.spawn(C_bf);
 local function C_c3()
 local script = G2L["c3"];
 	-- ==========================================
-	-- FOV_Toggle (ВКЛ/ВЫКЛ - ЛОГИКА ИЗ HBE)
+	-- FOV_Toggle (ТОЧНАЯ КОПИЯ ИЗ HBE)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -5654,24 +5654,20 @@ local script = G2L["c3"];
 	indicator.Font = Enum.Font.SourceSansBold
 	indicator.Parent = button
 	
-	-- ====== ПОЛУЧАЕМ ЗНАЧЕНИЕ ИЗ FOV_Value ======
+	-- ====== ПОЛУЧАЕМ FOV ИЗ FOV_Value ======
 	local rightFrame = button.Parent
 	local fovBox = rightFrame:FindFirstChild("FOV_Value")
 	
 	if fovBox then
-		-- Берем значение из поля
 		fovValue = tonumber(fovBox.Text) or 70
 		fovValue = math.clamp(fovValue, 70, 120)
 	
-		-- Когда поле меняется — обновляем fovValue
+		-- Когда меняют поле
 		fovBox:GetPropertyChangedSignal("Text"):Connect(function()
 			local val = tonumber(fovBox.Text)
 			if val then
 				fovValue = math.clamp(val, 70, 120)
 				fovBox.Text = tostring(fovValue)
-				if fovEnabled then
-					applyFOV()
-				end
 			end
 		end)
 	end
@@ -5687,7 +5683,7 @@ local script = G2L["c3"];
 		end
 	end
 	
-	-- ====== ПРИМЕНЕНИЕ FOV (КАК В HBE) ======
+	-- ====== ПРИМЕНЕНИЕ FOV (ТОЧНО КАК В HBE) ======
 	local function applyFOV()
 		local cam = workspace.CurrentCamera
 		if cam then
@@ -5719,27 +5715,24 @@ local script = G2L["c3"];
 				fovLoop = nil
 			end
 	
-			-- Применяем FOV
+			-- Применяем
 			applyFOV()
 	
-			-- 👇 ЦИКЛ КАК В HBE (Heartbeat)
-			fovLoop = runService.Heartbeat:Connect(function()
+			-- 👇 ТОЧНЫЙ ЦИКЛ ИЗ HBE
+			fovLoop = runService.RenderStepped:Connect(function()
 				if fovEnabled then
 					applyFOV()
 				end
 			end)
 	
-			print("👁️ FOV ВКЛЮЧЕН (" .. fovValue .. "°)")
+			print("👁️ FOV ВКЛ (" .. fovValue .. "°)")
 		else
-			-- Закрываем цикл
 			if fovLoop then
 				fovLoop:Disconnect()
 				fovLoop = nil
 			end
-	
-			-- Возвращаем оригинальный FOV
 			restoreFOV()
-			print("👁️ FOV ВЫКЛЮЧЕН")
+			print("👁️ FOV ВЫКЛ")
 		end
 	
 		updateIndicator()
@@ -5747,7 +5740,7 @@ local script = G2L["c3"];
 	
 	button.MouseButton1Click:Connect(toggleFOV)
 	
-	-- ====== ПРИ РЕСПАВНЕ ======
+	-- ====== ПРИ РЕСПАВНЕ (КАК В HBE) ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
 		if fovEnabled then
@@ -5756,7 +5749,7 @@ local script = G2L["c3"];
 	end)
 	
 	updateIndicator()
-	print("✅ FOV_Toggle загружена (логика HBE)")
+	print("✅ FOV_Toggle загружена (точная копия HBE)")
 end;
 task.spawn(C_c3);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Value.LocalScript
@@ -5766,18 +5759,17 @@ local script = G2L["ca"];
 	-- FOV_Value (TextBox - ВВОД FOV)
 	-- ==========================================
 	local textBox = script.Parent
-	local player = game.Players.LocalPlayer
 	
 	textBox.PlaceholderText = "FOV (70-120)"
 	textBox.Text = "70"
 	
-	-- ====== КОГДА МЕНЯЕШЬ ЗНАЧЕНИЕ ======
+	-- ====== КОГДА МЕНЯЮТ ======
 	textBox:GetPropertyChangedSignal("Text"):Connect(function()
 		local val = tonumber(textBox.Text)
 		if val then
 			val = math.clamp(val, 70, 120)
 			textBox.Text = tostring(val)
-			print("👁️ FOV установлен: " .. val .. "°")
+			print("👁️ FOV: " .. val .. "°")
 		end
 	end)
 	
