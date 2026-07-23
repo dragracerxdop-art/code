@@ -5842,14 +5842,15 @@ task.spawn(C_ca);
 local function C_ce()
 local script = G2L["ce"];
 	-- ==========================================
-	-- HB_Visible (ВКЛ/ВЫКЛ ВИЗУАЛА ХИТБОКСА)
+	-- HB_Visible (ВКЛ/ВЫКЛ ВИЗУАЛА - С ЦИКЛОМ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local runService = game:GetService("RunService")
 	
-	-- ====== ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ======
+	-- ====== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ======
 	_G.HitboxVisible = false
+	local visualLoop = nil
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -5888,19 +5889,18 @@ local script = G2L["ce"];
 	
 		for _, part in pairs(parts) do
 			pcall(function()
-				-- 👇 ВИЗУАЛ ЗАВИСИТ ОТ _G.HitboxVisible
 				if _G.HitboxVisible and _G.HitboxEnabled then
-					-- 👇 НЕОН (ВИДИМЫЙ)
+					-- ВИДИМЫЙ НЕОН
 					part.Transparency = 0.5
 					part.BrickColor = BrickColor.new("Lilac")
 					part.Material = Enum.Material.Neon
 				elseif _G.HitboxEnabled then
-					-- 👇 НЕВИДИМЫЙ (но увеличенный)
+					-- НЕВИДИМЫЙ (но увеличенный)
 					part.Transparency = 1
 					part.BrickColor = BrickColor.new("Medium stone grey")
 					part.Material = Enum.Material.Plastic
 				else
-					-- 👇 НОРМАЛЬНЫЙ
+					-- НОРМАЛЬНЫЙ
 					part.Transparency = 0
 					part.BrickColor = BrickColor.new("Medium stone grey")
 					part.Material = Enum.Material.Plastic
@@ -5920,11 +5920,28 @@ local script = G2L["ce"];
 		end
 	end
 	
+	-- ====== ЗАПУСК ЦИКЛА ======
+	local function startVisualLoop()
+		if visualLoop then
+			visualLoop:Disconnect()
+			visualLoop = nil
+		end
+	
+		visualLoop = runService.RenderStepped:Connect(function()
+			applyVisual()
+		end)
+	end
+	
 	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	local function toggleVisible()
 		_G.HitboxVisible = not _G.HitboxVisible
 		applyVisual()
 		updateIndicator()
+	
+		-- 👇 ЗАПУСКАЕМ ЦИКЛ ЕСЛИ НЕ ЗАПУЩЕН
+		if not visualLoop then
+			startVisualLoop()
+		end
 	
 		print(_G.HitboxVisible and "👁️ Хитбокс ВИДИМ" or "👁️ Хитбокс СКРЫТ")
 	end
@@ -5937,10 +5954,19 @@ local script = G2L["ce"];
 		if _G.HitboxVisible then
 			applyVisual()
 		end
+		-- Перезапускаем цикл
+		if visualLoop then
+			visualLoop:Disconnect()
+			visualLoop = nil
+		end
+		startVisualLoop()
 	end)
 	
+	-- ====== ЗАПУСК ЦИКЛА ПРИ СТАРТЕ ======
+	startVisualLoop()
 	updateIndicator()
-	print("✅ HB_Visible загружена (неон)")
+	
+	print("✅ HB_Visible загружена (с циклом)")
 end;
 task.spawn(C_ce);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
