@@ -6260,77 +6260,31 @@ local script = G2L["d6"];
 		end
 	end
 	
-	-- ====== ПРОВЕРКА СУЩЕСТВОВАНИЯ ПРЕДМЕТА ======
-	local function findExistingTool()
-		-- Проверяем инвентарь
-		local backpack = player:FindFirstChild("Backpack")
-		if backpack then
-			for _, child in pairs(backpack:GetChildren()) do
-				if child:IsA("Tool") and child.Name == "Jerk Off" then
-					return child
-				end
-			end
-		end
-	
-		-- Проверяем руки (если уже в руке)
-		local char = player.Character
-		if char then
-			for _, child in pairs(char:GetChildren()) do
-				if child:IsA("Tool") and child.Name == "Jerk Off" then
-					return child
-				end
-			end
-		end
-	
-		return nil
-	end
-	
-	-- ====== СОЗДАНИЕ ПРЕДМЕТА ======
+	-- ====== СОЗДАНИЕ ПРЕДМЕТА (КАК В ТВОЁМ СКРИПТЕ) ======
 	local function giveTool()
-		-- Удаляем старый предмет
+		-- Удаляем старый
 		if currentTool then
 			pcall(function() currentTool:Destroy() end)
 			currentTool = nil
 		end
 	
-		-- Проверяем, может уже есть
-		local existing = findExistingTool()
-		if existing then
-			currentTool = existing
-			isActive = true
-			updateIndicator()
-			print("🎁 Предмет уже существует!")
-			return
+		-- Удаляем существующий в бекпаке
+		local backpack = player:FindFirstChild("Backpack")
+		if backpack then
+			local old = backpack:FindFirstChild("Jerk Off")
+			if old then old:Destroy() end
 		end
 	
-		-- Создаём НОВЫЙ предмет
+		-- Создаём предмет (точь-в-точь как в твоём скрипте)
 		local tool = Instance.new("Tool")
 		tool.Name = "Jerk Off"
 		tool.RequiresHandle = false
-		tool.CanBeDropped = true
+		tool.Parent = backpack or player
 	
-		-- Ждём Backpack
-		local backpack = player:WaitForChild("Backpack", 5)
-		if backpack then
-			tool.Parent = backpack
-			currentTool = tool
-			isActive = true
-			updateIndicator()
-			print("🎁 Предмет 'Jerk Off' выдан в инвентарь!")
-		else
-			-- Если Backpack нет, кладём в Character
-			local char = player.Character
-			if char then
-				tool.Parent = char
-				currentTool = tool
-				isActive = true
-				updateIndicator()
-				print("🎁 Предмет 'Jerk Off' выдан в персонажа!")
-			else
-				tool:Destroy()
-				print("❌ Не удалось выдать предмет!")
-			end
-		end
+		currentTool = tool
+		isActive = true
+		updateIndicator()
+		print("🎁 Предмет 'Jerk Off' выдан!")
 	end
 	
 	-- ====== УДАЛИТЬ ПРЕДМЕТ ======
@@ -6340,23 +6294,17 @@ local script = G2L["d6"];
 			currentTool = nil
 		end
 	
-		-- Удаляем все предметы с таким именем
+		-- Удаляем все такие предметы
 		local backpack = player:FindFirstChild("Backpack")
 		if backpack then
-			for _, child in pairs(backpack:GetChildren()) do
-				if child:IsA("Tool") and child.Name == "Jerk Off" then
-					pcall(function() child:Destroy() end)
-				end
-			end
+			local old = backpack:FindFirstChild("Jerk Off")
+			if old then old:Destroy() end
 		end
 	
 		local char = player.Character
 		if char then
-			for _, child in pairs(char:GetChildren()) do
-				if child:IsA("Tool") and child.Name == "Jerk Off" then
-					pcall(function() child:Destroy() end)
-				end
-			end
+			local old = char:FindFirstChild("Jerk Off")
+			if old then old:Destroy() end
 		end
 	
 		isActive = false
@@ -6377,7 +6325,7 @@ local script = G2L["d6"];
 	
 	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
-		task.wait(1)
+		task.wait(0.5)
 		if isActive then
 			giveTool()
 		end
