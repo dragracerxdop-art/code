@@ -6229,7 +6229,7 @@ task.spawn(C_d2);
 local function C_d6()
 local script = G2L["d6"];
 	-- ==========================================
-	-- TROLL_Funnn (ДЛИННАЯ ДРОЧКА)
+	-- TROLL_Funnn (НОРМАЛЬНАЯ ДРОЧКА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -6253,7 +6253,6 @@ local script = G2L["d6"];
 	indicator.Font = Enum.Font.SourceSansBold
 	indicator.Parent = button
 	
-	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
 	local function updateIndicator()
 		if isActive then
 			indicator.Text = "💀 JERK"
@@ -6264,7 +6263,6 @@ local script = G2L["d6"];
 		end
 	end
 	
-	-- ====== ПРОВЕРКА R15 ======
 	local function isR15()
 		local char = player.Character
 		if not char then return false end
@@ -6273,18 +6271,15 @@ local script = G2L["d6"];
 		return hum.RigType == Enum.HumanoidRigType.R15
 	end
 	
-	-- ====== ЗАПУСК АНИМАЦИИ ======
 	local function startJorking()
 		local char = player.Character
 		if not char then return end
-	
 		local hum = char:FindFirstChildOfClass("Humanoid")
 		if not hum then return end
-	
 		if isJorking then return end
+	
 		isJorking = true
 	
-		-- Останавливаем старую
 		if currentTrack then
 			pcall(function() currentTrack:Stop() end)
 			currentTrack = nil
@@ -6295,12 +6290,11 @@ local script = G2L["d6"];
 			animLoop = nil
 		end
 	
-		-- Создаём анимацию
 		local anim = Instance.new("Animation")
 		if isR15() then
-			anim.AnimationId = "rbxassetid://698251653"  -- R15
+			anim.AnimationId = "rbxassetid://698251653"
 		else
-			anim.AnimationId = "rbxassetid://72042024"   -- R6
+			anim.AnimationId = "rbxassetid://72042024"
 		end
 	
 		currentTrack = hum:LoadAnimation(anim)
@@ -6310,13 +6304,12 @@ local script = G2L["d6"];
 			return
 		end
 	
-		-- 👇 МЕДЛЕННАЯ СКОРОСТЬ (0.3 вместо 0.7)
-		local speed = isR15() and 0.3 or 0.25
+		-- 👇 СКОРОСТЬ: 0.5 (чуть медленнее стандарта)
+		local speed = isR15() and 0.5 or 0.45
 		currentTrack:Play()
 		currentTrack:AdjustSpeed(speed)
-		currentTrack.TimePosition = 0.5
+		currentTrack.TimePosition = 0.3
 	
-		-- 👇 ЦИКЛ ДЛЯ ПЛАВНОЙ ДРОЧКИ
 		animLoop = RunService.RenderStepped:Connect(function()
 			if not isJorking or not currentTrack then
 				if animLoop then
@@ -6326,49 +6319,37 @@ local script = G2L["d6"];
 				return
 			end
 	
-			-- Если анимация почти закончилась — перезапускаем
+			-- 👇 ДЛИННЫЙ ЦИКЛ (почти до конца)
 			local maxTime = isR15() and 0.95 or 0.9
 			if currentTrack.TimePosition >= maxTime then
 				currentTrack:Stop()
 				currentTrack:Play()
 				currentTrack:AdjustSpeed(speed)
-				currentTrack.TimePosition = 0.4
+				currentTrack.TimePosition = 0.3
 			end
 		end)
-	
-		print("💀 Jerk анимация запущена! (медленная)")
 	end
 	
-	-- ====== ОСТАНОВКА ======
 	local function stopJorking()
 		isJorking = false
-	
 		if animLoop then
 			animLoop:Disconnect()
 			animLoop = nil
 		end
-	
 		if currentTrack then
 			pcall(function() currentTrack:Stop() end)
 			currentTrack = nil
 		end
 	end
 	
-	-- ====== КОГДА БЕРУТ ======
 	local function onEquipped()
-		if isActive then
-			startJorking()
-			print("💀 Jerk взят в руки!")
-		end
+		if isActive then startJorking() end
 	end
 	
-	-- ====== КОГДА КЛАДУТ ======
 	local function onUnequipped()
 		stopJorking()
-		print("💀 Jerk убран из рук!")
 	end
 	
-	-- ====== ВЫДАЧА ПРЕДМЕТА ======
 	local function giveTool()
 		stopJorking()
 	
@@ -6401,11 +6382,8 @@ local script = G2L["d6"];
 		currentTool = tool
 		isActive = true
 		updateIndicator()
-	
-		print("🎁 Предмет 'Jerk Off' выдан!")
 	end
 	
-	-- ====== УДАЛЕНИЕ ======
 	local function removeTool()
 		isActive = false
 		updateIndicator()
@@ -6427,11 +6405,8 @@ local script = G2L["d6"];
 			local old = char:FindFirstChild("Jerk Off")
 			if old then old:Destroy() end
 		end
-	
-		print("🗑️ Предмет удалён!")
 	end
 	
-	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	local function toggleJerk()
 		if isActive then removeTool() else giveTool() end
 	end
@@ -6446,7 +6421,7 @@ local script = G2L["d6"];
 	player.CharacterAdded:Connect(stopJorking)
 	
 	updateIndicator()
-	print("✅ TROLL_Funnn загружена (длинная дрочка)")
+	print("✅ TROLL_Funnn загружена (нормальная скорость)")
 end;
 task.spawn(C_d6);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
