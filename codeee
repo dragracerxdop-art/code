@@ -5625,7 +5625,7 @@ task.spawn(C_bf);
 local function C_c3()
 local script = G2L["c3"];
 	-- ==========================================
-	-- FOV_Toggle (ФИНАЛЬНЫЙ ФИКС)
+	-- FOV_Toggle (ЖЁСТКАЯ БЛОКИРОВКА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -5634,7 +5634,6 @@ local script = G2L["c3"];
 	
 	local fovEnabled = false
 	local fovValue = 70
-	local fovLoop = nil
 	local originalFov = 70
 	
 	-- ====== ИНДИКАТОР ======
@@ -5662,9 +5661,6 @@ local script = G2L["c3"];
 			if val then
 				fovValue = math.clamp(val, 70, 120)
 				fovBox.Text = tostring(fovValue)
-				if fovEnabled then
-					applyFOV()
-				end
 			end
 		end)
 	end
@@ -5677,27 +5673,6 @@ local script = G2L["c3"];
 		else
 			indicator.Text = "ВЫКЛ"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-		end
-	end
-	
-	-- ====== ПРИМЕНЕНИЕ FOV (БЛОКИРОВКА) ======
-	local function applyFOV()
-		local cam = workspace.CurrentCamera
-		if cam then
-			-- 👇 ПРЯМОЕ ПРИСВОЕНИЕ
-			cam.FieldOfView = fovValue
-			cam.CameraType = Enum.CameraType.Custom
-	
-			-- 👇 ДОПОЛНИТЕЛЬНАЯ БЛОКИРОВКА
-			if cam:IsA("Camera") then
-				pcall(function()
-					-- Пытаемся заблокировать через свойства
-					local fovProp = cam:FindFirstChild("FieldOfView")
-					if fovProp then
-						fovProp.Value = fovValue
-					end
-				end)
-			end
 		end
 	end
 	
@@ -5717,54 +5692,8 @@ local script = G2L["c3"];
 		if fovEnabled then
 			originalFov = workspace.CurrentCamera.FieldOfView
 	
-			if fovLoop then
-				fovLoop:Disconnect()
-				fovLoop = nil
-			end
-	
-			applyFOV()
-	
-			-- 👇 ОСНОВНОЙ ЦИКЛ
-			fovLoop = runService.RenderStepped:Connect(function()
-				if fovEnabled then
-					applyFOV()
-				end
-			end)
-	
-			-- 👇 ДОПОЛНИТЕЛЬНЫЙ ЦИКЛ (Heartbeat)
-			local heartbeatConn = runService.Heartbeat:Connect(function()
-				if fovEnabled then
-					local cam = workspace.CurrentCamera
-					if cam and cam.FieldOfView ~= fovValue then
-						cam.FieldOfView = fovValue
-					end
-				end
-			end)
-			fovLoop._heartbeat = heartbeatConn
-	
-			-- 👇 ОТСЛЕЖИВАНИЕ ИЗМЕНЕНИЯ FOV
-			local cam = workspace.CurrentCamera
-			if cam then
-				local propConn = cam:GetPropertyChangedSignal("FieldOfView"):Connect(function()
-					if fovEnabled and cam.FieldOfView ~= fovValue then
-						cam.FieldOfView = fovValue
-					end
-				end)
-				fovLoop._propConn = propConn
-			end
-	
 			print("👁️ FOV ВКЛ (" .. fovValue .. "°)")
 		else
-			if fovLoop then
-				if fovLoop._heartbeat then
-					fovLoop._heartbeat:Disconnect()
-				end
-				if fovLoop._propConn then
-					fovLoop._propConn:Disconnect()
-				end
-				fovLoop:Disconnect()
-				fovLoop = nil
-			end
 			restoreFOV()
 			print("👁️ FOV ВЫКЛ")
 		end
@@ -5774,42 +5703,61 @@ local script = G2L["c3"];
 	
 	button.MouseButton1Click:Connect(toggleFOV)
 	
-	-- ====== ПРИ РЕСПАВНЕ ======
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
+	-- ====== ГЛАВНЫЙ ЦИКЛ (ЖЁСТКАЯ БЛОКИРОВКА) ======
+	local function blockFOV()
 		if fovEnabled then
-			applyFOV()
+			local cam = workspace.CurrentCamera
+			if cam and cam.FieldOfView ~= fovValue then
+				cam.FieldOfView = fovValue
+				cam.CameraType = Enum.CameraType.Custom
+			end
+		end
+	end
+	
+	-- 👇 ТРИ ЦИКЛА ДЛЯ 100% БЛОКИРОВКИ
+	runService.RenderStepped:Connect(blockFOV)
+	runService.Heartbeat:Connect(blockFOV)
+	runService.Stepped:Connect(blockFOV)
+	
+	-- 👇 ОТСЛЕЖИВАНИЕ ИЗМЕНЕНИЯ FOV
+	workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+		if fovEnabled then
+			task.wait(0.05)
+			blockFOV()
 		end
 	end)
 	
-	-- ====== ПРИ СМЕНЕ КАМЕРЫ ======
-	workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
-		if fovEnabled then
-			task.wait(0.1)
-			local cam = workspace.CurrentCamera
-			if cam then
-				cam.FieldOfView = fovValue
-				cam.CameraType = Enum.CameraType.Custom
-	
-				-- Переподключаем отслеживание
-				local propConn = cam:GetPropertyChangedSignal("FieldOfView"):Connect(function()
-					if fovEnabled and cam.FieldOfView ~= fovValue then
-						cam.FieldOfView = fovValue
-					end
-				end)
-	
-				if fovLoop then
-					if fovLoop._propConn then
-						fovLoop._propConn:Disconnect()
-					end
-					fovLoop._propConn = propConn
+	-- 👇 ОТСЛЕЖИВАЕМ КАЖДУЮ КАМЕРУ
+	local function hookCamera(cam)
+		if cam then
+			local conn = cam:GetPropertyChangedSignal("FieldOfView"):Connect(function()
+				if fovEnabled and cam.FieldOfView ~= fovValue then
+					cam.FieldOfView = fovValue
+					cam.CameraType = Enum.CameraType.Custom
 				end
-			end
+			end)
+			return conn
+		end
+		return nil
+	end
+	
+	local currentCam = workspace.CurrentCamera
+	local camConn = hookCamera(currentCam)
+	
+	workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+		if camConn then
+			camConn:Disconnect()
+			camConn = nil
+		end
+		task.wait(0.05)
+		local newCam = workspace.CurrentCamera
+		if newCam then
+			camConn = hookCamera(newCam)
 		end
 	end)
 	
 	updateIndicator()
-	print("✅ FOV_Toggle загружена (финальный фикс)")
+	print("✅ FOV_Toggle загружена (жёсткая блокировка)")
 end;
 task.spawn(C_c3);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Value.LocalScript
