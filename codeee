@@ -5476,7 +5476,7 @@ task.spawn(C_bb);
 local function C_bf()
 local script = G2L["bf"];
 	-- ==========================================
-	-- HB_Toggle (ВКЛ/ВЫКЛ РАБОТЫ ХИТБОКСА)
+	-- HB_Toggle (ВКЛ/ВЫКЛ РАБОТЫ - С ЦИКЛОМ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -5562,14 +5562,11 @@ local script = G2L["bf"];
 					originalSize = part.Size
 				end
 	
-				-- 👇 УВЕЛИЧИВАЕМ ОРУЖИЕ
+				-- УВЕЛИЧИВАЕМ
 				part.Size = originalSize * size
 				part.CanCollide = false
 	
-				-- 👇 ВСЕГДА НЕВИДИМЫЙ (Transparency = 1)
-				part.Transparency = 1
-				part.BrickColor = BrickColor.new("Medium stone grey")
-				part.Material = Enum.Material.Plastic
+				-- ВИЗУАЛ (будет применён HB_Visible)
 			end)
 		end
 	end
@@ -5602,7 +5599,7 @@ local script = G2L["bf"];
 			hitboxLoop = runService.RenderStepped:Connect(function()
 				if hitboxEnabled then applyHitbox() end
 			end)
-			print("🗡️ Хитбокс ВКЛ (размер: " .. hitboxSize .. "x, НЕВИДИМЫЙ)")
+			print("🗡️ Хитбокс ВКЛ (размер: " .. hitboxSize .. "x)")
 		else
 			if hitboxLoop then hitboxLoop:Disconnect() hitboxLoop = nil end
 			restoreHitbox()
@@ -5621,7 +5618,7 @@ local script = G2L["bf"];
 	end)
 	
 	updateIndicator()
-	print("✅ HB_Toggle загружена (оружие НЕВИДИМОЕ)")
+	print("✅ HB_Toggle загружена")
 end;
 task.spawn(C_bf);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.FOV_Toggle.LocalScript
