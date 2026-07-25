@@ -1855,16 +1855,23 @@ G2L["f9"]["Name"] = [[AntiFling]];
 local function C_b()
 local script = G2L["b"];
 	-- ==========================================
-	-- СВОРЫЧИВАНИЕ / РАЗВОРАЧИВАНИЕ (БЕЗ СЪЕЗДОВ)
+	-- СВОРЫЧИВАНИЕ / РАЗВОРАЧИВАНИЕ (С ФИКСОМ РАЗМЕРА)
 	-- ==========================================
 	local main = script.Parent.Parent
+	local button = script.Parent
 	local isMinimized = false
 	local savedPosition = nil
 	
-	-- РАЗМЕРЫ ТВОЕГО ОКНА (ПОДСТАВЬ СВОИ)
+	-- РАЗМЕРЫ ТВОЕГО ОКНА
 	local FULL_WIDTH = 509
 	local FULL_HEIGHT = 481
 	local MIN_HEIGHT = 45
+	
+	-- 👇 ФИКСИРУЕМ РАЗМЕР КНОПКИ (28x28)
+	local ORIGINAL_BUTTON_SIZE = UDim2.new(0, 28, 0, 28)
+	
+	-- УСТАНАВЛИВАЕМ РАЗМЕР СРАЗУ
+	button.Size = ORIGINAL_BUTTON_SIZE
 	
 	-- ОТСЛЕЖИВАЕМ ПЕРЕТАСКИВАНИЕ В СВЁРНУТОМ СОСТОЯНИИ
 	main:GetPropertyChangedSignal("Position"):Connect(function()
@@ -1888,6 +1895,9 @@ local script = G2L["b"];
 			local right = main:FindFirstChild("RightFrame")
 			if left then left.Visible = false end
 			if right then right.Visible = false end
+	
+			-- 👇 ФИКС: ВОЗВРАЩАЕМ КНОПКЕ ЕЁ РАЗМЕР (ЧТОБЫ НЕ РАСТЯГИВАЛАСЬ)
+			button.Size = ORIGINAL_BUTTON_SIZE
 		else
 			-- Разворачиваем
 			main.Size = UDim2.new(0, FULL_WIDTH, 0, FULL_HEIGHT)
@@ -1902,6 +1912,9 @@ local script = G2L["b"];
 			if savedPosition then
 				main.Position = savedPosition
 			end
+	
+			-- 👇 ФИКС: ВОЗВРАЩАЕМ КНОПКЕ ЕЁ РАЗМЕР
+			button.Size = ORIGINAL_BUTTON_SIZE
 		end
 	end)
 end;
