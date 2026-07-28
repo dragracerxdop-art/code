@@ -6781,7 +6781,7 @@ task.spawn(C_de);
 local function C_f1()
 local script = G2L["f1"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (РАБОЧАЯ ВЕРСИЯ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -6792,21 +6792,7 @@ local script = G2L["f1"];
 		return
 	end
 	
-	-- ===== ИЩЕМ toggleListBtn =====
-	local toggleListBtn = nil
-	
-	local function findInParent(parent)
-		for _, child in pairs(parent:GetChildren()) do
-			if child:IsA("ImageButton") and child.Name == "TELEPORT_ToggleList" then
-				toggleListBtn = child
-			end
-			if child:IsA("Frame") or child:IsA("ScrollingFrame") then
-				findInParent(child)
-			end
-		end
-	end
-	
-	findInParent(rightFrame)
+	print("✅ Свитч табс запущен!")
 	
 	-- ===== ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ =====
 	local function switchTab(tabName)
@@ -6852,12 +6838,6 @@ local script = G2L["f1"];
 				if child:IsA("ScrollingFrame") and child.Name == "TELEPORT_SCROLL" then
 					child.Visible = true
 				end
-				if child:IsA("ScrollingFrame") and child.Name == "PlayerList" then
-					child.Visible = false
-				end
-			end
-			if toggleListBtn then
-				toggleListBtn.Visible = true
 			end
 			print("✅ TELEPORT")
 	
@@ -6949,7 +6929,7 @@ local script = G2L["f1"];
 			end
 			print("✅ DA HOOD")
 	
-			-- ===== TROLL (С ANTI LAG) =====
+			-- ===== TROLL (БЕЗ ANTI LAG ЧТОБЫ НЕ ЛОМАТЬ) =====
 		elseif tabName == "Troll" then
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("ImageButton") and (
@@ -6962,8 +6942,7 @@ local script = G2L["f1"];
 						child.Name == "TROLL_Push2" or
 						child.Name == "TROLL_Invisible" or
 						child.Name == "TROLL_Back" or
-						child.Name == "TROLL_Funnn" or
-						child.Name == "TROLL_AntiLag"
+						child.Name == "TROLL_Funnn"
 					) then
 					child.Visible = true
 				end
@@ -7022,7 +7001,7 @@ local script = G2L["f1"];
 	end
 	
 	switchTab("TELEPORT")
-	print("✅ Переключение вкладок загружено! (TROLL_AntiLag добавлена)")
+	print("✅ Переключение вкладок загружено!")
 end;
 task.spawn(C_f1);
 -- StarterGui.Folder.PurpHub.MainFrame.HotKeys
