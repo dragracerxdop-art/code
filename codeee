@@ -6781,21 +6781,48 @@ task.spawn(C_de);
 local function C_f1()
 local script = G2L["f1"];
 	-- ==========================================
-	-- СВИТЧ ТАБС (МИНИМАЛЬНЫЙ)
+	-- СВИТЧ ТАБС (ПРЯМОЙ ДОСТУП)
 	-- ==========================================
-	local leftFrame = script.Parent
-	local main = leftFrame.Parent
-	local rightFrame = main:FindFirstChild("RightFrame")
+	local player = game.Players.LocalPlayer
+	local playerGui = player:WaitForChild("PlayerGui")
+	local purpHub = playerGui:FindFirstChild("PurpHub")
 	
-	if not rightFrame then
+	if not purpHub then
+		print("❌ PurpHub не найден!")
 		return
 	end
 	
+	local mainFrame = purpHub:FindFirstChild("MainFrame")
+	if not mainFrame then
+		print("❌ MainFrame не найден!")
+		return
+	end
+	
+	local leftFrame = mainFrame:FindFirstChild("LeftFrame")
+	local rightFrame = mainFrame:FindFirstChild("RightFrame")
+	
+	if not leftFrame then
+		print("❌ LeftFrame не найден!")
+		return
+	end
+	
+	if not rightFrame then
+		print("❌ RightFrame не найден!")
+		return
+	end
+	
+	print("✅ Все найдено!")
+	
+	-- ===== ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ =====
 	local function switchTab(tabName)
+		print("🔘 Переключение на: " .. tabName)
+	
+		-- Скрываем всё в RightFrame
 		for _, child in pairs(rightFrame:GetChildren()) do
 			child.Visible = false
 		end
 	
+		-- Показываем нужные
 		if tabName == "TELEPORT" then
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child.Name == "TELEPORT_ToggleList" or child.Name == "TELEPORT_ADD" or 
@@ -6812,37 +6839,37 @@ local script = G2L["f1"];
 			end
 		elseif tabName == "Troll" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child.Name:find("TROLL") then
+				if string.find(child.Name, "TROLL") then
 					child.Visible = true
 				end
 			end
 		elseif tabName == "MISC" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child.Name:find("MISC") then
+				if string.find(child.Name, "MISC") then
 					child.Visible = true
 				end
 			end
 		elseif tabName == "MM2" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child.Name:find("MM2") then
+				if string.find(child.Name, "MM2") then
 					child.Visible = true
 				end
 			end
 		elseif tabName == "SPECTATE" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child.Name:find("SPECTATE") then
+				if string.find(child.Name, "SPECTATE") then
 					child.Visible = true
 				end
 			end
 		elseif tabName == "Da Hood" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child.Name:find("DaHood") then
+				if string.find(child.Name, "DaHood") then
 					child.Visible = true
 				end
 			end
 		elseif tabName == "Zo Wip" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child.Name:find("HB_") or child.Name:find("FOV_") then
+				if string.find(child.Name, "HB_") or string.find(child.Name, "FOV_") then
 					child.Visible = true
 				end
 			end
@@ -6853,10 +6880,11 @@ local script = G2L["f1"];
 				end
 			end
 		elseif tabName == "INFO" then
-			-- ничего не показываем
+			-- ничего
 		end
 	end
 	
+	-- ===== КЛИКИ ПО КНОПКАМ =====
 	for _, btn in pairs(leftFrame:GetChildren()) do
 		if btn:IsA("ImageButton") then
 			btn.MouseButton1Click:Connect(function()
