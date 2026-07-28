@@ -1633,6 +1633,7 @@ G2L["da"] = Instance.new("LocalScript", G2L["d7"]);
 G2L["db"] = Instance.new("ScrollingFrame", G2L["2"]);
 G2L["db"]["Active"] = true;
 G2L["db"]["BorderSizePixel"] = 0;
+G2L["db"]["CanvasPosition"] = Vector2.new(0, 500);
 G2L["db"]["Name"] = [[LeftFrame]];
 G2L["db"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["db"]["Size"] = UDim2.new(0, 149, 0, 419);
