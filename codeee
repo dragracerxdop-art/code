@@ -2274,21 +2274,20 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (С ОСТАНОВКОЙ ПО ЗАПОЛНЕНИЮ МЕШКА)
+	-- MM2_AutoFarm (АВТО-ФАРМ МОНЕТ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
-	local runService = game:GetService("RunService")
+	local RunService = game:GetService("RunService")
+	local TweenService = game:GetService("TweenService")
 	
-	local isEnabled = false
+	local isActive = false
 	local farmLoop = nil
-	local isFarming = false
-	local waitingForRespawn = false
-	local lastTeleportTime = 0
-	local collectedCoins = 0
-	local maxCoins = 40 -- лимит монет в мешке
+	local tween = nil
+	local noclipConnection = nil
+	local savedCollisions = {}
 	
-	-- Индикатор
+	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
 	indicator.Size = UDim2.new(1, 0, 0.3, 0)
@@ -2300,189 +2299,225 @@ local script = G2L["1b"];
 	indicator.Font = Enum.Font.SourceSansBold
 	indicator.Parent = button
 	
-	local function updateState()
-		if isEnabled then
-			if waitingForRespawn then
-				indicator.Text = "ОЖИДАНИЕ"
-				indicator.TextColor3 = Color3.fromRGB(255, 255, 0)
-			else
-				indicator.Text = "ФАРМ " .. collectedCoins .. "/" .. maxCoins
-				indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-			end
+	local function updateIndicator()
+		if isActive then
+			indicator.Text = "🟢 ФАРМ"
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
 		else
-			indicator.Text = "ВЫКЛ"
+			indicator.Text = "🔴 ВЫКЛ"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 		end
 	end
 	
-	-- ===== ПРОВЕРКА: ЖИВ ЛИ ИГРОК =====
-	local function isAlive()
-		local char = player.Character
-		if not char then return false end
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid then return false end
-		return humanoid.Health > 0
-	end
-	
-	-- ===== ПОЛУЧЕНИЕ КОЛИЧЕСТВА МОНЕТ В МЕШКЕ =====
-	local function getCoinCount()
-		local leaderstats = player:FindFirstChild("leaderstats")
-		if leaderstats then
-			local coins = leaderstats:FindFirstChild("Coins")
-			if coins then
-				return coins.Value
+	-- ====== ПОИСК КОНТЕЙНЕРА С МОНЕТАМИ ======
+	local function findCoinContainer()
+		for _, obj in pairs(workspace:GetChildren()) do
+			if obj:FindFirstChild("CoinContainer") and obj:IsA("Model") then
+				return obj:FindFirstChild("CoinContainer")
 			end
 		end
-		return 0
+		return nil
 	end
 	
-	-- ===== ПОИСК БЛИЖАЙШЕЙ НЕ СОБРАННОЙ МОНЕТЫ =====
-	local function findNearestCoin()
+	-- ====== ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ ======
+	local function findNearestCoin(container)
+		if not container then return nil, math.huge end
+	
 		local char = player.Character
-		if not char then return nil end
+		if not char then return nil, math.huge end
 	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return nil end
+		if not hrp then return nil, math.huge end
 	
-		local nearestCoin = nil
-		local nearestDist = math.huge
+		local nearest = nil
+		local minDist = math.huge
 	
-		for _, obj in pairs(workspace:GetDescendants()) do
-			if obj:IsA("BasePart") and obj.Name == "Coin_Server" then
-				local dist = (hrp.Position - obj.Position).Magnitude
-	
-				-- Пропускаем монеты, которые уже собраны (расстояние < 2)
-				if dist < 2 then
-					continue
-				end
-	
-				if dist < nearestDist then
-					nearestDist = dist
-					nearestCoin = obj
+		for _, coin in pairs(container:GetChildren()) do
+			if coin:GetAttribute("CoinID") == "Coin" and coin:FindFirstChild("TouchInterest") and coin.Transparency == 1 then
+				local dist = (hrp.Position - coin.Position).Magnitude
+				if dist < minDist then
+					nearest = coin
+					minDist = dist
 				end
 			end
 		end
 	
-		return nearestCoin
+		return nearest, minDist
 	end
 	
-	-- ===== ТЕЛЕПОРТ К МОНЕТЕ =====
-	local function teleportToCoin(coin)
+	-- ====== ВКЛЮЧЕНИЕ NOCLIP ======
+	local function enableNoclip()
+		if noclipConnection then return end
+	
 		local char = player.Character
 		if not char then return end
 	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return end
-	
-		hrp.CFrame = CFrame.new(coin.Position + Vector3.new(0, 3, 0))
-	end
-	
-	-- ===== ОСНОВНОЙ ЦИКЛ =====
-	local function farmLoopFunction()
-		if not isEnabled then return end
-	
-		if not isAlive() then
-			if not waitingForRespawn then
-				waitingForRespawn = true
-				updateState()
-				print("💀 Мёртв, жду перерождения...")
+		-- Сохраняем оригинальные настройки
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then
+				savedCollisions[part] = part.CanCollide
 			end
-			return
 		end
 	
-		if waitingForRespawn then
-			waitingForRespawn = false
-			updateState()
-			print("🔄 Переродился!")
-		end
-	
-		-- Проверяем количество монет
-		local coins = getCoinCount()
-		if coins > collectedCoins then
-			collectedCoins = coins
-			updateState()
-		end
-	
-		-- Если мешок полон — останавливаем фарм
-		if collectedCoins >= maxCoins then
-			print("🛑 Мешок полон! (" .. collectedCoins .. "/" .. maxCoins .. ") Останавливаем фарм...")
-			stopFarm()
-			return
-		end
-	
-		-- Задержка между телепортами
-		local now = tick()
-		if now - lastTeleportTime < 1.5 then
-			return
-		end
-		lastTeleportTime = now
-	
-		local coin = findNearestCoin()
-		if coin then
-			teleportToCoin(coin)
-			print("🪙 Телепорт к монете! (" .. collectedCoins .. "/" .. maxCoins .. ")")
-		else
-			print("⏳ Монет нет на карте")
-		end
-	end
-	
-	-- ===== ЗАПУСК =====
-	local function startFarm()
-		if isFarming then return end
-		isFarming = true
-		waitingForRespawn = false
-		lastTeleportTime = 0
-		collectedCoins = getCoinCount()
-	
-		farmLoop = runService.Heartbeat:Connect(function()
-			if not isEnabled then
-				stopFarm()
-				return
+		noclipConnection = RunService.Stepped:Connect(function()
+			if isActive and player.Character then
+				for _, part in pairs(player.Character:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.CanCollide = false
+					end
+				end
 			end
-			farmLoopFunction()
 		end)
-	
-		print("🪙 Авто-фарм запущен! Лимит: " .. maxCoins .. " монет")
-		updateState()
 	end
 	
-	-- ===== ОСТАНОВКА =====
-	local function stopFarm()
-		isFarming = false
-		waitingForRespawn = false
+	-- ====== ОТКЛЮЧЕНИЕ NOCLIP ======
+	local function disableNoclip()
+		if noclipConnection then
+			noclipConnection:Disconnect()
+			noclipConnection = nil
+		end
+	
+		local char = player.Character
+		if char then
+			for part, canCollide in pairs(savedCollisions) do
+				if part and part.Parent then
+					part.CanCollide = canCollide
+				end
+			end
+		end
+		savedCollisions = {}
+	end
+	
+	-- ====== ОСТАНОВКА ФАРМА ======
+	local function stopFarming()
+		isActive = false
+		updateIndicator()
+	
+		if tween then
+			pcall(function() tween:Cancel() end)
+			tween = nil
+		end
+	
 		if farmLoop then
 			farmLoop:Disconnect()
 			farmLoop = nil
 		end
-		print("🪙 Авто-фарм остановлен! Собрано: " .. collectedCoins .. " монет")
-		updateState()
-	end
 	
-	-- ===== ПЕРЕКЛЮЧЕНИЕ =====
-	local function toggleFarm()
-		isEnabled = not isEnabled
-		updateState()
+		disableNoclip()
 	
-		if isEnabled then
-			startFarm()
-		else
-			stopFarm()
+		local char = player.Character
+		if char then
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.Velocity = Vector3.zero
+				hrp.RotVelocity = Vector3.zero
+			end
+			local humanoid = char:FindFirstChildOfClass("Humanoid")
+			if humanoid then
+				humanoid.PlatformStand = false
+			end
 		end
+	
+		print("🪙 Авто-фарм ВЫКЛЮЧЕН!")
 	end
 	
-	button.MouseButton1Click:Connect(toggleFarm)
+	-- ====== ЗАПУСК ФАРМА ======
+	local function startFarming()
+		if isActive then return end
 	
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		if isEnabled and waitingForRespawn then
-			waitingForRespawn = false
-			updateState()
-			print("🔄 Переродился! Продолжаем фарм...")
+		local char = player.Character
+		if not char then return end
+	
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not hrp or not humanoid then return end
+	
+		if player:GetAttribute("Alive") ~= true then
+			print("❌ Персонаж мёртв!")
+			return
+		end
+	
+		isActive = true
+		updateIndicator()
+	
+		print("🪙 Авто-фарм ВКЛЮЧЕН!")
+	
+		enableNoclip()
+	
+		if farmLoop then
+			farmLoop:Disconnect()
+			farmLoop = nil
+		end
+	
+		farmLoop = RunService.Heartbeat:Connect(function()
+			if not isActive then
+				stopFarming()
+				return
+			end
+	
+			if not player.Character or player:GetAttribute("Alive") ~= true then
+				return
+			end
+	
+			local container = findCoinContainer()
+			if not container then return end
+	
+			local coin, dist = findNearestCoin(container)
+			if not coin or dist > 50 then
+				return
+			end
+	
+			local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+			if not hrp then return end
+	
+			-- Отключаем скорость
+			hrp.Velocity = Vector3.zero
+			hrp.RotVelocity = Vector3.zero
+	
+			-- Телепорт к монете
+			local targetPos = coin.Position - Vector3.new(0, 2.5, 0)
+			local targetCFrame = CFrame.new(targetPos) * CFrame.Angles(math.rad(90), 0, 0)
+	
+			if tween then
+				pcall(function() tween:Cancel() end)
+				tween = nil
+			end
+	
+			local tweenInfo = TweenInfo.new(dist / 30, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+			tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
+			tween:Play()
+	
+			-- Сбор монеты
+			if dist <= 5 then
+				pcall(function()
+					firetouchinterest(hrp, coin, 0)
+					firetouchinterest(hrp, coin, 1)
+				end)
+			end
+		end)
+	end
+	
+	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
+	button.MouseButton1Click:Connect(function()
+		if isActive then
+			stopFarming()
+		else
+			startFarming()
 		end
 	end)
 	
-	updateState()
-	print("✅ MM2_AutoFarm загружена (с остановкой по лимиту)!")
+	-- ====== ПРИ РЕСПАВНЕ ======
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5)
+		if isActive then
+			stopFarming()
+			task.wait(0.5)
+			startFarming()
+		end
+	end)
+	
+	updateIndicator()
+	print("✅ MM2_AutoFarm загружена!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
@@ -7017,15 +7052,17 @@ task.spawn(C_e0);
 local function C_e4()
 local script = G2L["e4"];
 	-- ==========================================
-	-- MM2_KillMurderer (УБИТЬ МАНЬЯКА)
+	-- MM2_KillMurderer (УБИТЬ УБИЙЦУ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local RunService = game:GetService("RunService")
+	local UserInputService = game:GetService("UserInputService")
 	
 	local isActive = false
+	local killLoop = nil
 	local murdererName = nil
 	
 	-- ====== ИНДИКАТОР ======
@@ -7050,7 +7087,7 @@ local script = G2L["e4"];
 		end
 	end
 	
-	-- ====== ПОИСК МАНЬЯКА ======
+	-- ====== ПОИСК УБИЙЦЫ (КАК В СКРИПТЕ) ======
 	local function findMurderer()
 		local getPlayerData = ReplicatedStorage:FindFirstChild("GetPlayerData", true)
 		if not getPlayerData then return nil end
@@ -7059,20 +7096,48 @@ local script = G2L["e4"];
 			return getPlayerData:InvokeServer()
 		end)
 	
-		if success and data then
-			for name, info in pairs(data) do
-				if info.Role == "Murderer" then
-					local plr = Players:FindFirstChild(name)
-					if plr and plr:GetAttribute("Alive") == true then
-						return plr
-					end
+		if not success or not data then return nil end
+	
+		for name, info in pairs(data) do
+			if info.Role == "Murderer" then
+				local plr = Players:FindFirstChild(name)
+				if plr and plr:GetAttribute("Alive") == true then
+					return plr
 				end
 			end
 		end
 		return nil
 	end
 	
-	-- ====== УБИТЬ МАНЬЯКА ======
+	-- ====== ПОИСК ОРУЖИЯ (КАК В СКРИПТЕ) ======
+	local function findGun()
+		local char = player.Character
+		if not char then return nil end
+	
+		-- Ищем в руках
+		local gun = char:FindFirstChild("Gun")
+		if gun then return gun end
+	
+		-- Ищем в бекпаке
+		local backpack = player:FindFirstChild("Backpack")
+		if backpack then
+			gun = backpack:FindFirstChild("Gun")
+			if gun then
+				gun.Parent = char
+				return gun
+			end
+		end
+	
+		return nil
+	end
+	
+	-- ====== ПОЛУЧЕНИЕ ПИНГА (КАК В СКРИПТЕ) ======
+	local function getPing()
+		local stats = game:GetService("Stats")
+		return stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+	end
+	
+	-- ====== УБИТЬ УБИЙЦУ (КАК В СКРИПТЕ) ======
 	local function killMurderer()
 		local myChar = player.Character
 		if not myChar then return end
@@ -7080,7 +7145,7 @@ local script = G2L["e4"];
 		local myHrp = myChar:FindFirstChild("HumanoidRootPart")
 		if not myHrp then return end
 	
-		-- Находим маньяка
+		-- Находим убийцу
 		local target = findMurderer()
 		if not target then
 			if murdererName then
@@ -7090,32 +7155,47 @@ local script = G2L["e4"];
 		end
 	
 		murdererName = target.Name
+	
 		local char = target.Character
 		if not char then return end
 	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
+		local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not hrp or not humanoid or humanoid.Health <= 0 then return end
 	
-		-- Отключаем коллизии
-		for _, part in pairs(char:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = false
-			end
+		if not hrp or not torso or not humanoid then return end
+		if humanoid.Health <= 0 then
+			murdererName = nil
+			return
 		end
 	
-		-- Телепортируем маньяка к тебе
-		local teleportPos = myHrp.Position + Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
-		hrp.CFrame = CFrame.new(teleportPos)
-		hrp.Size = Vector3.new(5, 5, 5)
-		hrp.Anchored = true
+		-- Находим оружие
+		local gun = findGun()
+		if not gun then
+			print("❌ Оружие не найдено!")
+			return
+		end
 	
-		task.wait(0.05)
+		-- 👇 ЛОГИКА ВЫСТРЕЛА (КАК В СКРИПТЕ)
+		local ping = getPing()
+		local delay = (ping / 1000) * 1.25
+		local targetPos = torso.Position + (hrp.Velocity * delay)
 	
-		-- УБИВАЕМ
-		humanoid.Health = 0
-		print("💀 Маньяк " .. target.Name .. " убит!")
-		murdererName = nil
+		-- Целимся в убийцу
+		local shootCFrame = CFrame.new(myHrp.Position, targetPos)
+		local bulletCFrame = CFrame.new(targetPos)
+	
+		-- Ищем событие выстрела
+		local shootEvent = gun:FindFirstChild("ShootEvent") or gun:FindFirstChild("Shoot")
+	
+		if shootEvent then
+			pcall(function()
+				shootEvent:FireServer(shootCFrame, bulletCFrame)
+				print("🔫 Выстрел в " .. target.Name)
+			end)
+		else
+			print("❌ Событие выстрела не найдено!")
+		end
 	end
 	
 	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
@@ -7124,13 +7204,13 @@ local script = G2L["e4"];
 		updateIndicator()
 	
 		if isActive then
-			print("🟢 Охота на маньяка ВКЛЮЧЕНА!")
+			print("🟢 Охота на убийцу ВКЛЮЧЕНА!")
 			while isActive do
 				killMurderer()
 				task.wait(0.5)
 			end
 		else
-			print("🔴 Охота на маньяка ВЫКЛЮЧЕНА!")
+			print("🔴 Охота на убийцу ВЫКЛЮЧЕНА!")
 		end
 	end)
 	
