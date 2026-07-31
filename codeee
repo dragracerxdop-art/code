@@ -7052,18 +7052,18 @@ task.spawn(C_e0);
 local function C_e4()
 local script = G2L["e4"];
 	-- ==========================================
-	-- MM2_KillMurderer (УБИТЬ УБИЙЦУ)
+	-- MM2_KillMurderer (УБИТЬ УБИЙЦУ СКВОЗЬ СТЕНЫ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local RunService = game:GetService("RunService")
-	local UserInputService = game:GetService("UserInputService")
 	
 	local isActive = false
 	local killLoop = nil
 	local murdererName = nil
+	local MAGIC_BULLET = true  -- 👈 ПУЛЯ СКВОЗЬ СТЕНЫ
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -7087,7 +7087,7 @@ local script = G2L["e4"];
 		end
 	end
 	
-	-- ====== ПОИСК УБИЙЦЫ (КАК В СКРИПТЕ) ======
+	-- ====== ПОИСК УБИЙЦЫ ======
 	local function findMurderer()
 		local getPlayerData = ReplicatedStorage:FindFirstChild("GetPlayerData", true)
 		if not getPlayerData then return nil end
@@ -7109,16 +7109,14 @@ local script = G2L["e4"];
 		return nil
 	end
 	
-	-- ====== ПОИСК ОРУЖИЯ (КАК В СКРИПТЕ) ======
+	-- ====== ПОИСК ОРУЖИЯ ======
 	local function findGun()
 		local char = player.Character
 		if not char then return nil end
 	
-		-- Ищем в руках
 		local gun = char:FindFirstChild("Gun")
 		if gun then return gun end
 	
-		-- Ищем в бекпаке
 		local backpack = player:FindFirstChild("Backpack")
 		if backpack then
 			gun = backpack:FindFirstChild("Gun")
@@ -7131,13 +7129,13 @@ local script = G2L["e4"];
 		return nil
 	end
 	
-	-- ====== ПОЛУЧЕНИЕ ПИНГА (КАК В СКРИПТЕ) ======
+	-- ====== ПОЛУЧЕНИЕ ПИНГА ======
 	local function getPing()
 		local stats = game:GetService("Stats")
-		return stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+		return stats.Network.ServerStatsItem["Data Ping"]:GetValue() or 50
 	end
 	
-	-- ====== УБИТЬ УБИЙЦУ (КАК В СКРИПТЕ) ======
+	-- ====== УБИТЬ УБИЙЦУ (СКВОЗЬ СТЕНЫ) ======
 	local function killMurderer()
 		local myChar = player.Character
 		if not myChar then return end
@@ -7148,9 +7146,7 @@ local script = G2L["e4"];
 		-- Находим убийцу
 		local target = findMurderer()
 		if not target then
-			if murdererName then
-				murdererName = nil
-			end
+			murdererName = nil
 			return
 		end
 	
@@ -7176,13 +7172,21 @@ local script = G2L["e4"];
 			return
 		end
 	
-		-- 👇 ЛОГИКА ВЫСТРЕЛА (КАК В СКРИПТЕ)
+		-- 👇 ВЫСТРЕЛ (СКВОЗЬ СТЕНЫ)
 		local ping = getPing()
 		local delay = (ping / 1000) * 1.25
 		local targetPos = torso.Position + (hrp.Velocity * delay)
 	
-		-- Целимся в убийцу
-		local shootCFrame = CFrame.new(myHrp.Position, targetPos)
+		-- 👇 MAGIC BULLET — ЦЕЛИМСЯ ПРЯМО В УБИЙЦУ (СКВОЗЬ СТЕНЫ)
+		local shootCFrame
+		if MAGIC_BULLET then
+			-- Пуля летит сквозь стены (целимся в позицию убийцы)
+			shootCFrame = CFrame.new(torso.Position, targetPos)
+		else
+			-- Обычный выстрел (от тебя к убийце)
+			shootCFrame = CFrame.new(myHrp.Position, targetPos)
+		end
+	
 		local bulletCFrame = CFrame.new(targetPos)
 	
 		-- Ищем событие выстрела
@@ -7191,7 +7195,7 @@ local script = G2L["e4"];
 		if shootEvent then
 			pcall(function()
 				shootEvent:FireServer(shootCFrame, bulletCFrame)
-				print("🔫 Выстрел в " .. target.Name)
+				print("🔫 Выстрел в " .. target.Name .. " (сквозь стены!)")
 			end)
 		else
 			print("❌ Событие выстрела не найдено!")
@@ -7204,10 +7208,10 @@ local script = G2L["e4"];
 		updateIndicator()
 	
 		if isActive then
-			print("🟢 Охота на убийцу ВКЛЮЧЕНА!")
+			print("🟢 Охота на убийцу ВКЛЮЧЕНА! (пуля сквозь стены)")
 			while isActive do
 				killMurderer()
-				task.wait(0.5)
+				task.wait(0.3)
 			end
 		else
 			print("🔴 Охота на убийцу ВЫКЛЮЧЕНА!")
@@ -7215,7 +7219,7 @@ local script = G2L["e4"];
 	end)
 	
 	updateIndicator()
-	print("✅ MM2_KillMurderer загружена!")
+	print("✅ MM2_KillMurderer загружена! (MAGIC BULLET = сквозь стены)")
 end;
 task.spawn(C_e4);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
