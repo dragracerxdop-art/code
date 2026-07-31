@@ -7052,7 +7052,7 @@ task.spawn(C_e0);
 local function C_e4()
 local script = G2L["e4"];
 	-- ==========================================
-	-- MM2_KillMurderer (УБИТЬ УБИЙЦУ СКВОЗЬ СТЕНЫ)
+	-- MM2_KillMurderer (MAGIC BULLET)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -7063,7 +7063,6 @@ local script = G2L["e4"];
 	local isActive = false
 	local killLoop = nil
 	local murdererName = nil
-	local MAGIC_BULLET = true  -- 👈 ПУЛЯ СКВОЗЬ СТЕНЫ
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -7135,7 +7134,7 @@ local script = G2L["e4"];
 		return stats.Network.ServerStatsItem["Data Ping"]:GetValue() or 50
 	end
 	
-	-- ====== УБИТЬ УБИЙЦУ (СКВОЗЬ СТЕНЫ) ======
+	-- ====== УБИТЬ УБИЙЦУ (MAGIC BULLET КАК В ОРИГИНАЛЕ) ======
 	local function killMurderer()
 		local myChar = player.Character
 		if not myChar then return end
@@ -7172,30 +7171,21 @@ local script = G2L["e4"];
 			return
 		end
 	
-		-- 👇 ВЫСТРЕЛ (СКВОЗЬ СТЕНЫ)
+		-- 👇 MAGIC BULLET (КАК В ОРИГИНАЛЕ)
 		local ping = getPing()
 		local delay = (ping / 1000) * 1.25
 		local targetPos = torso.Position + (hrp.Velocity * delay)
 	
-		-- 👇 MAGIC BULLET — ЦЕЛИМСЯ ПРЯМО В УБИЙЦУ (СКВОЗЬ СТЕНЫ)
-		local shootCFrame
-		if MAGIC_BULLET then
-			-- Пуля летит сквозь стены (целимся в позицию убийцы)
-			shootCFrame = CFrame.new(torso.Position, targetPos)
-		else
-			-- Обычный выстрел (от тебя к убийце)
-			shootCFrame = CFrame.new(myHrp.Position, targetPos)
-		end
+		-- 👇 ПЕРВЫЙ АРГУМЕНТ = ПОЗИЦИЯ УБИЙЦЫ (MAGIC BULLET)
+		local shootCFrame = CFrame.new(torso.Position, targetPos)  -- 👈 ЦЕЛИМСЯ В УБИЙЦУ
+		local bulletCFrame = CFrame.new(targetPos)                -- 👈 ПУЛЯ ЛЕТИТ В НЕГО
 	
-		local bulletCFrame = CFrame.new(targetPos)
-	
-		-- Ищем событие выстрела
 		local shootEvent = gun:FindFirstChild("ShootEvent") or gun:FindFirstChild("Shoot")
 	
 		if shootEvent then
 			pcall(function()
 				shootEvent:FireServer(shootCFrame, bulletCFrame)
-				print("🔫 Выстрел в " .. target.Name .. " (сквозь стены!)")
+				print("🔫 Magic Bullet в " .. target.Name)
 			end)
 		else
 			print("❌ Событие выстрела не найдено!")
@@ -7208,7 +7198,7 @@ local script = G2L["e4"];
 		updateIndicator()
 	
 		if isActive then
-			print("🟢 Охота на убийцу ВКЛЮЧЕНА! (пуля сквозь стены)")
+			print("🟢 Охота на убийцу ВКЛЮЧЕНА! (Magic Bullet)")
 			while isActive do
 				killMurderer()
 				task.wait(0.3)
@@ -7219,7 +7209,7 @@ local script = G2L["e4"];
 	end)
 	
 	updateIndicator()
-	print("✅ MM2_KillMurderer загружена! (MAGIC BULLET = сквозь стены)")
+	print("✅ MM2_KillMurderer загружена! (Magic Bullet)")
 end;
 task.spawn(C_e4);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
