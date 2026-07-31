@@ -6916,9 +6916,12 @@ local script = G2L["e0"];
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
+	local RunService = game:GetService("RunService")
 	
 	local isActive = false
+	local killLoop = nil
 	
+	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
 	indicator.Size = UDim2.new(1, 0, 0.3, 0)
@@ -6940,6 +6943,7 @@ local script = G2L["e0"];
 		end
 	end
 	
+	-- ====== УБИТЬ ВСЕХ ======
 	local function killAll()
 		local myChar = player.Character
 		if not myChar then return end
@@ -6954,11 +6958,12 @@ local script = G2L["e0"];
 					local hrp = char:FindFirstChild("HumanoidRootPart")
 					local humanoid = char:FindFirstChildOfClass("Humanoid")
 					if hrp and humanoid and humanoid.Health > 0 then
-						-- Телепорт к тебе
-						hrp.CFrame = myHrp.CFrame * CFrame.new(0, 0, 3)
+						-- ТЕЛЕПОРТ К ТЕБЕ (вплотную)
+						local teleportPos = myHrp.Position + Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
+						hrp.CFrame = CFrame.new(teleportPos)
 						char:SetPrimaryPartCFrame(hrp.CFrame)
 						task.wait(0.05)
-						-- Убийство
+						-- УБИВАЕМ
 						humanoid.Health = 0
 					end
 				end
@@ -6966,14 +6971,16 @@ local script = G2L["e0"];
 		end
 	end
 	
+	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	button.MouseButton1Click:Connect(function()
 		isActive = not isActive
 		updateIndicator()
+	
 		if isActive then
 			print("🟢 Kill All ВКЛЮЧЕН!")
 			while isActive do
 				killAll()
-				task.wait(0.5)
+				task.wait(0.3)
 			end
 		else
 			print("🔴 Kill All ВЫКЛЮЧЕН!")
@@ -6994,10 +7001,13 @@ local script = G2L["e4"];
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local RunService = game:GetService("RunService")
 	
 	local isActive = false
+	local killLoop = nil
 	local murdererName = nil
 	
+	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
 	indicator.Size = UDim2.new(1, 0, 0.3, 0)
@@ -7019,7 +7029,7 @@ local script = G2L["e4"];
 		end
 	end
 	
-	-- ===== ПОИСК МАНЬЯКА =====
+	-- ====== ПОИСК МАНЬЯКА ======
 	local function findMurderer()
 		local success, data = pcall(function()
 			return ReplicatedStorage:FindFirstChild("GetPlayerData", true):InvokeServer()
@@ -7035,8 +7045,15 @@ local script = G2L["e4"];
 		return nil
 	end
 	
-	-- ===== УБИЙСТВО =====
+	-- ====== УБИТЬ МАНЬЯКА ======
 	local function killMurderer()
+		local myChar = player.Character
+		if not myChar then return end
+	
+		local myHrp = myChar:FindFirstChild("HumanoidRootPart")
+		if not myHrp then return end
+	
+		-- Находим маньяка
 		if not murdererName then
 			murdererName = findMurderer()
 			if not murdererName then
@@ -7062,29 +7079,28 @@ local script = G2L["e4"];
 			return
 		end
 	
-		-- Телепорт к маньяку
-		local myChar = player.Character
-		if myChar then
-			local myHrp = myChar:FindFirstChild("HumanoidRootPart")
-			if myHrp then
-				myHrp.CFrame = hrp.CFrame * CFrame.new(0, 0, 3)
-			end
-		end
+		-- ТЕЛЕПОРТ МАНЬЯКА К ТЕБЕ (вплотную)
+		local teleportPos = myHrp.Position + Vector3.new(math.random(-1, 1), 0, math.random(-1, 1))
+		hrp.CFrame = CFrame.new(teleportPos)
+		char:SetPrimaryPartCFrame(hrp.CFrame)
+		task.wait(0.05)
 	
-		task.wait(0.1)
+		-- УБИВАЕМ
 		humanoid.Health = 0
 		print("💀 Маньяк " .. target.Name .. " убит!")
 		murdererName = nil
 	end
 	
+	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	button.MouseButton1Click:Connect(function()
 		isActive = not isActive
 		updateIndicator()
+	
 		if isActive then
 			print("🟢 Охота на маньяка ВКЛЮЧЕНА!")
 			while isActive do
 				killMurderer()
-				task.wait(1)
+				task.wait(0.5)
 			end
 		else
 			print("🔴 Охота на маньяка ВЫКЛЮЧЕНА!")
