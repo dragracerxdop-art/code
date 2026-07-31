@@ -7322,7 +7322,7 @@ task.spawn(C_e4);
 local function C_f7()
 local script = G2L["f7"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ТОЛЬКО 2 КНОПКИ В MM2)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -7461,32 +7461,14 @@ local script = G2L["f7"];
 			end
 			print("✅ MISC")
 	
-			-- ===== MM2 (ОБНОВЛЁННЫЙ) =====
+			-- ===== MM2 (ТОЛЬКО 2 КНОПКИ) =====
 		elseif tabName == "MM2" then
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("ImageButton") and (
-					child.Name == "MM2_ESP" or
-						child.Name == "MM2_GunESP" or
-						child.Name == "MM2_PickUpGun" or
-						child.Name == "MM2_AutoFarm" or
-						child.Name == "MM2_KillAll" or
-						child.Name == "MM2_KillMurderer" or
-						child.Name == "MM2_KillSheriff"
+					child.Name == "MM2_KillAll" or
+						child.Name == "MM2_KillMurderer"
 					) then
 					child.Visible = true
-				end
-			end
-			-- 👇 СКРЫВАЕМ СТАРЫЕ РОЛИ (ЕСЛИ ЕСТЬ)
-			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("Frame") and child.Name == "MM2_Roles" then
-					child.Visible = false
-				end
-				if child:IsA("TextLabel") and (
-					child.Name == "MM2_Sheriff" or
-						child.Name == "MM2_Murder" or
-						child.Name == "MM2_Hero"
-					) then
-					child.Visible = false
 				end
 			end
 			print("✅ MM2")
@@ -7575,7 +7557,7 @@ local script = G2L["f7"];
 	end
 	
 	switchTab("TELEPORT")
-	print("✅ Переключение вкладок загружено! (MM2 обновлена)")
+	print("✅ Переключение вкладок загружено! (MM2: KillAll + KillMurderer)")
 end;
 task.spawn(C_f7);
 -- StarterGui.Folder.PurpHub.MainFrame.HotKeys
