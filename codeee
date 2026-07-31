@@ -7238,7 +7238,7 @@ local script = G2L["f7"];
 			end
 			print("✅ MISC")
 	
-			-- ===== MM2 =====
+			-- ===== MM2 (ВСЕ КНОПКИ) =====
 		elseif tabName == "MM2" then
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("ImageButton") and (
@@ -7252,8 +7252,18 @@ local script = G2L["f7"];
 					) then
 					child.Visible = true
 				end
+			end
+			-- 👇 ПОКАЗЫВАЕМ РОЛИ (ЕСЛИ ЕСТЬ)
+			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("Frame") and child.Name == "MM2_Roles" then
-					child.Visible = false
+					child.Visible = true
+				end
+				if child:IsA("TextLabel") and (
+					child.Name == "MM2_Sheriff" or
+						child.Name == "MM2_Murder" or
+						child.Name == "MM2_Hero"
+					) then
+					child.Visible = true
 				end
 			end
 			print("✅ MM2")
