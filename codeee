@@ -6911,7 +6911,7 @@ task.spawn(C_dc);
 local function C_e0()
 local script = G2L["e0"];
 	-- ==========================================
-	-- MM2_KillAll (УБИТЬ ВСЕХ)
+	-- MM2_KillAll (ТЕЛЕПОРТ ХИТБОКСОВ ВСЕХ ИГРОКОВ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -6958,12 +6958,18 @@ local script = G2L["e0"];
 					local hrp = char:FindFirstChild("HumanoidRootPart")
 					local humanoid = char:FindFirstChildOfClass("Humanoid")
 					if hrp and humanoid and humanoid.Health > 0 then
-						-- ТЕЛЕПОРТ К ТЕБЕ (вплотную)
+						-- 👇 ТЕЛЕПОРТИРУЕМ ТОЛЬКО ХИТБОКС (HumanoidRootPart) К ТЕБЕ
 						local teleportPos = myHrp.Position + Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
 						hrp.CFrame = CFrame.new(teleportPos)
-						char:SetPrimaryPartCFrame(hrp.CFrame)
+	
+						-- 👇 ДОПОЛНИТЕЛЬНО: телепортируем голову (для уверенности)
+						local head = char:FindFirstChild("Head")
+						if head then
+							head.CFrame = CFrame.new(teleportPos + Vector3.new(0, 1.5, 0))
+						end
+	
 						task.wait(0.05)
-						-- УБИВАЕМ
+						-- 👇 УБИВАЕМ
 						humanoid.Health = 0
 					end
 				end
@@ -6995,7 +7001,7 @@ task.spawn(C_e0);
 local function C_e4()
 local script = G2L["e4"];
 	-- ==========================================
-	-- MM2_KillMurderer (УБИТЬ МАНЬЯКА)
+	-- MM2_KillMurderer (ТЕЛЕПОРТ ХИТБОКСА МАНЬЯКА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -7053,7 +7059,6 @@ local script = G2L["e4"];
 		local myHrp = myChar:FindFirstChild("HumanoidRootPart")
 		if not myHrp then return end
 	
-		-- Находим маньяка
 		if not murdererName then
 			murdererName = findMurderer()
 			if not murdererName then
@@ -7079,13 +7084,17 @@ local script = G2L["e4"];
 			return
 		end
 	
-		-- ТЕЛЕПОРТ МАНЬЯКА К ТЕБЕ (вплотную)
+		-- 👇 ТЕЛЕПОРТИРУЕМ ТОЛЬКО ХИТБОКС (HumanoidRootPart) МАНЬЯКА К ТЕБЕ
 		local teleportPos = myHrp.Position + Vector3.new(math.random(-1, 1), 0, math.random(-1, 1))
 		hrp.CFrame = CFrame.new(teleportPos)
-		char:SetPrimaryPartCFrame(hrp.CFrame)
-		task.wait(0.05)
 	
-		-- УБИВАЕМ
+		-- 👇 ДОПОЛНИТЕЛЬНО: телепортируем голову
+		local head = char:FindFirstChild("Head")
+		if head then
+			head.CFrame = CFrame.new(teleportPos + Vector3.new(0, 1.5, 0))
+		end
+	
+		task.wait(0.05)
 		humanoid.Health = 0
 		print("💀 Маньяк " .. target.Name .. " убит!")
 		murdererName = nil
