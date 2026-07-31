@@ -7052,17 +7052,18 @@ task.spawn(C_e0);
 local function C_e4()
 local script = G2L["e4"];
 	-- ==========================================
-	-- MM2_KillMurderer (MAGIC BULLET)
+	-- MM2_KillMurderer (MAGIC BULLET ИЗ СКРИПТА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local RunService = game:GetService("RunService")
+	local Stats = game:GetService("Stats")
 	
 	local isActive = false
-	local killLoop = nil
 	local murdererName = nil
+	local MAGIC_BULLET = true  -- 👈 КАК В СКРИПТЕ
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -7086,7 +7087,7 @@ local script = G2L["e4"];
 		end
 	end
 	
-	-- ====== ПОИСК УБИЙЦЫ ======
+	-- ====== ПОИСК УБИЙЦЫ (ТОЧНО КАК В СКРИПТЕ) ======
 	local function findMurderer()
 		local getPlayerData = ReplicatedStorage:FindFirstChild("GetPlayerData", true)
 		if not getPlayerData then return nil end
@@ -7097,10 +7098,10 @@ local script = G2L["e4"];
 	
 		if not success or not data then return nil end
 	
-		for name, info in pairs(data) do
-			if info.Role == "Murderer" then
-				local plr = Players:FindFirstChild(name)
-				if plr and plr:GetAttribute("Alive") == true then
+		for _, plr in pairs(Players:GetPlayers()) do
+			if plr ~= player and plr:GetAttribute("Alive") == true then
+				local info = data[plr.Name]
+				if info and info.Role == "Murderer" then
 					return plr
 				end
 			end
@@ -7108,7 +7109,7 @@ local script = G2L["e4"];
 		return nil
 	end
 	
-	-- ====== ПОИСК ОРУЖИЯ ======
+	-- ====== ПОИСК ОРУЖИЯ (ТОЧНО КАК В СКРИПТЕ) ======
 	local function findGun()
 		local char = player.Character
 		if not char then return nil end
@@ -7128,13 +7129,12 @@ local script = G2L["e4"];
 		return nil
 	end
 	
-	-- ====== ПОЛУЧЕНИЕ ПИНГА ======
+	-- ====== ПОЛУЧЕНИЕ ПИНГА (ТОЧНО КАК В СКРИПТЕ) ======
 	local function getPing()
-		local stats = game:GetService("Stats")
-		return stats.Network.ServerStatsItem["Data Ping"]:GetValue() or 50
+		return Stats.Network.ServerStatsItem["Data Ping"]:GetValue() or 50
 	end
 	
-	-- ====== УБИТЬ УБИЙЦУ (MAGIC BULLET КАК В ОРИГИНАЛЕ) ======
+	-- ====== УБИТЬ УБИЙЦУ (ТОЧНАЯ КОПИЯ) ======
 	local function killMurderer()
 		local myChar = player.Character
 		if not myChar then return end
@@ -7171,21 +7171,28 @@ local script = G2L["e4"];
 			return
 		end
 	
-		-- 👇 MAGIC BULLET (КАК В ОРИГИНАЛЕ)
+		-- 👇 ТОЧНАЯ КОПИЯ ЛОГИКИ ИЗ СКРИПТА
 		local ping = getPing()
 		local delay = (ping / 1000) * 1.25
 		local targetPos = torso.Position + (hrp.Velocity * delay)
 	
-		-- 👇 ПЕРВЫЙ АРГУМЕНТ = ПОЗИЦИЯ УБИЙЦЫ (MAGIC BULLET)
-		local shootCFrame = CFrame.new(torso.Position, targetPos)  -- 👈 ЦЕЛИМСЯ В УБИЙЦУ
-		local bulletCFrame = CFrame.new(targetPos)                -- 👈 ПУЛЯ ЛЕТИТ В НЕГО
+		-- 👇 MAGIC BULLET (КАК В СКРИПТЕ)
+		local shootCFrame
+		if MAGIC_BULLET then
+			shootCFrame = CFrame.new(torso.Position, targetPos)  -- СКВОЗЬ СТЕНЫ
+		else
+			shootCFrame = CFrame.new(myHrp.Position, targetPos)  -- ОБЫЧНЫЙ
+		end
 	
+		local bulletCFrame = CFrame.new(targetPos)
+	
+		-- 👇 СОБЫТИЕ ВЫСТРЕЛА (КАК В СКРИПТЕ)
 		local shootEvent = gun:FindFirstChild("ShootEvent") or gun:FindFirstChild("Shoot")
 	
 		if shootEvent then
 			pcall(function()
 				shootEvent:FireServer(shootCFrame, bulletCFrame)
-				print("🔫 Magic Bullet в " .. target.Name)
+				print("🔫 Выстрел в " .. target.Name .. (MAGIC_BULLET and " (MAGIC BULLET)" or ""))
 			end)
 		else
 			print("❌ Событие выстрела не найдено!")
@@ -7198,7 +7205,7 @@ local script = G2L["e4"];
 		updateIndicator()
 	
 		if isActive then
-			print("🟢 Охота на убийцу ВКЛЮЧЕНА! (Magic Bullet)")
+			print("🟢 Охота на убийцу ВКЛЮЧЕНА!")
 			while isActive do
 				killMurderer()
 				task.wait(0.3)
@@ -7209,7 +7216,7 @@ local script = G2L["e4"];
 	end)
 	
 	updateIndicator()
-	print("✅ MM2_KillMurderer загружена! (Magic Bullet)")
+	print("✅ MM2_KillMurderer загружена!")
 end;
 task.spawn(C_e4);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
