@@ -7052,18 +7052,12 @@ task.spawn(C_e0);
 local function C_e4()
 local script = G2L["e4"];
 	-- ==========================================
-	-- MM2_KillMurderer (MAGIC BULLET ИЗ СКРИПТА)
+	-- MM2_KillMurderer (ПРОСТОЙ ВАРИАНТ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local RunService = game:GetService("RunService")
-	local Stats = game:GetService("Stats")
-	
-	local isActive = false
-	local murdererName = nil
-	local MAGIC_BULLET = true  -- 👈 КАК В СКРИПТЕ
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -7071,23 +7065,13 @@ local script = G2L["e4"];
 	indicator.Size = UDim2.new(1, 0, 0.3, 0)
 	indicator.Position = UDim2.new(0, 0, 0.7, 0)
 	indicator.BackgroundTransparency = 1
-	indicator.Text = "ВЫКЛ"
-	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+	indicator.Text = "НАЖМИ"
+	indicator.TextColor3 = Color3.fromRGB(255, 165, 0)
 	indicator.TextSize = 14
 	indicator.Font = Enum.Font.SourceSansBold
 	indicator.Parent = button
 	
-	local function updateIndicator()
-		if isActive then
-			indicator.Text = "🟢 ОХОТА"
-			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-		else
-			indicator.Text = "🔴 ВЫКЛ"
-			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-		end
-	end
-	
-	-- ====== ПОИСК УБИЙЦЫ (ТОЧНО КАК В СКРИПТЕ) ======
+	-- ====== ПОИСК УБИЙЦЫ ======
 	local function findMurderer()
 		local getPlayerData = ReplicatedStorage:FindFirstChild("GetPlayerData", true)
 		if not getPlayerData then return nil end
@@ -7109,7 +7093,7 @@ local script = G2L["e4"];
 		return nil
 	end
 	
-	-- ====== ПОИСК ОРУЖИЯ (ТОЧНО КАК В СКРИПТЕ) ======
+	-- ====== ПОИСК ОРУЖИЯ ======
 	local function findGun()
 		local char = player.Character
 		if not char then return nil end
@@ -7129,94 +7113,55 @@ local script = G2L["e4"];
 		return nil
 	end
 	
-	-- ====== ПОЛУЧЕНИЕ ПИНГА (ТОЧНО КАК В СКРИПТЕ) ======
-	local function getPing()
-		return Stats.Network.ServerStatsItem["Data Ping"]:GetValue() or 50
-	end
-	
-	-- ====== УБИТЬ УБИЙЦУ (ТОЧНАЯ КОПИЯ) ======
-	local function killMurderer()
-		local myChar = player.Character
-		if not myChar then return end
-	
-		local myHrp = myChar:FindFirstChild("HumanoidRootPart")
-		if not myHrp then return end
-	
-		-- Находим убийцу
+	-- ====== ВЫСТРЕЛ ======
+	local function shootMurderer()
 		local target = findMurderer()
 		if not target then
-			murdererName = nil
+			print("❌ Убийца не найден!")
 			return
 		end
-	
-		murdererName = target.Name
 	
 		local char = target.Character
 		if not char then return end
 	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
 		local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 	
-		if not hrp or not torso or not humanoid then return end
-		if humanoid.Health <= 0 then
-			murdererName = nil
+		if not torso or not humanoid or humanoid.Health <= 0 then
+			print("❌ Убийца мёртв!")
 			return
 		end
 	
-		-- Находим оружие
 		local gun = findGun()
 		if not gun then
 			print("❌ Оружие не найдено!")
 			return
 		end
 	
-		-- 👇 ТОЧНАЯ КОПИЯ ЛОГИКИ ИЗ СКРИПТА
-		local ping = getPing()
-		local delay = (ping / 1000) * 1.25
-		local targetPos = torso.Position + (hrp.Velocity * delay)
-	
-		-- 👇 MAGIC BULLET (КАК В СКРИПТЕ)
-		local shootCFrame
-		if MAGIC_BULLET then
-			shootCFrame = CFrame.new(torso.Position, targetPos)  -- СКВОЗЬ СТЕНЫ
-		else
-			shootCFrame = CFrame.new(myHrp.Position, targetPos)  -- ОБЫЧНЫЙ
-		end
-	
-		local bulletCFrame = CFrame.new(targetPos)
-	
-		-- 👇 СОБЫТИЕ ВЫСТРЕЛА (КАК В СКРИПТЕ)
 		local shootEvent = gun:FindFirstChild("ShootEvent") or gun:FindFirstChild("Shoot")
-	
-		if shootEvent then
-			pcall(function()
-				shootEvent:FireServer(shootCFrame, bulletCFrame)
-				print("🔫 Выстрел в " .. target.Name .. (MAGIC_BULLET and " (MAGIC BULLET)" or ""))
-			end)
-		else
+		if not shootEvent then
 			print("❌ Событие выстрела не найдено!")
+			return
 		end
+	
+		-- 👇 ВЫСТРЕЛ
+		local shootCFrame = CFrame.new(torso.Position, torso.Position + Vector3.new(0, 1, 0))
+		local bulletCFrame = CFrame.new(torso.Position)
+	
+		pcall(function()
+			shootEvent:FireServer(shootCFrame, bulletCFrame)
+			print("🔫 Выстрел в убийцу " .. target.Name)
+	
+			-- Мигаем индикатором
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+			task.wait(0.3)
+			indicator.TextColor3 = Color3.fromRGB(255, 165, 0)
+		end)
 	end
 	
-	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
-	button.MouseButton1Click:Connect(function()
-		isActive = not isActive
-		updateIndicator()
+	button.MouseButton1Click:Connect(shootMurderer)
 	
-		if isActive then
-			print("🟢 Охота на убийцу ВКЛЮЧЕНА!")
-			while isActive do
-				killMurderer()
-				task.wait(0.3)
-			end
-		else
-			print("🔴 Охота на убийцу ВЫКЛЮЧЕНА!")
-		end
-	end)
-	
-	updateIndicator()
-	print("✅ MM2_KillMurderer загружена!")
+	print("✅ MM2_KillMurderer загружена! (нажми на кнопку чтобы выстрелить)")
 end;
 task.spawn(C_e4);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
