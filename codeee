@@ -7386,15 +7386,10 @@ task.spawn(C_e8);
 local function C_fb()
 local script = G2L["fb"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (С ПОИСКОМ ПАНЕЛЕЙ)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (НЕ ЗАВИСИТ ОТ РОДИТЕЛЯ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
-	local playerGui = player:FindFirstChild("PlayerGui")
-	
-	if not playerGui then
-		warn("❌ PlayerGui не найден!")
-		return
-	end
+	local playerGui = player:WaitForChild("PlayerGui")
 	
 	local purpHub = playerGui:FindFirstChild("PurpHub")
 	if not purpHub then
@@ -7427,24 +7422,16 @@ local script = G2L["fb"];
 	local function switchTab(tabName)
 		print("🔘 Переключение на: " .. tabName)
 	
+		-- Скрываем всё в RightFrame
 		for _, child in pairs(rightFrame:GetChildren()) do
-			if child:IsA("ImageButton") or child:IsA("TextButton") then
-				child.Visible = false
-			end
-			if child:IsA("TextBox") then
-				child.Visible = false
-			end
-			if child:IsA("TextLabel") then
-				child.Visible = false
-			end
-			if child:IsA("ScrollingFrame") then
-				child.Visible = false
-			end
-			if child:IsA("Frame") then
+			if child:IsA("ImageButton") or child:IsA("TextButton") or 
+				child:IsA("TextBox") or child:IsA("TextLabel") or 
+				child:IsA("ScrollingFrame") or child:IsA("Frame") then
 				child.Visible = false
 			end
 		end
 	
+		-- TELEPORT
 		if tabName == "TELEPORT" then
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child.Name == "TELEPORT_ToggleList" or child.Name == "TELEPORT_ADD" or 
@@ -7453,44 +7440,49 @@ local script = G2L["fb"];
 					child.Visible = true
 				end
 			end
+			-- ESP
 		elseif tabName == "ESP" then
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child.Name == "ESP_Box" or child.Name == "ESP_Box_Color" or child.Name == "ESP_Name" then
 					child.Visible = true
 				end
 			end
+			-- SPECTATE
 		elseif tabName == "SPECTATE" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child.Name:find("SPECTATE") then
+				if string.find(child.Name, "SPECTATE") then
 					child.Visible = true
 				end
 			end
+			-- MISC
 		elseif tabName == "MISC" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child.Name:find("MISC") then
+				if string.find(child.Name, "MISC") then
 					child.Visible = true
 				end
 			end
+			-- MM2
 		elseif tabName == "MM2" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child.Name:find("MM2") then
+				if string.find(child.Name, "MM2") then
 					child.Visible = true
 				end
 			end
+			-- Da Hood
 		elseif tabName == "Da Hood" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child.Name:find("DaHood") then
+				if string.find(child.Name, "DaHood") then
 					child.Visible = true
 				end
 			end
+			-- Troll
 		elseif tabName == "Troll" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child.Name:find("TROLL") then
+				if string.find(child.Name, "TROLL") then
 					child.Visible = true
 				end
 			end
-		elseif tabName == "INFO" then
-			-- ничего не показываем
+			-- Zo Wip
 		elseif tabName == "Zo Wip" then
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child.Name == "HB_Toggle" or child.Name == "HB_Visible" or child.Name == "FOV_Toggle" or
@@ -7498,15 +7490,22 @@ local script = G2L["fb"];
 					child.Visible = true
 				end
 			end
+			-- SHOW
 		elseif tabName == "SHOW" then
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child.Name == "SHOW_Autobid" then
 					child.Visible = true
 				end
 			end
+			-- INFO
+		elseif tabName == "INFO" then
+			-- ничего не показываем
+		else
+			print("❌ Неизвестная вкладка: " .. tabName)
 		end
 	end
 	
+	-- ===== ПОДКЛЮЧАЕМ КНОПКИ В ЛЕВОЙ ПАНЕЛИ =====
 	for _, btn in pairs(leftFrame:GetChildren()) do
 		if btn:IsA("ImageButton") then
 			btn.MouseButton1Click:Connect(function()
