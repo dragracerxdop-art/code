@@ -7386,54 +7386,48 @@ task.spawn(C_e8);
 local function C_fb()
 local script = G2L["fb"];
 	-- ==========================================
-	-- TabSwitcher (НОВОЕ ИМЯ, БЕЗ ОШИБОК)
+	-- TabSwitcher (РАБОЧАЯ ВЕРСИЯ)
 	-- ==========================================
-	print("🔧 TabSwitcher запущен!")
+	local leftFrame = script.Parent  -- LeftFrame
+	local mainFrame = leftFrame.Parent  -- MainFrame
+	local rightFrame = mainFrame:FindFirstChild("RightFrame")
 	
-	local player = game.Players.LocalPlayer
-	local gui = player.PlayerGui:FindFirstChild("PurpHub")
-	
-	if not gui then
-		print("❌ PurpHub не найден!")
+	if not rightFrame then
+		warn("❌ RightFrame не найден!")
 		return
 	end
 	
-	local main = gui:FindFirstChild("MainFrame")
-	if not main then
-		print("❌ MainFrame не найден!")
-		return
-	end
-	
-	local left = main:FindFirstChild("LeftFrame")
-	local right = main:FindFirstChild("RightFrame")
-	
-	if not left then
-		print("❌ LeftFrame не найден!")
-		return
-	end
-	
-	if not right then
-		print("❌ RightFrame не найден!")
-		return
-	end
-	
-	print("✅ Все панели найдены!")
+	print("✅ TabSwitcher запущен!")
 	
 	-- ===== ПЕРЕКЛЮЧЕНИЕ =====
 	local function switchTab(tabName)
 		print("🔘 Переключение на: " .. tabName)
 	
-		-- Скрываем всё
-		for _, child in pairs(right:GetChildren()) do
-			if child:IsA("ImageButton") or child:IsA("TextButton") or child:IsA("TextBox") or 
-				child:IsA("TextLabel") or child:IsA("ScrollingFrame") or child:IsA("Frame") then
+		-- Скрываем всё в RightFrame
+		for _, child in pairs(rightFrame:GetChildren()) do
+			if child:IsA("ImageButton") then
+				child.Visible = false
+			end
+			if child:IsA("TextBox") then
+				child.Visible = false
+			end
+			if child:IsA("TextLabel") then
+				child.Visible = false
+			end
+			if child:IsA("ScrollingFrame") then
+				child.Visible = false
+			end
+			if child:IsA("Frame") then
+				child.Visible = false
+			end
+			if child:IsA("TextButton") then
 				child.Visible = false
 			end
 		end
 	
 		-- TELEPORT
 		if tabName == "TELEPORT" then
-			for _, child in pairs(right:GetChildren()) do
+			for _, child in pairs(rightFrame:GetChildren()) do
 				if child.Name == "TELEPORT_ToggleList" or child.Name == "TELEPORT_ADD" or 
 					child.Name == "TELEPORT_REMOVE" or child.Name == "TELEPORT_NAME" or 
 					child.Name == "TELEPORT_SCROLL" then
@@ -7442,42 +7436,42 @@ local script = G2L["fb"];
 			end
 			-- ESP
 		elseif tabName == "ESP" then
-			for _, child in pairs(right:GetChildren()) do
+			for _, child in pairs(rightFrame:GetChildren()) do
 				if child.Name == "ESP_Box" or child.Name == "ESP_Box_Color" or child.Name == "ESP_Name" then
 					child.Visible = true
 				end
 			end
 			-- SPECTATE
 		elseif tabName == "SPECTATE" then
-			for _, child in pairs(right:GetChildren()) do
+			for _, child in pairs(rightFrame:GetChildren()) do
 				if string.find(child.Name, "SPECTATE") then
 					child.Visible = true
 				end
 			end
 			-- MISC
 		elseif tabName == "MISC" then
-			for _, child in pairs(right:GetChildren()) do
+			for _, child in pairs(rightFrame:GetChildren()) do
 				if string.find(child.Name, "MISC") then
 					child.Visible = true
 				end
 			end
 			-- MM2
 		elseif tabName == "MM2" then
-			for _, child in pairs(right:GetChildren()) do
+			for _, child in pairs(rightFrame:GetChildren()) do
 				if string.find(child.Name, "MM2") then
 					child.Visible = true
 				end
 			end
 			-- Da Hood
 		elseif tabName == "Da Hood" then
-			for _, child in pairs(right:GetChildren()) do
+			for _, child in pairs(rightFrame:GetChildren()) do
 				if string.find(child.Name, "DaHood") then
 					child.Visible = true
 				end
 			end
 			-- TROLL
 		elseif tabName == "Troll" then
-			for _, child in pairs(right:GetChildren()) do
+			for _, child in pairs(rightFrame:GetChildren()) do
 				if string.find(child.Name, "TROLL") then
 					child.Visible = true
 				end
@@ -7487,7 +7481,7 @@ local script = G2L["fb"];
 			-- ничего
 			-- ZO WIP
 		elseif tabName == "Zo Wip" then
-			for _, child in pairs(right:GetChildren()) do
+			for _, child in pairs(rightFrame:GetChildren()) do
 				if child.Name == "HB_Toggle" or child.Name == "HB_Visible" or child.Name == "FOV_Toggle" or
 					child.Name == "HB_Size" or child.Name == "FOV_Value" then
 					child.Visible = true
@@ -7495,7 +7489,7 @@ local script = G2L["fb"];
 			end
 			-- SHOW
 		elseif tabName == "SHOW" then
-			for _, child in pairs(right:GetChildren()) do
+			for _, child in pairs(rightFrame:GetChildren()) do
 				if child.Name == "SHOW_Autobid" then
 					child.Visible = true
 				end
@@ -7506,7 +7500,7 @@ local script = G2L["fb"];
 	end
 	
 	-- ===== ПОДКЛЮЧАЕМ КНОПКИ =====
-	for _, btn in pairs(left:GetChildren()) do
+	for _, btn in pairs(leftFrame:GetChildren()) do
 		if btn:IsA("ImageButton") then
 			btn.MouseButton1Click:Connect(function()
 				switchTab(btn.Name)
