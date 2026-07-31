@@ -6820,10 +6820,14 @@ task.spawn(C_dd);
 local function C_e1()
 local script = G2L["e1"];
 	-- ==========================================
-	-- TROLL_AntiLag (ОДНОРАЗОВЫЙ СБРОС)
+	-- TROLL_AntiLag (ТОЛЬКО СБРОС СКОРОСТИ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
+	local RunService = game:GetService("RunService")
+	
+	local isActive = false
+	local fixLoop = nil
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -6831,65 +6835,95 @@ local script = G2L["e1"];
 	indicator.Size = UDim2.new(1, 0, 0.3, 0)
 	indicator.Position = UDim2.new(0, 0, 0.7, 0)
 	indicator.BackgroundTransparency = 1
-	indicator.Text = "СБРОС"
-	indicator.TextColor3 = Color3.fromRGB(255, 165, 0)
+	indicator.Text = "ВЫКЛ"
+	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 	indicator.TextSize = 14
 	indicator.Font = Enum.Font.SourceSansBold
 	indicator.Parent = button
 	
-	-- ====== СБРОС ФИЗИКИ ======
-	local function resetPhysics()
-		local char = player.Character
-		if not char then
-			print("❌ Нет персонажа!")
-			return
-		end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-	
-		if hrp then
-			pcall(function()
-				hrp.AssemblyLinearVelocity = Vector3.zero
-				hrp.AssemblyAngularVelocity = Vector3.zero
-				hrp.Velocity = Vector3.zero
-				hrp.RotVelocity = Vector3.zero
-			end)
-			print("✅ Скорость сброшена!")
+	local function updateIndicator()
+		if isActive then
+			indicator.Text = "ВКЛ"
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
 		else
-			print("❌ Нет HumanoidRootPart!")
+			indicator.Text = "ВЫКЛ"
+			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 		end
-	
-		if humanoid then
-			pcall(function()
-				humanoid.PlatformStand = false
-				humanoid.AutoRotate = true
-	
-				if humanoid.WalkSpeed > 50 or humanoid.WalkSpeed < 10 then
-					humanoid.WalkSpeed = 16
-				end
-	
-				if humanoid:GetState() == Enum.HumanoidStateType.Freefall then
-					humanoid:ChangeState(Enum.HumanoidStateType.Running)
-				end
-			end)
-			print("✅ Humanoid сброшен!")
-		else
-			print("❌ Нет Humanoid!")
-		end
-	
-		-- Мигаем индикатором
-		indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-		task.wait(0.3)
-		indicator.TextColor3 = Color3.fromRGB(255, 165, 0)
-	
-		print("🔄 Физика сброшена!")
 	end
 	
-	button.MouseButton1Click:Connect(resetPhysics)
+	-- ====== СБРОС ТОЛЬКО СКОРОСТИ (БЕЗ HUMANOD) ======
+	local function resetSpeed()
+		local char = player.Character
+		if not char then return end
 	
-	print("✅ TROLL_AntiLag загружена!")
-	print("📌 Нажми на кнопку чтобы сбросить физику")
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+	
+		pcall(function()
+			-- ТОЛЬКО СБРАСЫВАЕМ СКОРОСТЬ
+			hrp.AssemblyLinearVelocity = Vector3.zero
+			hrp.AssemblyAngularVelocity = Vector3.zero
+			hrp.Velocity = Vector3.zero
+			hrp.RotVelocity = Vector3.zero
+		end)
+	end
+	
+	-- ====== ЗАПУСК ======
+	local function startFix()
+		if isActive then return end
+		isActive = true
+		updateIndicator()
+		print("🟢 Анти-лаг ВКЛЮЧЕН!")
+	
+		if fixLoop then
+			fixLoop:Disconnect()
+			fixLoop = nil
+		end
+	
+		fixLoop = RunService.Heartbeat:Connect(function()
+			if not isActive then
+				if fixLoop then
+					fixLoop:Disconnect()
+					fixLoop = nil
+				end
+				return
+			end
+			resetSpeed()
+		end)
+	end
+	
+	-- ====== ОСТАНОВКА ======
+	local function stopFix()
+		isActive = false
+		updateIndicator()
+	
+		if fixLoop then
+			fixLoop:Disconnect()
+			fixLoop = nil
+		end
+	
+		print("🔴 Анти-лаг ВЫКЛЮЧЕН!")
+	end
+	
+	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
+	button.MouseButton1Click:Connect(function()
+		if isActive then
+			stopFix()
+		else
+			startFix()
+		end
+	end)
+	
+	-- ====== ПРИ РЕСПАВНЕ ======
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5)
+		if isActive then
+			resetSpeed()
+		end
+	end)
+	
+	updateIndicator()
+	print("✅ TROLL_AntiLag загружена (ТОЛЬКО СКОРОСТЬ)")
 end;
 task.spawn(C_e1);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
