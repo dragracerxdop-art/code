@@ -6624,7 +6624,7 @@ task.spawn(C_d9);
 local function C_dd()
 local script = G2L["dd"];
 	-- ==========================================
-	-- MISC_Platform (СПАВН ПЛАТФОРМ ПОД ИГРОКОМ)
+	-- MISC_Platform (С ЗАЖАТИЕМ G + ПОДЪЁМ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -6633,12 +6633,12 @@ local script = G2L["dd"];
 	
 	local isActive = false
 	local platforms = {}
-	local platformLoop = nil
 	local spawnedCount = 0
+	local isGKeyDown = false
+	local spawnLoop = nil
 	
 	-- ====== ГЛОБАЛЬНАЯ ДЛЯ CTRL+DELETE ======
 	_G.Platforms = platforms
-	_G.SpawnedPlatforms = platforms
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -6654,10 +6654,10 @@ local script = G2L["dd"];
 	
 	local function updateIndicator()
 		if isActive then
-			indicator.Text = "🟢 ВКЛ [G]"
+			indicator.Text = "ВКЛ"
 			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
 		else
-			indicator.Text = "🔴 ВЫКЛ"
+			indicator.Text = "ВЫКЛ"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 		end
 	end
@@ -6665,39 +6665,39 @@ local script = G2L["dd"];
 	-- ====== СПАВН ПЛАТФОРМЫ ======
 	local function spawnPlatform()
 		local char = player.Character
-		if not char then 
-			print("❌ Нет персонажа!")
-			return 
-		end
+		if not char then return end
 	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then 
-			print("❌ Нет HumanoidRootPart!")
-			return 
-		end
+		if not hrp then return end
 	
 		local pos = hrp.Position
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid then return end
 	
-		-- 👇 СОЗДАЁМ ПЛАТФОРМУ
+		-- 👇 ВЫСОТА: чуть выше ног (ниже колен)
+		local heightOffset = 1.5
+		local platformY = pos.Y - heightOffset
+	
+		-- 👇 ПРОВЕРЯЕМ: не слишком ли низко
+		if platformY < 0 then
+			platformY = 0.5
+		end
+	
 		local platform = Instance.new("Part")
 		platform.Size = Vector3.new(8, 0.5, 8)
-		platform.Position = Vector3.new(pos.X, pos.Y - 2, pos.Z)
+		platform.Position = Vector3.new(pos.X, platformY, pos.Z)
 		platform.Anchored = true
 		platform.CanCollide = true
 		platform.Transparency = 0.2
-		platform.Color = Color3.fromRGB(75, 0, 130)  -- ТЕМНО-ФИОЛЕТОВЫЙ
+		platform.Color = Color3.fromRGB(75, 0, 130)
 		platform.Material = Enum.Material.Neon
 		platform.Name = "Platform_" .. spawnedCount
-	
-		-- 👇 ПЛАТФОРМА ВИДНА ТОЛЬКО ТЕБЕ (локальная)
 		platform.LocalTransparencyModifier = 0
 		platform.Parent = workspace
 	
-		-- 👇 ДОБАВЛЯЕМ В СПИСОК
 		table.insert(platforms, platform)
 		spawnedCount = spawnedCount + 1
 	
-		print("🟣 Платформа #" .. spawnedCount .. " создана!")
 		return platform
 	end
 	
@@ -6710,23 +6710,48 @@ local script = G2L["dd"];
 		end
 		platforms = {}
 		_G.Platforms = platforms
-		_G.SpawnedPlatforms = platforms
 		spawnedCount = 0
 		print("🗑️ Все платформы удалены!")
 	end
 	
-	-- ====== ОТСЛЕЖИВАНИЕ КЛАВИШИ G ======
-	local function onKeyPress(input)
-		if not isActive then return end
-		if input.KeyCode == Enum.KeyCode.G then
-			spawnPlatform()
+	-- ====== ЗАПУСК ЦИКЛА СПАВНА ======
+	local function startSpawnLoop()
+		if spawnLoop then
+			spawnLoop:Disconnect()
+			spawnLoop = nil
 		end
+	
+		spawnLoop = RunService.Heartbeat:Connect(function()
+			if not isActive then
+				if spawnLoop then
+					spawnLoop:Disconnect()
+					spawnLoop = nil
+				end
+				return
+			end
+	
+			if isGKeyDown then
+				spawnPlatform()
+				task.wait(0.05)  -- 👈 ЗАДЕРЖКА МЕЖДУ ПЛАТФОРМАМИ
+			end
+		end)
 	end
 	
-	UserInputService.InputBegan:Connect(onKeyPress)
+	-- ====== ОТСЛЕЖИВАНИЕ КЛАВИШИ G ======
+	UserInputService.InputBegan:Connect(function(input)
+		if not isActive then return end
+		if input.KeyCode == Enum.KeyCode.G then
+			isGKeyDown = true
+			print("🔽 G зажата")
+		end
+	end)
 	
-	-- ====== ОБНОВЛЕНИЕ ПОЗИЦИИ ПЛАТФОРМ (ОСТАЮТСЯ НА МЕСТЕ) ======
-	-- Платформы НЕ ДВИГАЮТСЯ, они остаются там где были созданы
+	UserInputService.InputEnded:Connect(function(input)
+		if input.KeyCode == Enum.KeyCode.G then
+			isGKeyDown = false
+			print("🔼 G отпущена")
+		end
+	end)
 	
 	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	local function togglePlatform()
@@ -6734,17 +6759,21 @@ local script = G2L["dd"];
 		updateIndicator()
 	
 		if isActive then
-			print("ВКЛ")
+			print("🟢 Режим платформ ВКЛЮЧЕН! Зажми G для подъёма")
+			startSpawnLoop()
 		else
-			print("Выкл")
+			print("🔴 Режим платформ ВЫКЛЮЧЕН!")
+			isGKeyDown = false
+			if spawnLoop then
+				spawnLoop:Disconnect()
+				spawnLoop = nil
+			end
 		end
 	end
 	
 	button.MouseButton1Click:Connect(togglePlatform)
 	
-	-- ====== ФУНКЦИЯ ДЛЯ CTRL+DELETE (УДАЛЕНИЕ ЧЕРЕЗ HOTKEYS) ======
-	-- В скрипте HotKeys уже есть удаление объектов,
-	-- но добавим отдельную функцию для платформ
+	-- ====== ФУНКЦИЯ ДЛЯ CTRL+DELETE ======
 	_G.DeletePlatforms = function()
 		deleteAllPlatforms()
 	end
@@ -6752,13 +6781,12 @@ local script = G2L["dd"];
 	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
-		-- Платформы НЕ УДАЛЯЮТСЯ при респавне
 		print("🔄 Респавн! Платформы остались на месте")
 	end)
 	
 	updateIndicator()
 	print("✅ MISC_Platform загружена!")
-	print("📌 Нажми G чтобы создать платформу под ногами")
+	print("📌 Зажми G чтобы подниматься вверх")
 	print("📌 Платформы видны только тебе")
 end;
 task.spawn(C_dd);
@@ -6766,7 +6794,7 @@ task.spawn(C_dd);
 local function C_e1()
 local script = G2L["e1"];
 	-- ==========================================
-	-- TROLL_AntiLag (ФИКС ТОРМОЗОВ ПОСЛЕ ФЛИНГА)
+	-- TROLL_AntiLag (ФИКС ТОРМОЗОВ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -6789,15 +6817,15 @@ local script = G2L["e1"];
 	
 	local function updateIndicator()
 		if isActive then
-			indicator.Text = "🟢 ФИКС"
+			indicator.Text = "ВКЛ"
 			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
 		else
-			indicator.Text = "🔴 ВЫКЛ"
+			indicator.Text = "ВЫКЛ"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 		end
 	end
 	
-	-- ====== СБРОС ФИЗИКИ (БЕЗ ОШИБОК) ======
+	-- ====== СБРОС ФИЗИКИ ======
 	local function resetPhysics()
 		local char = player.Character
 		if not char then return end
@@ -6807,7 +6835,6 @@ local script = G2L["e1"];
 	
 		if not hrp or not humanoid then return end
 	
-		-- Останавливаем движение
 		pcall(function()
 			hrp.AssemblyLinearVelocity = Vector3.zero
 			hrp.AssemblyAngularVelocity = Vector3.zero
@@ -6815,7 +6842,6 @@ local script = G2L["e1"];
 			hrp.RotVelocity = Vector3.zero
 		end)
 	
-		-- Сбрасываем состояние
 		pcall(function()
 			humanoid.PlatformStand = false
 			humanoid.AutoRotate = true
@@ -6824,7 +6850,6 @@ local script = G2L["e1"];
 				humanoid.WalkSpeed = 16
 			end
 	
-			-- Принудительно меняем состояние
 			if humanoid:GetState() == Enum.HumanoidStateType.Freefall then
 				humanoid:ChangeState(Enum.HumanoidStateType.Running)
 			end
@@ -6837,15 +6862,13 @@ local script = G2L["e1"];
 		isActive = true
 		updateIndicator()
 	
-		print("ВКЛ!")
+		print("🟢 Анти-лаг ВКЛЮЧЕН!")
 	
-		-- Закрываем старый цикл
 		if fixLoop then
 			fixLoop:Disconnect()
 			fixLoop = nil
 		end
 	
-		-- Запускаем новый
 		fixLoop = RunService.RenderStepped:Connect(function()
 			if not isActive then
 				if fixLoop then
@@ -6868,7 +6891,7 @@ local script = G2L["e1"];
 			fixLoop = nil
 		end
 	
-		print("Выкл")
+		print("🔴 Анти-лаг ВЫКЛЮЧЕН!")
 	end
 	
 	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
