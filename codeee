@@ -7099,7 +7099,7 @@ task.spawn(C_e4);
 local function C_f7()
 local script = G2L["f7"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (РАБОЧАЯ ВЕРСИЯ)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -7242,10 +7242,18 @@ local script = G2L["f7"];
 		elseif tabName == "MM2" then
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("ImageButton") and (
-					child.Name == "MM2_KillAll" or
+					child.Name == "MM2_CheckRoles" or
+						child.Name == "MM2_ESP" or
+						child.Name == "MM2_GunESP" or
+						child.Name == "MM2_PickUpGun" or
+						child.Name == "MM2_AutoFarm" or
+						child.Name == "MM2_KillAll" or
 						child.Name == "MM2_KillMurderer"
 					) then
 					child.Visible = true
+				end
+				if child:IsA("Frame") and child.Name == "MM2_Roles" then
+					child.Visible = false
 				end
 			end
 			print("✅ MM2")
