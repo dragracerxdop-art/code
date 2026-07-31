@@ -4041,7 +4041,7 @@ task.spawn(C_6b);
 local function C_72()
 local script = G2L["72"];
 	-- ==========================================
-	-- ESP_Name (СТАБИЛЬНАЯ ВЕРСИЯ)
+	-- ESP_Name (БЕЗОПАСНАЯ ВЕРСИЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -4074,19 +4074,11 @@ local script = G2L["72"];
 		end
 	end
 	
-	-- ====== ОЧИСТКА ВСЕХ СОЕДИНЕНИЙ ======
-	local function clearConnections()
-		for _, conn in pairs(connections) do
-			pcall(function() conn:Disconnect() end)
-		end
-		connections = {}
-	end
-	
-	-- ====== УДАЛЕНИЕ ЛЕЙБЛА ИГРОКА ======
+	-- ====== УДАЛЕНИЕ ======
 	local function removeLabel(plr)
 		if nameLabels[plr] then
 			pcall(function()
-				if nameLabels[plr].Parent then
+				if nameLabels[plr] and nameLabels[plr].Parent then
 					nameLabels[plr]:Destroy()
 				end
 			end)
@@ -4094,7 +4086,7 @@ local script = G2L["72"];
 		end
 	end
 	
-	-- ====== СОЗДАНИЕ ИМЕНИ ======
+	-- ====== СОЗДАНИЕ ======
 	local function createNameLabel(plr)
 		if plr == player then return nil end
 		if not plr.Character then return nil end
@@ -4102,7 +4094,6 @@ local script = G2L["72"];
 		local head = plr.Character:FindFirstChild("Head")
 		if not head then return nil end
 	
-		-- Удаляем старый если есть
 		removeLabel(plr)
 	
 		local billboard = Instance.new("BillboardGui")
@@ -4118,7 +4109,6 @@ local script = G2L["72"];
 		text.BackgroundTransparency = 1
 		text.Text = plr.Name
 		text.TextColor3 = Color3.fromRGB(255, 255, 255)
-		text.TextScaled = false
 		text.TextSize = 16
 		text.Font = Enum.Font.GothamBold
 		text.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
@@ -4128,160 +4118,85 @@ local script = G2L["72"];
 		return billboard
 	end
 	
-	-- ====== ПРОВЕРКА ВСЕХ ИГРОКОВ ======
-	local function updateAllPlayers()
-		if not isEnabled then return end
+	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
+	local function toggleESP()
+		isEnabled = not isEnabled
+		updateState()
 	
-		for _, plr in pairs(game.Players:GetPlayers()) do
-			if plr == player then 
-				removeLabel(plr)
-				goto continue
-			end
+		if isEnabled then
+			print("👤 Name ESP ВКЛЮЧЕН!")
 	
-			if plr.Character and plr.Character:FindFirstChild("Head") then
-				if not nameLabels[plr] or not nameLabels[plr].Parent then
+			-- Создаём имена для всех
+			for _, plr in pairs(game.Players:GetPlayers()) do
+				if plr ~= player then
 					local label = createNameLabel(plr)
 					if label then
 						nameLabels[plr] = label
 					end
 				end
-			else
+			end
+	
+			-- Запускаем цикл обновления
+			if updateLoop then
+				updateLoop:Disconnect()
+				updateLoop = nil
+			end
+	
+			updateLoop = runService.Heartbeat:Connect(function()
+				if not isEnabled then
+					if updateLoop then
+						updateLoop:Disconnect()
+						updateLoop = nil
+					end
+					return
+				end
+	
+				-- Проверяем всех игроков
+				for _, plr in pairs(game.Players:GetPlayers()) do
+					if plr ~= player then
+						if plr.Character and plr.Character:FindFirstChild("Head") then
+							if not nameLabels[plr] or not nameLabels[plr].Parent then
+								local label = createNameLabel(plr)
+								if label then
+									nameLabels[plr] = label
+								end
+							end
+						else
+							removeLabel(plr)
+						end
+					end
+				end
+			end)
+	
+		else
+			print("👤 Name ESP ВЫКЛЮЧЕН!")
+	
+			if updateLoop then
+				updateLoop:Disconnect()
+				updateLoop = nil
+			end
+	
+			-- Удаляем всё
+			for plr, _ in pairs(nameLabels) do
 				removeLabel(plr)
 			end
-	
-			::continue::
-		end
-	end
-	
-	-- ====== ОБРАБОТЧИК РЕСПАВНА ИГРОКА ======
-	local function onPlayerCharacterAdded(plr)
-		if not isEnabled then return end
-		if plr == player then return end
-	
-		-- Ждём появления головы
-		local function checkHead()
-			if plr.Character and plr.Character:FindFirstChild("Head") then
-				local label = createNameLabel(plr)
-				if label then
-					nameLabels[plr] = label
-				end
-			else
-				task.wait(0.5)
-				checkHead()
-			end
-		end
-		task.spawn(checkHead)
-	end
-	
-	-- ====== ОБРАБОТЧИК ДОБАВЛЕНИЯ ИГРОКА ======
-	local function onPlayerAdded(plr)
-		if not isEnabled then return end
-		if plr == player then return end
-	
-		-- Подписываемся на его CharacterAdded
-		local conn = plr.CharacterAdded:Connect(function()
-			task.wait(0.5)
-			onPlayerCharacterAdded(plr)
-		end)
-		table.insert(connections, conn)
-	
-		-- Если уже есть персонаж
-		if plr.Character then
-			task.wait(0.5)
-			onPlayerCharacterAdded(plr)
-		end
-	end
-	
-	-- ====== ВКЛЮЧЕНИЕ ======
-	local function enableESP()
-		if isEnabled then return end
-		isEnabled = true
-		updateState()
-	
-		print("👤 Name ESP ВКЛЮЧЕН!")
-	
-		-- Чистим старые
-		clearConnections()
-	
-		-- Подписываемся на новых игроков
-		local conn = game.Players.PlayerAdded:Connect(onPlayerAdded)
-		table.insert(connections, conn)
-	
-		-- Подписываемся на выход игроков
-		local conn2 = game.Players.PlayerRemoving:Connect(function(plr)
-			removeLabel(plr)
-		end)
-		table.insert(connections, conn2)
-	
-		-- Подписываемся на свой респавн (не влияет на чужие имена)
-		local conn3 = player.CharacterAdded:Connect(function()
-			task.wait(1)
-			if isEnabled then
-				updateAllPlayers()
-			end
-		end)
-		table.insert(connections, conn3)
-	
-		-- Обрабатываем уже существующих игроков
-		for _, plr in pairs(game.Players:GetPlayers()) do
-			if plr ~= player then
-				onPlayerAdded(plr)
-			end
-		end
-	
-		-- Запускаем цикл обновления (на всякий случай)
-		if updateLoop then
-			updateLoop:Disconnect()
-			updateLoop = nil
-		end
-	
-		updateLoop = runService.Heartbeat:Connect(function()
-			if not isEnabled then
-				if updateLoop then
-					updateLoop:Disconnect()
-					updateLoop = nil
-				end
-				return
-			end
-			updateAllPlayers()
-		end)
-	end
-	
-	-- ====== ВЫКЛЮЧЕНИЕ ======
-	local function disableESP()
-		isEnabled = false
-		updateState()
-	
-		print("👤 Name ESP ВЫКЛЮЧЕН!")
-	
-		clearConnections()
-	
-		if updateLoop then
-			updateLoop:Disconnect()
-			updateLoop = nil
-		end
-	
-		-- Удаляем все лейблы
-		for plr, _ in pairs(nameLabels) do
-			removeLabel(plr)
-		end
-		nameLabels = {}
-	end
-	
-	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
-	local function toggleESP()
-		if isEnabled then
-			disableESP()
-		else
-			enableESP()
+			nameLabels = {}
 		end
 	end
 	
 	button.MouseButton1Click:Connect(toggleESP)
 	
-	-- ====== ПРИ СТАРТЕ ======
+	-- ====== ПРИ РЕСПАВНЕ ======
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5)
+		if isEnabled then
+			-- Не удаляем чужие имена, они остаются
+			print("🔄 Респавн! Имена других игроков остались")
+		end
+	end)
+	
 	updateState()
-	print("✅ ESP_Name загружена (стабильная версия)!")
+	print("✅ ESP_Name загружена (безопасная версия)!")
 end;
 task.spawn(C_72);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_CheckRoles.LocalScript
