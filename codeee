@@ -6911,15 +6911,14 @@ task.spawn(C_dc);
 local function C_e0()
 local script = G2L["e0"];
 	-- ==========================================
-	-- MM2_KillAll (ТЕЛЕПОРТ ХИТБОКСОВ ВСЕХ ИГРОКОВ)
+	-- MM2_KillAll (УБИТЬ ВСЕХ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
-	local RunService = game:GetService("RunService")
+	local VirtualInputManager = game:GetService("VirtualInputManager")
 	
 	local isActive = false
-	local killLoop = nil
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -6948,6 +6947,18 @@ local script = G2L["e0"];
 		local myChar = player.Character
 		if not myChar then return end
 	
+		-- Ищем нож
+		local knife = myChar:FindFirstChild("Knife")
+		if not knife then
+			knife = player.Backpack:FindFirstChild("Knife")
+			if knife then
+				knife.Parent = myChar
+			else
+				print("❌ Нож не найден!")
+				return
+			end
+		end
+	
 		local myHrp = myChar:FindFirstChild("HumanoidRootPart")
 		if not myHrp then return end
 	
@@ -6958,19 +6969,24 @@ local script = G2L["e0"];
 					local hrp = char:FindFirstChild("HumanoidRootPart")
 					local humanoid = char:FindFirstChildOfClass("Humanoid")
 					if hrp and humanoid and humanoid.Health > 0 then
-						-- 👇 ТЕЛЕПОРТИРУЕМ ТОЛЬКО ХИТБОКС (HumanoidRootPart) К ТЕБЕ
-						local teleportPos = myHrp.Position + Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
-						hrp.CFrame = CFrame.new(teleportPos)
-	
-						-- 👇 ДОПОЛНИТЕЛЬНО: телепортируем голову (для уверенности)
-						local head = char:FindFirstChild("Head")
-						if head then
-							head.CFrame = CFrame.new(teleportPos + Vector3.new(0, 1.5, 0))
+						-- Отключаем коллизии
+						for _, part in pairs(char:GetDescendants()) do
+							if part:IsA("BasePart") then
+								part.CanCollide = false
+							end
 						end
 	
+						-- Телепортируем к тебе
+						local teleportPos = myHrp.CFrame + myHrp.CFrame.LookVector * 3
+						hrp.CFrame = teleportPos
+						hrp.Size = Vector3.new(5, 5, 5)
+						hrp.Anchored = true
+	
+						-- Имитируем удар (как в скрипте)
+						VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+						VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+	
 						task.wait(0.05)
-						-- 👇 УБИВАЕМ
-						humanoid.Health = 0
 					end
 				end
 			end
@@ -6986,7 +7002,7 @@ local script = G2L["e0"];
 			print("🟢 Kill All ВКЛЮЧЕН!")
 			while isActive do
 				killAll()
-				task.wait(0.3)
+				task.wait(0.5)
 			end
 		else
 			print("🔴 Kill All ВЫКЛЮЧЕН!")
@@ -7001,7 +7017,7 @@ task.spawn(C_e0);
 local function C_e4()
 local script = G2L["e4"];
 	-- ==========================================
-	-- MM2_KillMurderer (ТЕЛЕПОРТ ХИТБОКСА МАНЬЯКА)
+	-- MM2_KillMurderer (УБИТЬ МАНЬЯКА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -7010,7 +7026,6 @@ local script = G2L["e4"];
 	local RunService = game:GetService("RunService")
 	
 	local isActive = false
-	local killLoop = nil
 	local murdererName = nil
 	
 	-- ====== ИНДИКАТОР ======
@@ -7037,14 +7052,20 @@ local script = G2L["e4"];
 	
 	-- ====== ПОИСК МАНЬЯКА ======
 	local function findMurderer()
+		local getPlayerData = ReplicatedStorage:FindFirstChild("GetPlayerData", true)
+		if not getPlayerData then return nil end
+	
 		local success, data = pcall(function()
-			return ReplicatedStorage:FindFirstChild("GetPlayerData", true):InvokeServer()
+			return getPlayerData:InvokeServer()
 		end)
 	
 		if success and data then
 			for name, info in pairs(data) do
 				if info.Role == "Murderer" then
-					return name
+					local plr = Players:FindFirstChild(name)
+					if plr and plr:GetAttribute("Alive") == true then
+						return plr
+					end
 				end
 			end
 		end
@@ -7059,42 +7080,39 @@ local script = G2L["e4"];
 		local myHrp = myChar:FindFirstChild("HumanoidRootPart")
 		if not myHrp then return end
 	
-		if not murdererName then
-			murdererName = findMurderer()
-			if not murdererName then
-				print("❌ Маньяк не найден!")
-				return
-			end
-			print("🔴 Маньяк: " .. murdererName)
-		end
-	
-		local target = Players:FindFirstChild(murdererName)
+		-- Находим маньяка
+		local target = findMurderer()
 		if not target then
-			murdererName = nil
+			if murdererName then
+				murdererName = nil
+			end
 			return
 		end
 	
+		murdererName = target.Name
 		local char = target.Character
 		if not char then return end
 	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not hrp or not humanoid or humanoid.Health <= 0 then
-			murdererName = nil
-			return
+		if not hrp or not humanoid or humanoid.Health <= 0 then return end
+	
+		-- Отключаем коллизии
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
 		end
 	
-		-- 👇 ТЕЛЕПОРТИРУЕМ ТОЛЬКО ХИТБОКС (HumanoidRootPart) МАНЬЯКА К ТЕБЕ
-		local teleportPos = myHrp.Position + Vector3.new(math.random(-1, 1), 0, math.random(-1, 1))
+		-- Телепортируем маньяка к тебе
+		local teleportPos = myHrp.Position + Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
 		hrp.CFrame = CFrame.new(teleportPos)
-	
-		-- 👇 ДОПОЛНИТЕЛЬНО: телепортируем голову
-		local head = char:FindFirstChild("Head")
-		if head then
-			head.CFrame = CFrame.new(teleportPos + Vector3.new(0, 1.5, 0))
-		end
+		hrp.Size = Vector3.new(5, 5, 5)
+		hrp.Anchored = true
 	
 		task.wait(0.05)
+	
+		-- УБИВАЕМ
 		humanoid.Health = 0
 		print("💀 Маньяк " .. target.Name .. " убит!")
 		murdererName = nil
