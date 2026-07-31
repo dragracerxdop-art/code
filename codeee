@@ -6911,17 +6911,14 @@ task.spawn(C_dc);
 local function C_e0()
 local script = G2L["e0"];
 	-- ==========================================
-	-- MM2_KillAll (УБИТЬ ВСЕХ ИГРОКОВ)
+	-- MM2_KillAll (УБИТЬ ВСЕХ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
-	local RunService = game:GetService("RunService")
 	
 	local isActive = false
-	local killLoop = nil
 	
-	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
 	indicator.Size = UDim2.new(1, 0, 0.3, 0)
@@ -6943,148 +6940,48 @@ local script = G2L["e0"];
 		end
 	end
 	
-	-- ====== ПОИСК ВСЕХ ИГРОКОВ ======
-	local function getAllPlayers()
-		local targets = {}
+	local function killAll()
+		local myChar = player.Character
+		if not myChar then return end
+	
+		local myHrp = myChar:FindFirstChild("HumanoidRootPart")
+		if not myHrp then return end
+	
 		for _, plr in pairs(Players:GetPlayers()) do
 			if plr ~= player then
-				if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-					local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
-					if humanoid and humanoid.Health > 0 then
-						table.insert(targets, plr)
+				local char = plr.Character
+				if char then
+					local hrp = char:FindFirstChild("HumanoidRootPart")
+					local humanoid = char:FindFirstChildOfClass("Humanoid")
+					if hrp and humanoid and humanoid.Health > 0 then
+						-- Телепорт к тебе
+						hrp.CFrame = myHrp.CFrame * CFrame.new(0, 0, 3)
+						char:SetPrimaryPartCFrame(hrp.CFrame)
+						task.wait(0.05)
+						-- Убийство
+						humanoid.Health = 0
 					end
 				end
 			end
 		end
-		return targets
 	end
 	
-	-- ====== УБИЙСТВО ИГРОКА ======
-	local function killPlayer(targetPlr)
-		local char = targetPlr.Character
-		if not char then return false end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-	
-		if not hrp or not humanoid then return false end
-		if humanoid.Health <= 0 then return false end
-	
-		-- 👇 1. ТЕЛЕПОРТИРУЕМ К ТЕБЕ
-		local myChar = player.Character
-		if myChar then
-			local myHrp = myChar:FindFirstChild("HumanoidRootPart")
-			if myHrp then
-				-- Телепорт прямо перед тобой
-				local pos = myHrp.Position + myHrp.CFrame.LookVector * 3
-				hrp.CFrame = CFrame.new(pos)
-				char:SetPrimaryPartCFrame(hrp.CFrame)
-			end
-		end
-	
-		-- 👇 2. УБИВАЕМ (устанавливаем здоровье в 0)
-		pcall(function()
-			humanoid.Health = 0
-			humanoid.BreakJointsOnDeath = true
-		end)
-	
-		-- 👇 3. ДОПОЛНИТЕЛЬНО: ломаем части тела
-		for _, part in pairs(char:GetDescendants()) do
-			if part:IsA("BasePart") then
-				pcall(function()
-					part.CanCollide = false
-					part.Transparency = 0.5
-				end)
-			end
-		end
-	
-		return true
-	end
-	
-	-- ====== УБИТЬ ВСЕХ ======
-	local function killAll()
-		local targets = getAllPlayers()
-	
-		if #targets == 0 then
-			print("❌ Нет живых игроков!")
-			return
-		end
-	
-		print("🔪 Убиваю " .. #targets .. " игроков...")
-	
-		local killed = 0
-		for _, target in ipairs(targets) do
-			local success = killPlayer(target)
-			if success then
-				killed = killed + 1
-				print("   💀 Убит: " .. target.Name)
-			end
-			task.wait(0.1)  -- 👈 ЗАДЕРЖКА ЧТОБЫ НЕ ЛАГАТЬ
-		end
-	
-		print("✅ Убито: " .. killed .. "/" .. #targets)
-	end
-	
-	-- ====== ЦИКЛ ДЛЯ ПОСТОЯННОГО УБИЙСТВА ======
-	local function startKillLoop()
-		if isActive then return end
-		isActive = true
+	button.MouseButton1Click:Connect(function()
+		isActive = not isActive
 		updateIndicator()
-	
-		print("🟢 Kill All ВКЛЮЧЕН!")
-	
-		if killLoop then
-			killLoop:Disconnect()
-			killLoop = nil
-		end
-	
-		killLoop = RunService.Heartbeat:Connect(function()
-			if not isActive then
-				if killLoop then
-					killLoop:Disconnect()
-					killLoop = nil
-				end
-				return
-			end
-			killAll()
-		end)
-	end
-	
-	-- ====== ОСТАНОВКА ======
-	local function stopKillLoop()
-		isActive = false
-		updateIndicator()
-	
-		if killLoop then
-			killLoop:Disconnect()
-			killLoop = nil
-		end
-	
-		print("🔴 Kill All ВЫКЛЮЧЕН!")
-		}
-	
-		-- ====== ПЕРЕКЛЮЧЕНИЕ ======
-	local function toggleKill()
 		if isActive then
-			stopKillLoop()
+			print("🟢 Kill All ВКЛЮЧЕН!")
+			while isActive do
+				killAll()
+				task.wait(0.5)
+			end
 		else
-			startKillLoop()
-		end
-	end
-	
-	button.MouseButton1Click:Connect(toggleKill)
-	
-	-- ====== ПРИ РЕСПАВНЕ ======
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		if isActive then
-			print("🔄 Респавн! Продолжаем убивать...")
+			print("🔴 Kill All ВЫКЛЮЧЕН!")
 		end
 	end)
 	
 	updateIndicator()
 	print("✅ MM2_KillAll загружена!")
-	print("📌 Нажми кнопку чтобы начать убивать всех")
 end;
 task.spawn(C_e0);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_KillMurderer.LocalScript
@@ -7097,12 +6994,10 @@ local script = G2L["e4"];
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local RunService = game:GetService("RunService")
 	
 	local isActive = false
-	local killLoop = nil
+	local murdererName = nil
 	
-	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
 	indicator.Size = UDim2.new(1, 0, 0.3, 0)
@@ -7116,7 +7011,7 @@ local script = G2L["e4"];
 	
 	local function updateIndicator()
 		if isActive then
-			indicator.Text = "🟢 ИЩУ"
+			indicator.Text = "🟢 ОХОТА"
 			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
 		else
 			indicator.Text = "🔴 ВЫКЛ"
@@ -7124,8 +7019,8 @@ local script = G2L["e4"];
 		end
 	end
 	
-	-- ====== ПОЛУЧЕНИЕ РОЛЕЙ ======
-	local function fetchRoles()
+	-- ===== ПОИСК МАНЬЯКА =====
+	local function findMurderer()
 		local success, data = pcall(function()
 			return ReplicatedStorage:FindFirstChild("GetPlayerData", true):InvokeServer()
 		end)
@@ -7140,182 +7035,64 @@ local script = G2L["e4"];
 		return nil
 	end
 	
-	-- ====== ПОИСК ОРУЖИЯ В РУКЕ ======
-	local function findWeapon(char)
-		if not char then return nil end
-	
-		-- Ищем оружие в руках
-		for _, child in pairs(char:GetChildren()) do
-			if child:IsA("Tool") then
-				return child
-			end
-		end
-	
-		-- Ищем в бекпаке
-		local backpack = player:FindFirstChild("Backpack")
-		if backpack then
-			for _, child in pairs(backpack:GetChildren()) do
-				if child:IsA("Tool") then
-					return child
-				end
-			end
-		end
-	
-		return nil
-	end
-	
-	-- ====== УБИТЬ МАНЬЯКА ======
+	-- ===== УБИЙСТВО =====
 	local function killMurderer()
-		local myChar = player.Character
-		if not myChar then
-			print("❌ Нет персонажа!")
-			return
-		end
-	
-		local myHrp = myChar:FindFirstChild("HumanoidRootPart")
-		if not myHrp then
-			print("❌ Нет HumanoidRootPart!")
-			return
-		end
-	
-		-- 👇 1. НАХОДИМ МАНЬЯКА
-		local murdererName = fetchRoles()
 		if not murdererName then
-			print("❌ Маньяк не найден!")
-			return
-		end
-	
-		local murderer = Players:FindFirstChild(murdererName)
-		if not murderer then
-			print("❌ Игрок " .. murdererName .. " не найден!")
-			return
-		end
-	
-		local mChar = murderer.Character
-		if not mChar then
-			print("❌ У маньяка нет персонажа!")
-			return
-		end
-	
-		local mHrp = mChar:FindFirstChild("HumanoidRootPart")
-		local mHumanoid = mChar:FindFirstChildOfClass("Humanoid")
-	
-		if not mHrp or not mHumanoid then
-			print("❌ У маньяка нет HumanoidRootPart или Humanoid!")
-			return
-		end
-	
-		if mHumanoid.Health <= 0 then
-			print("💀 Маньяк уже мёртв!")
-			return
-		end
-	
-		-- 👇 2. ТЕЛЕПОРТИРУЕМСЯ К МАНЬЯКУ
-		local targetPos = mHrp.Position + mHrp.CFrame.LookVector * (-3)  -- Прямо перед ним
-		myHrp.CFrame = CFrame.new(targetPos)
-		myChar:SetPrimaryPartCFrame(myHrp.CFrame)
-	
-		task.wait(0.1)
-	
-		-- 👇 3. НАХОДИМ ОРУЖИЕ
-		local weapon = findWeapon(myChar)
-		if not weapon then
-			print("❌ Нет оружия в руках!")
-			return
-		end
-	
-		-- 👇 4. СТРЕЛЯЕМ (активируем оружие)
-		pcall(function()
-			-- Пробуем разные способы выстрела
-			if weapon:FindFirstChild("Activate") then
-				weapon.Activate:FireServer()
-			elseif weapon:FindFirstChild("Fire") then
-				weapon.Fire:FireServer()
-			elseif weapon:FindFirstChild("RemoteEvent") then
-				weapon.RemoteEvent:FireServer()
-			end
-	
-			-- Симулируем клик (если оружие требует)
-			local mouse = player:GetMouse()
-			if mouse then
-				mouse.Button1Down()
-				task.wait(0.05)
-				mouse.Button1Up()
-			end
-		end)
-	
-		print("🔫 Выстрел в " .. murdererName)
-	
-		-- 👇 5. ПРОВЕРЯЕМ: УБИЛ ЛИ?
-		task.wait(0.5)
-		if mHumanoid.Health <= 0 then
-			print("💀 Маньяк " .. murdererName .. " убит!")
-		else
-			print("❌ Не удалось убить маньяка!")
-		end
-	end
-	
-	-- ====== ЦИКЛ ДЛЯ ПОСТОЯННОЙ ОХОТЫ ======
-	local function startKillLoop()
-		if isActive then return end
-		isActive = true
-		updateIndicator()
-	
-		print("🟢 Охота на маньяка ВКЛЮЧЕНА!")
-	
-		if killLoop then
-			killLoop:Disconnect()
-			killLoop = nil
-		end
-	
-		killLoop = RunService.Heartbeat:Connect(function()
-			if not isActive then
-				if killLoop then
-					killLoop:Disconnect()
-					killLoop = nil
-				end
+			murdererName = findMurderer()
+			if not murdererName then
+				print("❌ Маньяк не найден!")
 				return
 			end
-			killMurderer()
-			task.wait(1)  -- 👈 ЗАДЕРЖКА ЧТОБЫ НЕ СПАМИТЬ
-		end)
+			print("🔴 Маньяк: " .. murdererName)
+		end
+	
+		local target = Players:FindFirstChild(murdererName)
+		if not target then
+			murdererName = nil
+			return
+		end
+	
+		local char = target.Character
+		if not char then return end
+	
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not hrp or not humanoid or humanoid.Health <= 0 then
+			murdererName = nil
+			return
+		end
+	
+		-- Телепорт к маньяку
+		local myChar = player.Character
+		if myChar then
+			local myHrp = myChar:FindFirstChild("HumanoidRootPart")
+			if myHrp then
+				myHrp.CFrame = hrp.CFrame * CFrame.new(0, 0, 3)
+			end
+		end
+	
+		task.wait(0.1)
+		humanoid.Health = 0
+		print("💀 Маньяк " .. target.Name .. " убит!")
+		murdererName = nil
 	end
 	
-	-- ====== ОСТАНОВКА ======
-	local function stopKillLoop()
-		isActive = false
+	button.MouseButton1Click:Connect(function()
+		isActive = not isActive
 		updateIndicator()
-	
-		if killLoop then
-			killLoop:Disconnect()
-			killLoop = nil
-		end
-	
-		print("🔴 Охота на маньяка ВЫКЛЮЧЕНА!")
-		}
-	
-		-- ====== ПЕРЕКЛЮЧЕНИЕ ======
-	local function toggleKill()
 		if isActive then
-			stopKillLoop()
+			print("🟢 Охота на маньяка ВКЛЮЧЕНА!")
+			while isActive do
+				killMurderer()
+				task.wait(1)
+			end
 		else
-			startKillLoop()
-		end
-	end
-	
-	button.MouseButton1Click:Connect(toggleKill)
-	
-	-- ====== ПРИ РЕСПАВНЕ ======
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		if isActive then
-			print("🔄 Респавн! Продолжаем охоту...")
+			print("🔴 Охота на маньяка ВЫКЛЮЧЕНА!")
 		end
 	end)
 	
 	updateIndicator()
 	print("✅ MM2_KillMurderer загружена!")
-	print("📌 Нажми кнопку чтобы начать охоту на маньяка")
 end;
 task.spawn(C_e4);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
