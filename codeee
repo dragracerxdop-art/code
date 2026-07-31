@@ -7386,7 +7386,7 @@ task.spawn(C_e8);
 local function C_fb()
 local script = G2L["fb"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (РАБОЧАЯ ВЕРСИЯ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -7525,25 +7525,11 @@ local script = G2L["fb"];
 			end
 			print("✅ MISC")
 	
-			-- ===== MM2 =====
+			-- ===== MM2 (ТОЛЬКО ТЕ ЧТО ЕСТЬ) =====
 		elseif tabName == "MM2" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("ImageButton") and (
-					child.Name == "MM2_ESP" or
-						child.Name == "MM2_GunESP" or
-						child.Name == "MM2_PickUpGun" or
-						child.Name == "MM2_AutoFarm" or
-						child.Name == "MM2_KillAll" or
-						child.Name == "MM2_KillMurderer" or
-						child.Name == "MM2_AutoShoot"
-					) then
+				if child:IsA("ImageButton") then
 					child.Visible = true
-				end
-			end
-			-- Скрываем роли (если есть)
-			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("Frame") and child.Name == "MM2_Roles" then
-					child.Visible = false
 				end
 			end
 			print("✅ MM2")
