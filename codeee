@@ -2295,15 +2295,38 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- ПРОСТОЙ АВТОФАРМ (ИЗ ЭТОГО СКРИПТА)
+	-- MM2_AutoFarm (ПРОСТОЙ И РАБОЧИЙ)
 	-- ==========================================
+	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
 	
-	local isFarming = false
+	local isActive = false
 	local farmLoop = nil
 	
-	-- ПОИСК КОНТЕЙНЕРА
+	-- ====== ИНДИКАТОР ======
+	local indicator = Instance.new("TextLabel")
+	indicator.Name = "Indicator"
+	indicator.Size = UDim2.new(1, 0, 0.3, 0)
+	indicator.Position = UDim2.new(0, 0, 0.7, 0)
+	indicator.BackgroundTransparency = 1
+	indicator.Text = "ВЫКЛ"
+	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+	indicator.TextSize = 14
+	indicator.Font = Enum.Font.SourceSansBold
+	indicator.Parent = button
+	
+	local function updateIndicator()
+		if isActive then
+			indicator.Text = "🟢 ФАРМ"
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+		else
+			indicator.Text = "🔴 ВЫКЛ"
+			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+		end
+	end
+	
+	-- ====== ПОИСК КОНТЕЙНЕРА ======
 	local function findCoinContainer()
 		for _, obj in pairs(workspace:GetChildren()) do
 			if obj:IsA("Model") and obj:FindFirstChild("CoinContainer") then
@@ -2313,7 +2336,15 @@ local script = G2L["1b"];
 		return nil
 	end
 	
-	-- ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ
+	-- ====== ПРОВЕРКА: МОНЕТА ДОСТУПНА ======
+	local function isCoinAvailable(coin)
+		if not coin then return false end
+		if coin.Transparency ~= 1 then return false end
+		if not coin:FindFirstChild("TouchInterest") then return false end
+		return true
+	end
+	
+	-- ====== ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ ======
 	local function findNearestCoin(container)
 		if not container then return nil, math.huge end
 	
@@ -2327,7 +2358,7 @@ local script = G2L["1b"];
 		local minDist = math.huge
 	
 		for _, coin in pairs(container:GetChildren()) do
-			if coin:IsA("BasePart") and coin.Transparency == 1 then
+			if isCoinAvailable(coin) then
 				local dist = (hrp.Position - coin.Position).Magnitude
 				if dist < minDist then
 					nearest = coin
@@ -2339,22 +2370,28 @@ local script = G2L["1b"];
 		return nearest, minDist
 	end
 	
-	-- ДВИЖЕНИЕ К МОНЕТЕ (КАК В СКРИПТЕ)
-	local function moveToCoin(coin)
+	-- ====== ТЕЛЕПОРТ К МОНЕТЕ ======
+	local function teleportToCoin(coin)
 		local char = player.Character
 		if not char then return end
 	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return end
 	
+		hrp.Velocity = Vector3.zero
+		hrp.RotVelocity = Vector3.zero
+	
 		local targetPos = coin.Position + Vector3.new(0, 2, 0)
 		hrp.CFrame = CFrame.new(targetPos)
 	end
 	
-	-- ОСНОВНОЙ ЦИКЛ
+	-- ====== ГЛАВНЫЙ ЦИКЛ ======
 	local function farmLoopFunction()
 		local char = player.Character
 		if not char then return end
+	
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
 	
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then
@@ -2368,14 +2405,14 @@ local script = G2L["1b"];
 		local coin, dist = findNearestCoin(container)
 		if not coin then return end
 	
-		-- NOCLIP
+		-- НОКЛИП
 		for _, part in pairs(char:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.CanCollide = false
 			end
 		end
 	
-		moveToCoin(coin)
+		teleportToCoin(coin)
 	
 		pcall(function()
 			firetouchinterest(hrp, coin, 0)
@@ -2383,9 +2420,9 @@ local script = G2L["1b"];
 		end)
 	end
 	
-	-- ЗАПУСК
+	-- ====== ЗАПУСК ======
 	local function startFarming()
-		if isFarming then return end
+		if isActive then return end
 	
 		local char = player.Character
 		if not char then
@@ -2399,7 +2436,9 @@ local script = G2L["1b"];
 			return
 		end
 	
-		isFarming = true
+		isActive = true
+		updateIndicator()
+	
 		print("🪙 Автофарм ВКЛЮЧЕН!")
 	
 		if farmLoop then
@@ -2408,7 +2447,7 @@ local script = G2L["1b"];
 		end
 	
 		farmLoop = RunService.Heartbeat:Connect(function()
-			if not isFarming then
+			if not isActive then
 				if farmLoop then
 					farmLoop:Disconnect()
 					farmLoop = nil
@@ -2419,11 +2458,47 @@ local script = G2L["1b"];
 		end)
 	end
 	
-	-- ОСТАНОВКА
+	-- ====== ОСТАНОВКА ======
 	local function stopFarming()
-		isFarming = false
+		isActive = false
+		updateIndicator()
+	
+		if farmLoop then
+			farmLoop:Disconnect()
+			farmLoop = nil
+		end
+	
+		local char = player.Character
+		if char then
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.Velocity = Vector3.zero
+				hrp.RotVelocity = Vector3.zero
+			end
+		end
+	
 		print("🪙 Автофарм ВЫКЛЮЧЕН!")
 	end
+	
+	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
+	button.MouseButton1Click:Connect(function()
+		if isActive then
+			stopFarming()
+		else
+			startFarming()
+		end
+	end)
+	
+	-- ====== ПРИ РЕСПАВНЕ ======
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5)
+		if isActive then
+			startFarming()
+		end
+	end)
+	
+	updateIndicator()
+	print("✅ MM2_AutoFarm загружена!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
