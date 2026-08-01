@@ -7293,7 +7293,7 @@ task.spawn(C_e6);
 local function C_f9()
 local script = G2L["f9"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -7329,6 +7329,9 @@ local script = G2L["f9"];
 			if child:IsA("ImageButton") then
 				child.Visible = false
 			end
+			if child:IsA("TextButton") then
+				child.Visible = false
+			end
 			if child:IsA("TextBox") then
 				child.Visible = false
 			end
@@ -7339,9 +7342,6 @@ local script = G2L["f9"];
 				child.Visible = false
 			end
 			if child:IsA("Frame") then
-				child.Visible = false
-			end
-			if child:IsA("TextButton") then
 				child.Visible = false
 			end
 		end
@@ -7432,11 +7432,11 @@ local script = G2L["f9"];
 			end
 			print("✅ MISC")
 	
-			-- ===== MM2 (С SHOW ROLES) =====
+			-- ===== MM2 (С ПОДДЕРЖКОЙ TextButton) =====
 		elseif tabName == "MM2" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("ImageButton") and (
-					child.Name == "MM2_ShowRoles" or
+				if (child:IsA("ImageButton") or child:IsA("TextButton")) and (
+					child.Name == "MM2_RolesToggle" or
 						child.Name == "MM2_CheckRoles" or
 						child.Name == "MM2_ESP" or
 						child.Name == "MM2_GunESP" or
