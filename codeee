@@ -2295,63 +2295,15 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (БЫСТРЫЙ)
+	-- ПРОСТОЙ АВТОФАРМ (ИЗ ЭТОГО СКРИПТА)
 	-- ==========================================
-	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
-	local TweenService = game:GetService("TweenService")
 	
-	local isActive = false
+	local isFarming = false
 	local farmLoop = nil
-	local currentTween = nil
-	local noclipConn = nil
 	
-	-- ====== ИНДИКАТОР ======
-	local indicator = Instance.new("TextLabel")
-	indicator.Name = "Indicator"
-	indicator.Size = UDim2.new(1, 0, 0.3, 0)
-	indicator.Position = UDim2.new(0, 0, 0.7, 0)
-	indicator.BackgroundTransparency = 1
-	indicator.Text = "ВЫКЛ"
-	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-	indicator.TextSize = 14
-	indicator.Font = Enum.Font.SourceSansBold
-	indicator.Parent = button
-	
-	local function updateIndicator()
-		if isActive then
-			indicator.Text = "🟢 ФАРМ"
-			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-		else
-			indicator.Text = "🔴 ВЫКЛ"
-			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-		end
-	end
-	
-	-- ====== NOCLIP ======
-	local function enableNoclip()
-		if noclipConn then return end
-	
-		noclipConn = RunService.Stepped:Connect(function()
-			if isActive and player.Character then
-				for _, part in pairs(player.Character:GetDescendants()) do
-					if part:IsA("BasePart") then
-						part.CanCollide = false
-					end
-				end
-			end
-		end)
-	end
-	
-	local function disableNoclip()
-		if noclipConn then
-			noclipConn:Disconnect()
-			noclipConn = nil
-		end
-	end
-	
-	-- ====== ПОИСК КОНТЕЙНЕРА ======
+	-- ПОИСК КОНТЕЙНЕРА
 	local function findCoinContainer()
 		for _, obj in pairs(workspace:GetChildren()) do
 			if obj:IsA("Model") and obj:FindFirstChild("CoinContainer") then
@@ -2361,15 +2313,7 @@ local script = G2L["1b"];
 		return nil
 	end
 	
-	-- ====== ПРОВЕРКА: МОНЕТА ДОСТУПНА ======
-	local function isCoinAvailable(coin)
-		if not coin then return false end
-		if coin.Transparency ~= 1 then return false end
-		if not coin:FindFirstChild("TouchInterest") then return false end
-		return true
-	end
-	
-	-- ====== ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ ======
+	-- ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ
 	local function findNearestCoin(container)
 		if not container then return nil, math.huge end
 	
@@ -2383,7 +2327,7 @@ local script = G2L["1b"];
 		local minDist = math.huge
 	
 		for _, coin in pairs(container:GetChildren()) do
-			if isCoinAvailable(coin) then
+			if coin:IsA("BasePart") and coin.Transparency == 1 then
 				local dist = (hrp.Position - coin.Position).Magnitude
 				if dist < minDist then
 					nearest = coin
@@ -2395,21 +2339,22 @@ local script = G2L["1b"];
 		return nearest, minDist
 	end
 	
-	-- ====== ОСТАНОВКА ТВИНА ======
-	local function stopTween()
-		if currentTween then
-			pcall(function() currentTween:Cancel() end)
-			currentTween = nil
-		end
-	end
-	
-	-- ====== ГЛАВНЫЙ ЦИКЛ ======
-	local function farmLoopFunction()
+	-- ДВИЖЕНИЕ К МОНЕТЕ (КАК В СКРИПТЕ)
+	local function moveToCoin(coin)
 		local char = player.Character
 		if not char then return end
 	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return end
+	
+		local targetPos = coin.Position + Vector3.new(0, 2, 0)
+		hrp.CFrame = CFrame.new(targetPos)
+	end
+	
+	-- ОСНОВНОЙ ЦИКЛ
+	local function farmLoopFunction()
+		local char = player.Character
+		if not char then return end
 	
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then
@@ -2423,34 +2368,24 @@ local script = G2L["1b"];
 		local coin, dist = findNearestCoin(container)
 		if not coin then return end
 	
-		enableNoclip()
-	
-		hrp.Velocity = Vector3.zero
-		hrp.RotVelocity = Vector3.zero
-	
-		-- 👇 ФИКСИРОВАННАЯ СКОРОСТЬ (НЕ ЗАВИСИТ ОТ РАССТОЯНИЯ)
-		local targetPos = coin.Position + Vector3.new(0, 2, 0)
-		local targetCFrame = CFrame.new(targetPos)
-	
-		stopTween()
-	
-		-- 👇 ВСЕГДА ОДИНАКОВАЯ СКОРОСТЬ (0.3 СЕКУНДЫ)
-		local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-		currentTween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
-		currentTween:Play()
-	
-		-- 👇 СБОР МОНЕТЫ (НЕ ЖДЁМ ОКОНЧАНИЯ ТВИНА)
-		if dist < 15 then
-			pcall(function()
-				firetouchinterest(hrp, coin, 0)
-				firetouchinterest(hrp, coin, 1)
-			end)
+		-- NOCLIP
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
 		end
+	
+		moveToCoin(coin)
+	
+		pcall(function()
+			firetouchinterest(hrp, coin, 0)
+			firetouchinterest(hrp, coin, 1)
+		end)
 	end
 	
-	-- ====== ЗАПУСК ======
+	-- ЗАПУСК
 	local function startFarming()
-		if isActive then return end
+		if isFarming then return end
 	
 		local char = player.Character
 		if not char then
@@ -2464,9 +2399,7 @@ local script = G2L["1b"];
 			return
 		end
 	
-		isActive = true
-		updateIndicator()
-	
+		isFarming = true
 		print("🪙 Автофарм ВКЛЮЧЕН!")
 	
 		if farmLoop then
@@ -2475,7 +2408,7 @@ local script = G2L["1b"];
 		end
 	
 		farmLoop = RunService.Heartbeat:Connect(function()
-			if not isActive then
+			if not isFarming then
 				if farmLoop then
 					farmLoop:Disconnect()
 					farmLoop = nil
@@ -2486,50 +2419,11 @@ local script = G2L["1b"];
 		end)
 	end
 	
-	-- ====== ОСТАНОВКА ======
+	-- ОСТАНОВКА
 	local function stopFarming()
-		isActive = false
-		updateIndicator()
-	
-		if farmLoop then
-			farmLoop:Disconnect()
-			farmLoop = nil
-		end
-	
-		stopTween()
-		disableNoclip()
-	
-		local char = player.Character
-		if char then
-			local hrp = char:FindFirstChild("HumanoidRootPart")
-			if hrp then
-				hrp.Velocity = Vector3.zero
-				hrp.RotVelocity = Vector3.zero
-			end
-		end
-	
+		isFarming = false
 		print("🪙 Автофарм ВЫКЛЮЧЕН!")
 	end
-	
-	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
-	button.MouseButton1Click:Connect(function()
-		if isActive then
-			stopFarming()
-		else
-			startFarming()
-		end
-	end)
-	
-	-- ====== ПРИ РЕСПАВНЕ ======
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		if isActive then
-			startFarming()
-		end
-	end)
-	
-	updateIndicator()
-	print("✅ MM2_AutoFarm загружена!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
