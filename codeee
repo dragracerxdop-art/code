@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (АВТО-ФАРМ МОНЕТ)
+	-- MM2_AutoFarm (ПЛАВНЫЙ ТЕЛЕПОРТ + NOCLIP)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2304,9 +2304,8 @@ local script = G2L["1b"];
 	
 	local isActive = false
 	local farmLoop = nil
-	local tween = nil
-	local noclipConnection = nil
-	local savedCollisions = {}
+	local currentTween = nil
+	local noclipConn = nil
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2330,10 +2329,32 @@ local script = G2L["1b"];
 		end
 	end
 	
-	-- ====== ПОИСК КОНТЕЙНЕРА С МОНЕТАМИ ======
+	-- ====== NOCLIP ======
+	local function enableNoclip()
+		if noclipConn then return end
+	
+		noclipConn = RunService.Stepped:Connect(function()
+			if isActive and player.Character then
+				for _, part in pairs(player.Character:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.CanCollide = false
+					end
+				end
+			end
+		end)
+	end
+	
+	local function disableNoclip()
+		if noclipConn then
+			noclipConn:Disconnect()
+			noclipConn = nil
+		end
+	end
+	
+	-- ====== ПОИСК КОНТЕЙНЕРА ======
 	local function findCoinContainer()
 		for _, obj in pairs(workspace:GetChildren()) do
-			if obj:FindFirstChild("CoinContainer") and obj:IsA("Model") then
+			if obj:IsA("Model") and obj:FindFirstChild("CoinContainer") then
 				return obj:FindFirstChild("CoinContainer")
 			end
 		end
@@ -2354,7 +2375,7 @@ local script = G2L["1b"];
 		local minDist = math.huge
 	
 		for _, coin in pairs(container:GetChildren()) do
-			if coin:GetAttribute("CoinID") == "Coin" and coin:FindFirstChild("TouchInterest") and coin.Transparency == 1 then
+			if coin:GetAttribute("CoinID") == "Coin" and coin.Transparency == 1 then
 				local dist = (hrp.Position - coin.Position).Magnitude
 				if dist < minDist then
 					nearest = coin
@@ -2366,64 +2387,111 @@ local script = G2L["1b"];
 		return nearest, minDist
 	end
 	
-	-- ====== ВКЛЮЧЕНИЕ NOCLIP ======
-	local function enableNoclip()
-		if noclipConnection then return end
+	-- ====== ОСТАНОВКА ТВИНА ======
+	local function stopTween()
+		if currentTween then
+			pcall(function() currentTween:Cancel() end)
+			currentTween = nil
+		end
+	end
 	
+	-- ====== ГЛАВНЫЙ ЦИКЛ ======
+	local function farmLoopFunction()
 		local char = player.Character
 		if not char then return end
 	
-		-- Сохраняем оригинальные настройки
-		for _, part in pairs(char:GetDescendants()) do
-			if part:IsA("BasePart") then
-				savedCollisions[part] = part.CanCollide
-			end
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+	
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid or humanoid.Health <= 0 then
+			print("💀 Персонаж мёртв!")
+			stopFarming()
+			return
 		end
 	
-		noclipConnection = RunService.Stepped:Connect(function()
-			if isActive and player.Character then
-				for _, part in pairs(player.Character:GetDescendants()) do
-					if part:IsA("BasePart") then
-						part.CanCollide = false
-					end
-				end
-			end
-		end)
+		local container = findCoinContainer()
+		if not container then return end
+	
+		local coin, dist = findNearestCoin(container)
+		if not coin then return end
+	
+		-- 👇 ВКЛЮЧАЕМ NOCLIP
+		enableNoclip()
+	
+		-- 👇 СБРАСЫВАЕМ СКОРОСТЬ
+		hrp.Velocity = Vector3.zero
+		hrp.RotVelocity = Vector3.zero
+	
+		-- 👇 ПЛАВНЫЙ ТЕЛЕПОРТ (КАК В ТОМ СКРИПТЕ)
+		local targetPos = coin.Position - Vector3.new(0, 2.5, 0)
+		local targetCFrame = CFrame.new(targetPos) * CFrame.Angles(math.rad(90), 0, 0)
+	
+		stopTween()
+	
+		local speed = math.clamp(dist / 25, 0.2, 2)
+		local tweenInfo = TweenInfo.new(speed, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+		currentTween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
+		currentTween:Play()
+	
+		-- 👇 СБОР МОНЕТЫ (КОГДА РЯДОМ)
+		if dist < 5 then
+			pcall(function()
+				firetouchinterest(hrp, coin, 0)
+				firetouchinterest(hrp, coin, 1)
+			end)
+		end
 	end
 	
-	-- ====== ОТКЛЮЧЕНИЕ NOCLIP ======
-	local function disableNoclip()
-		if noclipConnection then
-			noclipConnection:Disconnect()
-			noclipConnection = nil
-		end
+	-- ====== ЗАПУСК ======
+	local function startFarming()
+		if isActive then return end
 	
 		local char = player.Character
-		if char then
-			for part, canCollide in pairs(savedCollisions) do
-				if part and part.Parent then
-					part.CanCollide = canCollide
-				end
-			end
+		if not char then
+			print("❌ Нет персонажа!")
+			return
 		end
-		savedCollisions = {}
-	end
 	
-	-- ====== ОСТАНОВКА ФАРМА ======
-	local function stopFarming()
-		isActive = false
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid or humanoid.Health <= 0 then
+			print("❌ Персонаж мёртв!")
+			return
+		end
+	
+		isActive = true
 		updateIndicator()
 	
-		if tween then
-			pcall(function() tween:Cancel() end)
-			tween = nil
-		end
+		print("🪙 Автофарм ВКЛЮЧЕН (плавный телепорт)!")
 	
 		if farmLoop then
 			farmLoop:Disconnect()
 			farmLoop = nil
 		end
 	
+		farmLoop = RunService.Heartbeat:Connect(function()
+			if not isActive then
+				if farmLoop then
+					farmLoop:Disconnect()
+					farmLoop = nil
+				end
+				return
+			end
+			farmLoopFunction()
+		end)
+	end
+	
+	-- ====== ОСТАНОВКА ======
+	local function stopFarming()
+		isActive = false
+		updateIndicator()
+	
+		if farmLoop then
+			farmLoop:Disconnect()
+			farmLoop = nil
+		end
+	
+		stopTween()
 		disableNoclip()
 	
 		local char = player.Character
@@ -2433,89 +2501,9 @@ local script = G2L["1b"];
 				hrp.Velocity = Vector3.zero
 				hrp.RotVelocity = Vector3.zero
 			end
-			local humanoid = char:FindFirstChildOfClass("Humanoid")
-			if humanoid then
-				humanoid.PlatformStand = false
-			end
 		end
 	
-		print("🪙 Авто-фарм ВЫКЛЮЧЕН!")
-	end
-	
-	-- ====== ЗАПУСК ФАРМА ======
-	local function startFarming()
-		if isActive then return end
-	
-		local char = player.Character
-		if not char then return end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not hrp or not humanoid then return end
-	
-		if player:GetAttribute("Alive") ~= true then
-			print("❌ Персонаж мёртв!")
-			return
-		end
-	
-		isActive = true
-		updateIndicator()
-	
-		print("🪙 Авто-фарм ВКЛЮЧЕН!")
-	
-		enableNoclip()
-	
-		if farmLoop then
-			farmLoop:Disconnect()
-			farmLoop = nil
-		end
-	
-		farmLoop = RunService.Heartbeat:Connect(function()
-			if not isActive then
-				stopFarming()
-				return
-			end
-	
-			if not player.Character or player:GetAttribute("Alive") ~= true then
-				return
-			end
-	
-			local container = findCoinContainer()
-			if not container then return end
-	
-			local coin, dist = findNearestCoin(container)
-			if not coin or dist > 50 then
-				return
-			end
-	
-			local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-			if not hrp then return end
-	
-			-- Отключаем скорость
-			hrp.Velocity = Vector3.zero
-			hrp.RotVelocity = Vector3.zero
-	
-			-- Телепорт к монете
-			local targetPos = coin.Position - Vector3.new(0, 2.5, 0)
-			local targetCFrame = CFrame.new(targetPos) * CFrame.Angles(math.rad(90), 0, 0)
-	
-			if tween then
-				pcall(function() tween:Cancel() end)
-				tween = nil
-			end
-	
-			local tweenInfo = TweenInfo.new(dist / 30, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-			tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
-			tween:Play()
-	
-			-- Сбор монеты
-			if dist <= 5 then
-				pcall(function()
-					firetouchinterest(hrp, coin, 0)
-					firetouchinterest(hrp, coin, 1)
-				end)
-			end
-		end)
+		print("🪙 Автофарм ВЫКЛЮЧЕН!")
 	end
 	
 	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
@@ -2531,14 +2519,12 @@ local script = G2L["1b"];
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
 		if isActive then
-			stopFarming()
-			task.wait(0.5)
 			startFarming()
 		end
 	end)
 	
 	updateIndicator()
-	print("✅ MM2_AutoFarm загружена!")
+	print("✅ MM2_AutoFarm загружена (плавный телепорт + noclip)!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
