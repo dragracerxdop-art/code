@@ -1704,7 +1704,7 @@ G2L["e3"] = Instance.new("LocalScript", G2L["e0"]);
 
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_ShowRoles
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_RolesToggle
 G2L["e4"] = Instance.new("TextButton", G2L["d"]);
 G2L["e4"]["BorderSizePixel"] = 0;
 G2L["e4"]["TextSize"] = 14;
@@ -1714,18 +1714,18 @@ G2L["e4"]["FontFace"] = Font.new([[rbxasset://fonts/families/Bangers.json]], Enu
 G2L["e4"]["Size"] = UDim2.new(0, 20, 0, 24);
 G2L["e4"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["e4"]["Text"] = [[!!!!]];
-G2L["e4"]["Name"] = [[MM2_ShowRoles]];
+G2L["e4"]["Name"] = [[MM2_RolesToggle]];
 G2L["e4"]["Position"] = UDim2.new(0.90057, 0, 0.04262, 0);
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_ShowRoles.UIStroke
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_RolesToggle.UIStroke
 G2L["e5"] = Instance.new("UIStroke", G2L["e4"]);
 G2L["e5"]["Thickness"] = 3;
 G2L["e5"]["Color"] = Color3.fromRGB(180, 4, 255);
 G2L["e5"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_ShowRoles.LocalScript
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_RolesToggle.LocalScript
 G2L["e6"] = Instance.new("LocalScript", G2L["e4"]);
 
 
@@ -7096,7 +7096,7 @@ local script = G2L["e3"];
 	print("✅ MM2_KillAll загружена!")
 end;
 task.spawn(C_e3);
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_ShowRoles.LocalScript
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_RolesToggle.LocalScript
 local function C_e6()
 local script = G2L["e6"];
 	-- ==========================================
