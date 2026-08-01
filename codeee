@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ПЛАВНЫЙ ТЕЛЕПОРТ + NOCLIP)
+	-- MM2_AutoFarm (МГНОВЕННЫЙ ПЕРЕХОД)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2306,6 +2306,7 @@ local script = G2L["1b"];
 	local farmLoop = nil
 	local currentTween = nil
 	local noclipConn = nil
+	local isCollecting = false
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2423,7 +2424,7 @@ local script = G2L["1b"];
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
 	
-		-- 👇 ПЛАВНЫЙ ТЕЛЕПОРТ (КАК В ТОМ СКРИПТЕ)
+		-- 👇 ПЛАВНЫЙ ТЕЛЕПОРТ К МОНЕТЕ
 		local targetPos = coin.Position - Vector3.new(0, 2.5, 0)
 		local targetCFrame = CFrame.new(targetPos) * CFrame.Angles(math.rad(90), 0, 0)
 	
@@ -2434,12 +2435,13 @@ local script = G2L["1b"];
 		currentTween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
 		currentTween:Play()
 	
-		-- 👇 СБОР МОНЕТЫ (КОГДА РЯДОМ)
-		if dist < 5 then
+		-- 👇 СРАЗУ СОБИРАЕМ МОНЕТУ (НЕ ЖДЁМ ПОКА ТВИН ЗАКОНЧИТСЯ)
+		if dist < 10 then
 			pcall(function()
 				firetouchinterest(hrp, coin, 0)
 				firetouchinterest(hrp, coin, 1)
 			end)
+			print("🪙 Собрана монета!")
 		end
 	end
 	
@@ -2462,7 +2464,7 @@ local script = G2L["1b"];
 		isActive = true
 		updateIndicator()
 	
-		print("🪙 Автофарм ВКЛЮЧЕН (плавный телепорт)!")
+		print("🪙 Автофарм ВКЛЮЧЕН!")
 	
 		if farmLoop then
 			farmLoop:Disconnect()
@@ -2524,7 +2526,7 @@ local script = G2L["1b"];
 	end)
 	
 	updateIndicator()
-	print("✅ MM2_AutoFarm загружена (плавный телепорт + noclip)!")
+	print("✅ MM2_AutoFarm загружена!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
