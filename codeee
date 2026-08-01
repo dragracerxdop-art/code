@@ -7432,9 +7432,8 @@ local script = G2L["f9"];
 			end
 			print("✅ MISC")
 	
-			-- ===== MM2 (С РОЛЯМИ) =====
+			-- ===== MM2 (С SHOW ROLES) =====
 		elseif tabName == "MM2" then
-			-- 👇 КНОПКИ
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("ImageButton") and (
 					child.Name == "MM2_ShowRoles" or
@@ -7449,7 +7448,6 @@ local script = G2L["f9"];
 					child.Visible = true
 				end
 			end
-			-- 👇 ТЕКСТОВЫЕ ПОЛЯ ДЛЯ РОЛЕЙ
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("TextLabel") and (
 					child.Name == "MM2_Murder" or
@@ -7459,13 +7457,12 @@ local script = G2L["f9"];
 					child.Visible = true
 				end
 			end
-			-- 👇 СКРЫВАЕМ СТАРУЮ РАМКУ РОЛЕЙ (ЕСЛИ ЕСТЬ)
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("Frame") and child.Name == "MM2_Roles" then
 					child.Visible = false
 				end
 			end
-			print("✅ MM2 (с ролями)")
+			print("✅ MM2")
 	
 			-- ===== DA HOOD =====
 		elseif tabName == "Da Hood" then
