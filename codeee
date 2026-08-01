@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (СПИЗЖЕННАЯ ЛОГИКА)
+	-- MM2_AutoFarm (БЫСТРЫЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2428,18 +2428,19 @@ local script = G2L["1b"];
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
 	
-		-- 👇 СПИЗЖЕННАЯ ЛОГИКА (БЕЗ ПОВОРОТА НА 90 ГРАДУСОВ)
-		local targetPos = coin.Position + Vector3.new(0, 2, 0)  -- 👈 ПРОСТО НАД МОНЕТОЙ
-		local targetCFrame = CFrame.new(targetPos)  -- 👈 БЕЗ ПОВОРОТА!
+		-- 👇 ФИКСИРОВАННАЯ СКОРОСТЬ (НЕ ЗАВИСИТ ОТ РАССТОЯНИЯ)
+		local targetPos = coin.Position + Vector3.new(0, 2, 0)
+		local targetCFrame = CFrame.new(targetPos)
 	
 		stopTween()
 	
-		local speed = math.clamp(dist / 25, 0.2, 2)
-		local tweenInfo = TweenInfo.new(speed, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+		-- 👇 ВСЕГДА ОДИНАКОВАЯ СКОРОСТЬ (0.3 СЕКУНДЫ)
+		local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 		currentTween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
 		currentTween:Play()
 	
-		if dist < 12 then
+		-- 👇 СБОР МОНЕТЫ (НЕ ЖДЁМ ОКОНЧАНИЯ ТВИНА)
+		if dist < 15 then
 			pcall(function()
 				firetouchinterest(hrp, coin, 0)
 				firetouchinterest(hrp, coin, 1)
