@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (МГНОВЕННЫЙ ПЕРЕХОД)
+	-- MM2_AutoFarm (СПИЗЖЕННАЯ ЛОГИКА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2306,7 +2306,6 @@ local script = G2L["1b"];
 	local farmLoop = nil
 	local currentTween = nil
 	local noclipConn = nil
-	local isCollecting = false
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2362,6 +2361,14 @@ local script = G2L["1b"];
 		return nil
 	end
 	
+	-- ====== ПРОВЕРКА: МОНЕТА ДОСТУПНА ======
+	local function isCoinAvailable(coin)
+		if not coin then return false end
+		if coin.Transparency ~= 1 then return false end
+		if not coin:FindFirstChild("TouchInterest") then return false end
+		return true
+	end
+	
 	-- ====== ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ ======
 	local function findNearestCoin(container)
 		if not container then return nil, math.huge end
@@ -2376,7 +2383,7 @@ local script = G2L["1b"];
 		local minDist = math.huge
 	
 		for _, coin in pairs(container:GetChildren()) do
-			if coin:GetAttribute("CoinID") == "Coin" and coin.Transparency == 1 then
+			if isCoinAvailable(coin) then
 				local dist = (hrp.Position - coin.Position).Magnitude
 				if dist < minDist then
 					nearest = coin
@@ -2406,7 +2413,6 @@ local script = G2L["1b"];
 	
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then
-			print("💀 Персонаж мёртв!")
 			stopFarming()
 			return
 		end
@@ -2417,16 +2423,14 @@ local script = G2L["1b"];
 		local coin, dist = findNearestCoin(container)
 		if not coin then return end
 	
-		-- 👇 ВКЛЮЧАЕМ NOCLIP
 		enableNoclip()
 	
-		-- 👇 СБРАСЫВАЕМ СКОРОСТЬ
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
 	
-		-- 👇 ПЛАВНЫЙ ТЕЛЕПОРТ К МОНЕТЕ
-		local targetPos = coin.Position - Vector3.new(0, 2.5, 0)
-		local targetCFrame = CFrame.new(targetPos) * CFrame.Angles(math.rad(90), 0, 0)
+		-- 👇 СПИЗЖЕННАЯ ЛОГИКА (БЕЗ ПОВОРОТА НА 90 ГРАДУСОВ)
+		local targetPos = coin.Position + Vector3.new(0, 2, 0)  -- 👈 ПРОСТО НАД МОНЕТОЙ
+		local targetCFrame = CFrame.new(targetPos)  -- 👈 БЕЗ ПОВОРОТА!
 	
 		stopTween()
 	
@@ -2435,13 +2439,11 @@ local script = G2L["1b"];
 		currentTween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
 		currentTween:Play()
 	
-		-- 👇 СРАЗУ СОБИРАЕМ МОНЕТУ (НЕ ЖДЁМ ПОКА ТВИН ЗАКОНЧИТСЯ)
-		if dist < 10 then
+		if dist < 12 then
 			pcall(function()
 				firetouchinterest(hrp, coin, 0)
 				firetouchinterest(hrp, coin, 1)
 			end)
-			print("🪙 Собрана монета!")
 		end
 	end
 	
