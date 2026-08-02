@@ -2295,19 +2295,19 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (С ОКТОДЕРЕВОМ)
+	-- MM2_AutoFarm (НЕ ТЕПАЕМ К УБИЙЦЕ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
+	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
-	local HttpService = game:GetService("HttpService")
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	
 	local isActive = false
 	local farmLoop = nil
 	local octree = nil
-	local touchedCoins = {}
 	local coinContainer = nil
-	local isCleaning = false
+	local murdererName = nil
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2331,7 +2331,7 @@ local script = G2L["1b"];
 		end
 	end
 	
-	-- ====== ОКТОДЕРЕВО (УПРОЩЁННАЯ ВЕРСИЯ) ======
+	-- ====== ОКТОДЕРЕВО (УПРОЩЁННОЕ) ======
 	local Octree = {}
 	Octree.__index = Octree
 	
@@ -2458,23 +2458,43 @@ local script = G2L["1b"];
 		remove(self)
 	end
 	
-	function Octree:FindFirstNode(object)
-		local function find(node)
-			if node.isLeaf then
-				for _, obj in pairs(node.objects) do
-					if obj.object == object then
-						return node
-					end
-				end
-			else
-				for _, child in pairs(node.children) do
-					local result = find(child)
-					if result then return result end
+	-- ====== ПОИСК УБИЙЦЫ ======
+	local function findMurderer()
+		local getPlayerData = ReplicatedStorage:FindFirstChild("GetPlayerData", true)
+		if not getPlayerData then return nil end
+	
+		local success, data = pcall(function()
+			return getPlayerData:InvokeServer()
+		end)
+	
+		if not success or not data then return nil end
+	
+		for name, info in pairs(data) do
+			if info.Role == "Murderer" then
+				local plr = Players:FindFirstChild(name)
+				if plr and plr:GetAttribute("Alive") == true then
+					return plr
 				end
 			end
-			return nil
 		end
-		return find(self)
+		return nil
+	end
+	
+	-- ====== ПРОВЕРКА: РЯДОМ С УБИЙЦЕЙ ======
+	local function isNearMurderer(position, radius)
+		if not murdererName then return false end
+	
+		local murderer = Players:FindFirstChild(murdererName)
+		if not murderer then return false end
+	
+		local char = murderer.Character
+		if not char then return false end
+	
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return false end
+	
+		local dist = (position - hrp.Position).Magnitude
+		return dist < radius
 	end
 	
 	-- ====== ПОИСК КОНТЕЙНЕРА ======
@@ -2495,182 +2515,251 @@ local script = G2L["1b"];
 		return true
 	end
 	
-	-- ====== ОТМЕТИТЬ МОНЕТУ КАК СОБРАННУЮ ======
-	local function markCoinAsTouched(coin)
-		touchedCoins[coin] = true
-		if octree then
-			local node = octree:FindFirstNode(coin)
-			if node then
-				octree:RemoveNode(node)
-			end
-		end
-	end
-	
-	-- ====== ПОПОЛНЕНИЕ ОКТОДЕРЕВА ======
+	-- ====== ПОПОЛНЕНИЕ ОКТОДЕРЕВА (ТОЛЬКО БЕЗОПАСНЫМИ МОНЕТАМИ) ======
 	local function populateOctree()
 		if not octree then
-			octree = Octree.new(Vector3.new(-1000, -1000, -1000), Vector3.new(1000, 1000, 1000))
+			octree = Octree.new()
 		end
 		octree:ClearAllNodes()
-		touchedCoins = {}
 	
 		coinContainer = findCoinContainer()
-		if not coinContainer then return end
+		if not coinContainer then return 0
 	
-		for _, descendant in pairs(coinContainer:GetDescendants()) do
-			if descendant:IsA("BasePart") and isCoinAvailable(descendant) then
-				octree:CreateNode(descendant.Position, descendant)
+			local count = 0
+			local safeRadius = 15  -- 👈 НЕ ТЕПАЕМ К МОНЕТАМ В РАДИУСЕ 15 ОТ УБИЙЦЫ
+	
+			for _, descendant in pairs(coinContainer:GetDescendants()) do
+				if descendant:IsA("BasePart") and isCoinAvailable(descendant) then
+					-- 👇 ПРОВЕРКА: РЯДОМ С УБИЙЦЕЙ?
+					if not isNearMurderer(descendant.Position, safeRadius) then
+						octree:CreateNode(descendant.Position, descendant)
+						count = count + 1
+					end
+				end
 			end
-		end
-	end
-	
-	-- ====== ПЛАВНОЕ ДВИЖЕНИЕ К МОНЕТЕ ======
-	local function moveToCoin(coin)
-		local char = player.Character
-		if not char then return end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return end
-	
-		hrp.Velocity = Vector3.zero
-		hrp.RotVelocity = Vector3.zero
-	
-		local targetPos = coin.Position + Vector3.new(0, 2, 0)
-		hrp.CFrame = CFrame.new(targetPos)
-	end
-	
-	-- ====== ОСНОВНОЙ ЦИКЛ ======
-	local function farmLoopFunction()
-		local char = player.Character
-		if not char then return end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return end
-	
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid or humanoid.Health <= 0 then
-			stopFarming()
-			return
+			return count
 		end
 	
-		if not coinContainer then
-			coinContainer = findCoinContainer()
-			if not coinContainer then return end
-			populateOctree()
-		end
-	
-		-- NOCLIP
-		for _, part in pairs(char:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = false
+		-- ====== ОБНОВЛЕНИЕ УБИЙЦЫ ======
+		local function updateMurderer()
+			local murderer = findMurderer()
+			if murderer then
+				murdererName = murderer.Name
+				return true
 			end
+			murdererName = nil
+			return false
 		end
 	
-		-- ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ
-		local nearestNodes = octree:GetNearest(hrp.Position, 500, 1)
-		if #nearestNodes > 0 then
-			local coin = nearestNodes[1].object
-			if not touchedCoins[coin] and isCoinAvailable(coin) then
-				moveToCoin(coin)
-				task.wait(0.1)
-				pcall(function()
-					firetouchinterest(hrp, coin, 0)
-					firetouchinterest(hrp, coin, 1)
-				end)
-				markCoinAsTouched(coin)
+		-- ====== ОБНОВЛЕНИЕ ОКТОДЕРЕВА ======
+		local function updateOctree()
+			if not octree or not coinContainer then return
+	
+				local function checkNode(node)
+					if node.isLeaf then
+						local toRemove = {}
+						for i, obj in pairs(node.objects) do
+							if not obj.object or not obj.object.Parent or not isCoinAvailable(obj.object) then
+								table.insert(toRemove, i)
+							end
+						end
+						for _, i in ipairs(toRemove) do
+							table.remove(node.objects, i)
+						end
+					else
+						for _, child in pairs(node.children) do
+							checkNode(child)
+						end
+					end
+				end
+				checkNode(octree)
 			end
-		else
-			task.wait(0.5)
-		end
-	end
 	
-	-- ====== ЗАПУСК ======
-	local function startFarming()
-		if isActive then return end
+			-- ====== ДВИЖЕНИЕ К МОНЕТЕ ======
+			local function moveToCoin(coin)
+				local char = player.Character
+				if not char then return end
 	
-		local char = player.Character
-		if not char then
-			print("❌ Нет персонажа!")
-			return
-		end
+				local hrp = char:FindFirstChild("HumanoidRootPart")
+				if not hrp then return end
 	
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid or humanoid.Health <= 0 then
-			print("❌ Персонаж мёртв!")
-			return
-		end
+				hrp.Velocity = Vector3.zero
+				hrp.RotVelocity = Vector3.zero
 	
-		coinContainer = findCoinContainer()
-		if not coinContainer then
-			print("❌ Контейнер с монетами не найден!")
-			return
-		end
+				local targetPos = coin.Position + Vector3.new(0, 2, 0)
+				hrp.CFrame = CFrame.new(targetPos)
+			end
 	
-		populateOctree()
+			-- ====== ОСНОВНОЙ ЦИКЛ ======
+			local function farmLoopFunction()
+				local char = player.Character
+				if not char then return end
 	
-		isActive = true
-		updateIndicator()
+				local hrp = char:FindFirstChild("HumanoidRootPart")
+				if not hrp then return end
 	
-		print("🪙 Автофарм С ОКТОДЕРЕВОМ ВКЛЮЧЕН!")
+				local humanoid = char:FindFirstChildOfClass("Humanoid")
+				if not humanoid or humanoid.Health <= 0 then
+					stopFarming()
+					return
+				end
 	
-		if farmLoop then
-			farmLoop:Disconnect()
-			farmLoop = nil
-		end
+				-- ОБНОВЛЯЕМ УБИЙЦУ
+				updateMurderer()
 	
-		farmLoop = RunService.Heartbeat:Connect(function()
-			if not isActive then
+				if not coinContainer then
+					coinContainer = findCoinContainer()
+					if not coinContainer then return end
+					local count = populateOctree()
+					print("🪙 Безопасных монет: " .. count)
+					if count == 0 then
+						task.wait(1)
+						return
+					end
+				end
+	
+				-- ОБНОВЛЯЕМ ОКТОДЕРЕВО
+				updateOctree()
+	
+				-- NOCLIP
+				for _, part in pairs(char:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.CanCollide = false
+					end
+				end
+	
+				-- ПОИСК БЛИЖАЙШЕЙ БЕЗОПАСНОЙ МОНЕТЫ
+				local nearestNodes = octree:GetNearest(hrp.Position, 500, 1)
+	
+				if #nearestNodes > 0 then
+					local coin = nearestNodes[1].object
+					if coin and coin.Parent and isCoinAvailable(coin) then
+						-- 👇 ДВОЙНАЯ ПРОВЕРКА: ВСЁ ЕЩЁ БЕЗОПАСНА?
+						if not isNearMurderer(coin.Position, 15) then
+							moveToCoin(coin)
+							task.wait(0.1)
+							pcall(function()
+								firetouchinterest(hrp, coin, 0)
+								firetouchinterest(hrp, coin, 1)
+							end)
+							octree:RemoveNode(coin)
+						else
+							-- Монета стала опасной, удаляем
+							octree:RemoveNode(coin)
+						end
+					else
+						updateOctree()
+					end
+				else
+					-- ПЕРЕЗАПОЛНЯЕМ ОКТОДЕРЕВО (БЕЗ ОПАСНЫХ МОНЕТ)
+					local count = populateOctree()
+					if count == 0 then
+						task.wait(1)
+					end
+				end
+			end
+	
+			-- ====== ЗАПУСК ======
+			local function startFarming()
+				if isActive then return end
+	
+				local char = player.Character
+				if not char then
+					print("❌ Нет персонажа!")
+					return
+				end
+	
+				local humanoid = char:FindFirstChildOfClass("Humanoid")
+				if not humanoid or humanoid.Health <= 0 then
+					print("❌ Персонаж мёртв!")
+					return
+				end
+	
+				-- Находим убийцу
+				updateMurderer()
+				if not murdererName then
+					print("❌ Убийца не найден!")
+					return
+				end
+				print("🔴 Убийца: " .. murdererName)
+	
+				coinContainer = findCoinContainer()
+				if not coinContainer then
+					print("❌ Контейнер с монетами не найден!")
+					return
+				end
+	
+				local count = populateOctree()
+				print("🪙 Безопасных монет: " .. count)
+	
+				if count == 0 then
+					print("❌ Нет безопасных монет!")
+					return
+				end
+	
+				isActive = true
+				updateIndicator()
+	
+				print("🪙 Автофарм ВКЛЮЧЕН! (не тепаем к убийце)")
+	
 				if farmLoop then
 					farmLoop:Disconnect()
 					farmLoop = nil
 				end
-				return
+	
+				farmLoop = RunService.Heartbeat:Connect(function()
+					if not isActive then
+						if farmLoop then
+							farmLoop:Disconnect()
+							farmLoop = nil
+						end
+						return
+					end
+					farmLoopFunction()
+				end)
 			end
-			farmLoopFunction()
-		end)
-	end
 	
-	-- ====== ОСТАНОВКА ======
-	local function stopFarming()
-		isActive = false
-		updateIndicator()
+			-- ====== ОСТАНОВКА ======
+			local function stopFarming()
+				isActive = false
+				updateIndicator()
 	
-		if farmLoop then
-			farmLoop:Disconnect()
-			farmLoop = nil
-		end
+				if farmLoop then
+					farmLoop:Disconnect()
+					farmLoop = nil
+				end
 	
-		local char = player.Character
-		if char then
-			local hrp = char:FindFirstChild("HumanoidRootPart")
-			if hrp then
-				hrp.Velocity = Vector3.zero
-				hrp.RotVelocity = Vector3.zero
+				local char = player.Character
+				if char then
+					local hrp = char:FindFirstChild("HumanoidRootPart")
+					if hrp then
+						hrp.Velocity = Vector3.zero
+						hrp.RotVelocity = Vector3.zero
+					end
+				end
+	
+				print("🪙 Автофарм ВЫКЛЮЧЕН!")
 			end
-		end
 	
-		print("🪙 Автофарм ВЫКЛЮЧЕН!")
-	end
+			-- ====== ПЕРЕКЛЮЧЕНИЕ ======
+			button.MouseButton1Click:Connect(function()
+				if isActive then
+					stopFarming()
+				else
+					startFarming()
+				end
+			end)
 	
-	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
-	button.MouseButton1Click:Connect(function()
-		if isActive then
-			stopFarming()
-		else
-			startFarming()
-		end
-	end)
+			-- ====== ПРИ РЕСПАВНЕ ======
+			player.CharacterAdded:Connect(function()
+				task.wait(0.5)
+				if isActive then
+					startFarming()
+				end
+			end)
 	
-	-- ====== ПРИ РЕСПАВНЕ ======
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		if isActive then
-			startFarming()
-		end
-	end)
-	
-	updateIndicator()
-	print("✅ MM2_AutoFarm загружена (с октодеревом)!")
+			updateIndicator()
+			print("✅ MM2_AutoFarm загружена (не тепаем к монетам рядом с убийцей)!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
