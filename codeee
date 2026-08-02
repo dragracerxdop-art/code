@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ПЛАВНЫЙ TWEEN)
+	-- MM2_AutoFarm (МГНОВЕННАЯ ПРОВЕРКА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2388,23 +2388,27 @@ local script = G2L["1b"];
 		return nil
 	end
 	
-	-- ====== ПРОВЕРКА МОНЕТЫ ======
+	-- ====== ПРОВЕРКА МОНЕТЫ (БЫСТРАЯ) ======
 	local function isCoinValid(coin)
 		if not coin then return false end
 		if not coin.Parent then return false end
+		-- ПРОВЕРЯЕМ ТОЛЬКО TouchInterest
 		if coin:FindFirstChild("TouchInterest") then
 			return true
 		end
 		return false
 	end
 	
-	-- ====== ПОЛУЧИТЬ ВСЕ МОНЕТЫ ======
+	-- ====== ПОЛУЧИТЬ ВСЕ МОНЕТЫ (БЫСТРО) ======
 	local function getCoins(container)
 		local coins = {}
 		if not container then return coins end
 	
-		for _, coin in pairs(container:GetChildren()) do
-			if isCoinValid(coin) then
+		-- ПРЯМОЙ ПЕРЕБОР БЕЗ ЛИШНИХ ПРОВЕРОК
+		local children = container:GetChildren()
+		for i = 1, #children do
+			local coin = children[i]
+			if coin:FindFirstChild("TouchInterest") then
 				table.insert(coins, coin)
 			end
 		end
@@ -2417,7 +2421,8 @@ local script = G2L["1b"];
 		local nearest = nil
 		local nearestDist = math.huge
 	
-		for _, coin in pairs(coins) do
+		for i = 1, #coins do
+			local coin = coins[i]
 			local coinPos = coin.Position
 	
 			if murdererPos then
@@ -2437,7 +2442,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ПЛАВНЫЙ ПОЛЕТ ЧЕРЕЗ TWEEN ======
+	-- ====== ПЛАВНЫЙ ПОЛЕТ ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2461,7 +2466,6 @@ local script = G2L["1b"];
 			return true
 		end
 	
-		-- НОРМАЛЬНАЯ СКОРОСТЬ
 		local speed = 45
 		local duration = distance / speed
 		duration = math.max(duration, 0.3)
@@ -2470,7 +2474,6 @@ local script = G2L["1b"];
 		stopTween()
 		isMoving = true
 	
-		-- ПЛАВНЫЙ TWEEN
 		local tweenInfo = TweenInfo.new(
 			duration,
 			Enum.EasingStyle.Quad,
@@ -2489,7 +2492,6 @@ local script = G2L["1b"];
 	
 		currentTween:Play()
 	
-		-- ЖДЕМ ЗАВЕРШЕНИЯ
 		local timeout = tick() + duration + 1
 		repeat
 			task.wait()
@@ -2526,7 +2528,8 @@ local script = G2L["1b"];
 	
 	-- ====== ПОДОБРАТЬ МОНЕТУ ======
 	local function pickCoin(coin)
-		if not coin or not isCoinValid(coin) then return false end
+		if not coin then return false end
+		if not coin.Parent then return false end
 	
 		local char = player.Character
 		if not char then return false end
@@ -2558,7 +2561,7 @@ local script = G2L["1b"];
 		flyTo(safePoint)
 	end
 	
-	-- ====== ОСНОВНОЙ ЦИКЛ ======
+	-- ====== ОСНОВНОЙ ЦИКЛ (МАКСИМАЛЬНО БЫСТРЫЙ) ======
 	local function farmTick()
 		-- РАУНД
 		if not isRoundActive() then
@@ -2607,14 +2610,14 @@ local script = G2L["1b"];
 		local container = findCoinContainer()
 		if not container then return end
 	
-		-- МОНЕТЫ
+		-- МОНЕТЫ (БЫСТРО)
 		local coins = getCoins(container)
 		if #coins == 0 then
 			updateIndicator("⏳ НЕТ МОНЕТ", Color3.fromRGB(255, 165, 0))
 			return
 		end
 	
-		-- БЛИЖАЙШАЯ
+		-- БЛИЖАЙШАЯ (БЫСТРО)
 		local nearest, dist = findNearestCoin(coins, hrp.Position, murdererPos)
 	
 		if not nearest then
@@ -2632,6 +2635,7 @@ local script = G2L["1b"];
 		if success then
 			pickCoin(nearest)
 			currentTarget = nil
+			-- МГНОВЕННО ПЕРЕХОДИМ К СЛЕДУЮЩЕЙ
 		end
 	end
 	
