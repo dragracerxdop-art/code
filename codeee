@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (TWEEN SERVICE - БЫСТРЫЙ)
+	-- MM2_AutoFarm (ПЛАВНЫЙ TWEEN)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2308,6 +2308,7 @@ local script = G2L["1b"];
 	local safePoint = nil
 	local currentTarget = nil
 	local currentTween = nil
+	local isMoving = false
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2332,6 +2333,7 @@ local script = G2L["1b"];
 			pcall(function() currentTween:Cancel() end)
 			currentTween = nil
 		end
+		isMoving = false
 	end
 	
 	-- ====== ПРОВЕРКА РАУНДА ======
@@ -2420,7 +2422,7 @@ local script = G2L["1b"];
 	
 			if murdererPos then
 				local distToMurderer = (coinPos - murdererPos).Magnitude
-				if distToMurderer < 35 then
+				if distToMurderer < 30 then
 					continue
 				end
 			end
@@ -2435,7 +2437,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== БЫСТРЫЙ ПОЛЕТ TWEEN ======
+	-- ====== ПЛАВНЫЙ ПОЛЕТ ЧЕРЕЗ TWEEN ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2455,21 +2457,23 @@ local script = G2L["1b"];
 	
 		local distance = (hrp.Position - targetPos).Magnitude
 	
-		if distance < 5 then
+		if distance < 3 then
 			return true
 		end
 	
-		-- СКОРОСТЬ ПОЛЕТА
-		local speed = 80
+		-- НОРМАЛЬНАЯ СКОРОСТЬ
+		local speed = 45
 		local duration = distance / speed
-		duration = math.max(duration, 0.1)
-		duration = math.min(duration, 1.5)
+		duration = math.max(duration, 0.3)
+		duration = math.min(duration, 2.5)
 	
 		stopTween()
+		isMoving = true
 	
+		-- ПЛАВНЫЙ TWEEN
 		local tweenInfo = TweenInfo.new(
 			duration,
-			Enum.EasingStyle.Linear,
+			Enum.EasingStyle.Quad,
 			Enum.EasingDirection.Out
 		)
 	
@@ -2480,28 +2484,26 @@ local script = G2L["1b"];
 		local completed = false
 		currentTween.Completed:Connect(function()
 			completed = true
+			isMoving = false
 		end)
 	
 		currentTween:Play()
 	
-		-- ЖДЕМ С ПРОВЕРКАМИ
+		-- ЖДЕМ ЗАВЕРШЕНИЯ
 		local timeout = tick() + duration + 1
 		repeat
 			task.wait()
 	
-			-- ПРОВЕРКА ЖИВ
 			if humanoid.Health <= 0 then
 				stopTween()
 				return false
 			end
 	
-			-- ПРОВЕРКА МОНЕТЫ
 			if currentTarget and not isCoinValid(currentTarget) then
 				stopTween()
 				return false
 			end
 	
-			-- ПРОВЕРКА ПОД КАРТУ
 			if hrp.Position.Y < -30 then
 				stopTween()
 				if safePoint then
@@ -2510,7 +2512,6 @@ local script = G2L["1b"];
 				return false
 			end
 	
-			-- ТАЙМАУТ
 			if tick() > timeout then
 				stopTween()
 				return false
@@ -2519,6 +2520,7 @@ local script = G2L["1b"];
 		until completed == true
 	
 		currentTween = nil
+		isMoving = false
 		return true
 	end
 	
@@ -2537,7 +2539,6 @@ local script = G2L["1b"];
 			firetouchinterest(hrp, coin, 1)
 		end)
 	
-		task.wait(0.05)
 		return true
 	end
 	
@@ -2559,29 +2560,21 @@ local script = G2L["1b"];
 	
 	-- ====== ОСНОВНОЙ ЦИКЛ ======
 	local function farmTick()
+		-- РАУНД
 		if not isRoundActive() then
 			updateIndicator("⏳ ОЖИДАНИЕ", Color3.fromRGB(255, 165, 0))
-			task.wait(0.5)
 			return
 		end
 	
+		-- ПЕРСОНАЖ
 		local char = player.Character
-		if not char then
-			task.wait(0.5)
-			return
-		end
+		if not char then return end
 	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then
-			task.wait(0.5)
-			return
-		end
+		if not hrp then return end
 	
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid or humanoid.Health <= 0 then
-			task.wait(0.5)
-			return
-		end
+		if not humanoid or humanoid.Health <= 0 then return end
 	
 		-- УБИЙЦА
 		local murderer = findMurderer()
@@ -2598,24 +2591,26 @@ local script = G2L["1b"];
 			local dist = (hrp.Position - murdererPos).Magnitude
 			if dist < 30 then
 				updateIndicator("⚠️ УБИЙЦА", Color3.fromRGB(255, 0, 0))
-				goToSafe()
-				task.wait(0.3)
+				if not isMoving then
+					goToSafe()
+				end
 				return
 			end
 		end
 	
-		-- КОНТЕЙНЕР
-		local container = findCoinContainer()
-		if not container then
-			task.wait(0.3)
+		-- ЕСЛИ ЛЕТИМ - НЕ ТРОГАЕМ
+		if isMoving then
 			return
 		end
+	
+		-- КОНТЕЙНЕР
+		local container = findCoinContainer()
+		if not container then return end
 	
 		-- МОНЕТЫ
 		local coins = getCoins(container)
 		if #coins == 0 then
 			updateIndicator("⏳ НЕТ МОНЕТ", Color3.fromRGB(255, 165, 0))
-			task.wait(0.3)
 			return
 		end
 	
@@ -2624,10 +2619,10 @@ local script = G2L["1b"];
 	
 		if not nearest then
 			updateIndicator("⏳ НЕТ БЕЗОП", Color3.fromRGB(255, 165, 0))
-			task.wait(0.3)
 			return
 		end
 	
+		-- ОБНОВЛЯЕМ ИНДИКАТОР
 		updateIndicator("🪙 " .. math.floor(dist) .. "ст", Color3.fromRGB(0, 255, 0))
 		currentTarget = nearest
 	
@@ -2638,8 +2633,6 @@ local script = G2L["1b"];
 			pickCoin(nearest)
 			currentTarget = nil
 		end
-	
-		task.wait(0.05)
 	end
 	
 	-- ====== ЗАПУСК ======
@@ -2709,7 +2702,7 @@ local script = G2L["1b"];
 	
 	-- ====== РЕСПАВН ======
 	player.CharacterAdded:Connect(function()
-		task.wait(1)
+		task.wait(0.5)
 		if isActive then
 			local char = player.Character
 			if char then
