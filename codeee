@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ФИКС ВЕРТИКАЛИ + СКОРОСТЬ)
+	-- MM2_AutoFarm (ФИКС РОТАЦИИ + СБОР)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2309,6 +2309,7 @@ local script = G2L["1b"];
 	local currentTarget = nil
 	local currentTween = nil
 	local isMoving = false
+	local gyro = nil
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2325,6 +2326,31 @@ local script = G2L["1b"];
 	local function updateIndicator(text, color)
 		indicator.Text = text
 		indicator.TextColor3 = color or Color3.fromRGB(255, 0, 0)
+	end
+	
+	-- ====== ФИКС РОТАЦИИ ======
+	local function fixRotation(char)
+		if not char then return end
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+	
+		if not gyro then
+			gyro = Instance.new("BodyGyro")
+			gyro.Parent = hrp
+			gyro.D = 500
+			gyro.P = 5000
+			gyro.MaxTorque = Vector3.new(4000, 4000, 4000)
+		end
+	
+		gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
+	end
+	
+	-- ====== УБРАТЬ ФИКС ======
+	local function removeGyro()
+		if gyro then
+			gyro:Destroy()
+			gyro = nil
+		end
 	end
 	
 	-- ====== ОСТАНОВКА ТВИНА ======
@@ -2440,7 +2466,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ПОЛЕТ С ФИКСИРОВАННОЙ ВЕРТИКАЛЬЮ ======
+	-- ====== ПОЛЕТ ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2458,13 +2484,15 @@ local script = G2L["1b"];
 			end
 		end
 	
+		-- ФИКС РОТАЦИИ
+		fixRotation(char)
+	
 		local distance = (hrp.Position - targetPos).Magnitude
 	
 		if distance < 3 then
 			return true
 		end
 	
-		-- СКОРОСТЬ КАК БЕГ (16) + НЕМНОГО БЫСТРЕЕ
 		local speed = 22
 		local duration = distance / speed
 		duration = math.max(duration, 0.3)
@@ -2473,19 +2501,15 @@ local script = G2L["1b"];
 		stopTween()
 		isMoving = true
 	
-		-- ФИКСИРУЕМ ВЕРТИКАЛЬ (СТОИМ ПРЯМО)
-		local currentCFrame = hrp.CFrame
-		local targetCFrame = CFrame.new(targetPos) * CFrame.Angles(0, currentCFrame.Yaw, 0)
-	
 		local tweenInfo = TweenInfo.new(
 			duration,
 			Enum.EasingStyle.Quad,
 			Enum.EasingDirection.Out
 		)
 	
-		-- ДВИГАЕМ CFrame, А НЕ Position (ЧТОБЫ НЕ ПЕРЕКРУЧИВАЛО)
+		-- ДВИГАЕМ ПОЗИЦИЮ (Position)
 		currentTween = TweenService:Create(hrp, tweenInfo, {
-			CFrame = targetCFrame
+			Position = targetPos
 		})
 	
 		local completed = false
@@ -2500,18 +2524,26 @@ local script = G2L["1b"];
 		repeat
 			task.wait()
 	
+			-- ОБНОВЛЯЕМ ФИКС РОТАЦИИ
+			if gyro then
+				gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
+			end
+	
 			if humanoid.Health <= 0 then
 				stopTween()
+				removeGyro()
 				return false
 			end
 	
 			if currentTarget and not isCoinValid(currentTarget) then
 				stopTween()
+				removeGyro()
 				return false
 			end
 	
 			if hrp.Position.Y < -30 then
 				stopTween()
+				removeGyro()
 				if safePoint then
 					hrp.CFrame = CFrame.new(safePoint)
 				end
@@ -2520,6 +2552,7 @@ local script = G2L["1b"];
 	
 			if tick() > timeout then
 				stopTween()
+				removeGyro()
 				return false
 			end
 	
@@ -2527,6 +2560,7 @@ local script = G2L["1b"];
 	
 		currentTween = nil
 		isMoving = false
+		removeGyro()
 		return true
 	end
 	
@@ -2675,6 +2709,7 @@ local script = G2L["1b"];
 		end
 	
 		stopTween()
+		removeGyro()
 	
 		local char = player.Character
 		if char then
