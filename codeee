@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (БЕЗ ТРЯСКИ + БЫСТРЫЙ ПЕРЕХОД)
+	-- MM2_AutoFarm (ФИКС ПУСТЫХ МОНЕТ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2311,7 +2311,6 @@ local script = G2L["1b"];
 	local SAFE_DISTANCE = 30
 	local currentTween = nil
 	local isWaiting = false
-	local isCollecting = false
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2433,11 +2432,13 @@ local script = G2L["1b"];
 		return nil
 	end
 	
-	-- ====== ПРОВЕРКА МОНЕТЫ ======
+	-- ====== ПРОВЕРКА МОНЕТЫ (ЖЁСТКАЯ) ======
 	local function isCoinAvailable(coin)
 		if not coin then return false end
 		if coin.Transparency ~= 1 then return false end
 		if not coin:FindFirstChild("TouchInterest") then return false end
+		-- 👇 ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА: монета существует и видна
+		if not coin.Parent or not coin.Parent.Parent then return false end
 		return true
 	end
 	
@@ -2448,7 +2449,7 @@ local script = G2L["1b"];
 		return dist > SAFE_DISTANCE
 	end
 	
-	-- ====== ПОИСК ЛУЧШЕЙ МОНЕТЫ ======
+	-- ====== ПОИСК ЛУЧШЕЙ МОНЕТЫ (ПЕРЕД КАЖДЫМ ПОЛЁТОМ) ======
 	local function findBestCoin(container, currentPos)
 		if not container then return nil, false end
 	
@@ -2483,13 +2484,19 @@ local script = G2L["1b"];
 		end
 	end
 	
-	-- ====== ПЛАВНЫЙ ПОЛЁТ (БЕЗ ТРЯСКИ) ======
+	-- ====== ПЛАВНЫЙ ПОЛЁТ ======
 	local function flyToCoin(coin)
 		local char = player.Character
 		if not char then return false end
 	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
+	
+		-- 👇 ПРОВЕРКА: МОНЕТА ВСЁ ЕЩЁ СУЩЕСТВУЕТ?
+		if not isCoinAvailable(coin) then
+			print("⚠️ Монета исчезла до полёта!")
+			return false
+		end
 	
 		-- НОКЛИП
 		for _, part in pairs(char:GetDescendants()) do
@@ -2501,7 +2508,6 @@ local script = G2L["1b"];
 		local targetPos = coin.Position
 		local dist = (hrp.Position - targetPos).Magnitude
 	
-		-- 👇 СКОРОСТЬ ПОЛЁТА
 		local speed = 30
 		local duration = dist / speed
 		duration = math.max(duration, 0.05)
@@ -2509,20 +2515,23 @@ local script = G2L["1b"];
 	
 		stopTween()
 	
-		-- 👇 ПЛАВНЫЙ ПОЛЁТ (SMOOTH)
 		local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 		currentTween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPos)})
 		currentTween:Play()
 		currentTween.Completed:Wait()
 		currentTween = nil
 	
-		-- 👇 СРАЗУ СОБИРАЕМ
+		-- 👇 ЕЩЁ РАЗ ПРОВЕРЯЕМ ПЕРЕД СБОРОМ
+		if not isCoinAvailable(coin) then
+			print("⚠️ Монета исчезла во время полёта!")
+			return false
+		end
+	
 		pcall(function()
 			firetouchinterest(hrp, coin, 0)
 			firetouchinterest(hrp, coin, 1)
 		end)
 	
-		-- 👇 НЕТ ЗАДЕРЖКИ!
 		return true
 	end
 	
@@ -2549,6 +2558,7 @@ local script = G2L["1b"];
 		local container = findCoinContainer()
 		if not container then return end
 	
+		-- 👇 ИЩЕМ МОНЕТУ КАЖДЫЙ РАЗ ЗАНОВО
 		local coin, hasSafeCoins = findBestCoin(container, hrp.Position)
 	
 		if not hasSafeCoins then
@@ -2572,8 +2582,13 @@ local script = G2L["1b"];
 			return
 		end
 	
-		-- 👇 ЛЕТИМ И СРАЗУ К СЛЕДУЮЩЕЙ
-		flyToCoin(coin)
+		-- 👇 ЛЕТИМ
+		local success = flyToCoin(coin)
+	
+		-- 👇 ЕСЛИ МОНЕТА ИСЧЕЗЛА — ПРОСТО ПРОДОЛЖАЕМ
+		if not success then
+			-- ничего, просто идём дальше
+		end
 	end
 	
 	-- ====== ЗАПУСК ======
