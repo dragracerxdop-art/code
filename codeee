@@ -2295,21 +2295,20 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ГАРАНТИРОВАННЫЙ СБОР)
+	-- MM2_AutoFarm (СТАРАЯ ВЕРСИЯ - РАБОТАЕТ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
-	local TweenService = game:GetService("TweenService")
 	
 	local isActive = false
 	local farmConnection = nil
 	local safePoint = nil
 	local currentTarget = nil
-	local currentTween = nil
 	local isMoving = false
 	local gyro = nil
+	local bodyVel = nil
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2329,19 +2328,15 @@ local script = G2L["1b"];
 	end
 	
 	-- ====== ФИКС РОТАЦИИ ======
-	local function fixRotation(char)
-		if not char then return end
-		local hrp = char:FindFirstChild("HumanoidRootPart")
+	local function createGyro(hrp)
 		if not hrp then return end
+		if gyro then return end
 	
-		if not gyro then
-			gyro = Instance.new("BodyGyro")
-			gyro.Parent = hrp
-			gyro.D = 500
-			gyro.P = 5000
-			gyro.MaxTorque = Vector3.new(4000, 4000, 4000)
-		end
-	
+		gyro = Instance.new("BodyGyro")
+		gyro.Parent = hrp
+		gyro.D = 500
+		gyro.P = 5000
+		gyro.MaxTorque = Vector3.new(4000, 4000, 4000)
 		gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
 	end
 	
@@ -2352,11 +2347,27 @@ local script = G2L["1b"];
 		end
 	end
 	
-	-- ====== ОСТАНОВКА ТВИНА ======
-	local function stopTween()
-		if currentTween then
-			pcall(function() currentTween:Cancel() end)
-			currentTween = nil
+	-- ====== ВЕЛОСИТИ ДЛЯ ДВИЖЕНИЯ ======
+	local function createVelocity(hrp)
+		if not hrp then return end
+		if bodyVel then return end
+	
+		bodyVel = Instance.new("BodyVelocity")
+		bodyVel.Parent = hrp
+		bodyVel.MaxForce = Vector3.new(4000, 4000, 4000)
+	end
+	
+	local function removeVelocity()
+		if bodyVel then
+			pcall(function() bodyVel:Destroy() end)
+			bodyVel = nil
+		end
+	end
+	
+	-- ====== ОСТАНОВКА ВСЕГО ======
+	local function stopAll()
+		if bodyVel then
+			bodyVel.Velocity = Vector3.zero
 		end
 		isMoving = false
 	end
@@ -2437,7 +2448,7 @@ local script = G2L["1b"];
 		return coins
 	end
 	
-	-- ====== ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ ======
+	-- ====== ПОИСК БЛИЖАЙШЕЙ ======
 	local function findNearestCoin(coins, position, murdererPos)
 		local nearest = nil
 		local nearestDist = math.huge
@@ -2462,8 +2473,8 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ДВИЖЕНИЕ К МОНЕТЕ ======
-	local function moveToCoin(targetPos)
+	-- ====== ДВИЖЕНИЕ ======
+	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
 	
@@ -2480,46 +2491,24 @@ local script = G2L["1b"];
 			end
 		end
 	
-		fixRotation(char)
+		createGyro(hrp)
+		createVelocity(hrp)
 	
 		local distance = (hrp.Position - targetPos).Magnitude
 	
-		-- ЕСЛИ УЖЕ ОЧЕНЬ БЛИЗКО - ТЕЛЕПОРТ
-		if distance < 10 then
-			hrp.CFrame = CFrame.new(targetPos)
-			task.wait(0.1)
+		if distance < 5 then
+			stopAll()
 			return true
 		end
 	
-		-- ДВИЖЕМСЯ TWEEN-ОМ
+		-- СКОРОСТЬ
 		local speed = 22
-		local duration = distance / speed
-		duration = math.max(duration, 0.3)
-		duration = math.min(duration, 2.5)
+		local direction = (targetPos - hrp.Position).Unit
 	
-		stopTween()
+		bodyVel.Velocity = direction * speed
 		isMoving = true
 	
-		local tweenInfo = TweenInfo.new(
-			duration,
-			Enum.EasingStyle.Quad,
-			Enum.EasingDirection.Out
-		)
-	
-		-- ДВИГАЕМ ПОЗИЦИЮ
-		currentTween = TweenService:Create(hrp, tweenInfo, {
-			Position = targetPos
-		})
-	
-		local completed = false
-		currentTween.Completed:Connect(function()
-			completed = true
-			isMoving = false
-		end)
-	
-		currentTween:Play()
-	
-		local timeout = tick() + duration + 1
+		local timeout = tick() + distance / speed + 2
 		repeat
 			task.wait()
 	
@@ -2527,18 +2516,25 @@ local script = G2L["1b"];
 				gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
 			end
 	
+			local currentDist = (hrp.Position - targetPos).Magnitude
+	
+			if currentDist < 5 then
+				stopAll()
+				return true
+			end
+	
 			if humanoid.Health <= 0 then
-				stopTween()
+				stopAll()
 				return false
 			end
 	
 			if currentTarget and not isCoinValid(currentTarget) then
-				stopTween()
+				stopAll()
 				return false
 			end
 	
-			if hrp.Position.Y < -10 then
-				stopTween()
+			if hrp.Position.Y < -30 then
+				stopAll()
 				if safePoint then
 					hrp.CFrame = CFrame.new(safePoint)
 				end
@@ -2546,18 +2542,15 @@ local script = G2L["1b"];
 			end
 	
 			if tick() > timeout then
-				stopTween()
+				stopAll()
 				return false
 			end
 	
-		until completed == true
+			-- КОРРЕКТИРУЕМ НАПРАВЛЕНИЕ
+			local newDir = (targetPos - hrp.Position).Unit
+			bodyVel.Velocity = newDir * speed
 	
-		currentTween = nil
-		isMoving = false
-	
-		-- ПОСЛЕ TWEEN-А ТЕЛЕПОРТИРУЕМ ТОЧНО НА МОНЕТУ
-		hrp.CFrame = CFrame.new(targetPos)
-		task.wait(0.1)
+		until false
 	
 		return true
 	end
@@ -2572,22 +2565,15 @@ local script = G2L["1b"];
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
 	
-		-- ПЫТАЕМСЯ ПОДОБРАТЬ
 		pcall(function()
-			firetouchinterest(hrp, coin, 0)
-			firetouchinterest(hrp, coin, 1)
-			task.wait(0.05)
 			firetouchinterest(hrp, coin, 0)
 			firetouchinterest(hrp, coin, 1)
 		end)
 	
-		-- ЖДЕМ ЧТОБЫ МОНЕТА ПОДОБРАЛАСЬ
-		task.wait(0.2)
-	
 		return true
 	end
 	
-	-- ====== ВЕРНУТЬСЯ В СЕЙВ ======
+	-- ====== В СЕЙВ ======
 	local function goToSafe()
 		if not safePoint then return end
 	
@@ -2600,7 +2586,7 @@ local script = G2L["1b"];
 		local dist = (hrp.Position - safePoint).Magnitude
 		if dist < 5 then return end
 	
-		moveToCoin(safePoint)
+		flyTo(safePoint)
 	end
 	
 	-- ====== ОСНОВНОЙ ЦИКЛ ======
@@ -2666,8 +2652,7 @@ local script = G2L["1b"];
 		updateIndicator("🪙 " .. math.floor(dist) .. "ст", Color3.fromRGB(0, 255, 0))
 		currentTarget = nearest
 	
-		-- ДВИГАЕМСЯ К МОНЕТЕ
-		local success = moveToCoin(nearest.Position)
+		local success = flyTo(nearest.Position)
 	
 		if success then
 			pickCoin(nearest)
@@ -2717,8 +2702,9 @@ local script = G2L["1b"];
 			farmConnection = nil
 		end
 	
-		stopTween()
+		stopAll()
 		removeGyro()
+		removeVelocity()
 	
 		local char = player.Character
 		if char then
