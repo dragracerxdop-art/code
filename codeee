@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ФИКС ПУСТЫХ МОНЕТ)
+	-- MM2_AutoFarm (ФИНАЛЬНАЯ ВЕРСИЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2432,13 +2432,15 @@ local script = G2L["1b"];
 		return nil
 	end
 	
-	-- ====== ПРОВЕРКА МОНЕТЫ (ЖЁСТКАЯ) ======
+	-- ====== ПРОВЕРКА МОНЕТЫ (ПО TouchInterest) ======
 	local function isCoinAvailable(coin)
 		if not coin then return false end
+		-- 👇 ГЛАВНАЯ ПРОВЕРКА: есть ли TouchInterest?
+		if not coin:FindFirstChild("TouchInterest") then 
+			return false 
+		end
 		if coin.Transparency ~= 1 then return false end
-		if not coin:FindFirstChild("TouchInterest") then return false end
-		-- 👇 ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА: монета существует и видна
-		if not coin.Parent or not coin.Parent.Parent then return false end
+		if not coin.Parent then return false end
 		return true
 	end
 	
@@ -2449,7 +2451,7 @@ local script = G2L["1b"];
 		return dist > SAFE_DISTANCE
 	end
 	
-	-- ====== ПОИСК ЛУЧШЕЙ МОНЕТЫ (ПЕРЕД КАЖДЫМ ПОЛЁТОМ) ======
+	-- ====== ПОИСК ЛУЧШЕЙ МОНЕТЫ ======
 	local function findBestCoin(container, currentPos)
 		if not container then return nil, false end
 	
@@ -2492,9 +2494,8 @@ local script = G2L["1b"];
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
 	
-		-- 👇 ПРОВЕРКА: МОНЕТА ВСЁ ЕЩЁ СУЩЕСТВУЕТ?
+		-- 👇 ПРОВЕРКА ПЕРЕД ПОЛЁТОМ
 		if not isCoinAvailable(coin) then
-			print("⚠️ Монета исчезла до полёта!")
 			return false
 		end
 	
@@ -2521,9 +2522,8 @@ local script = G2L["1b"];
 		currentTween.Completed:Wait()
 		currentTween = nil
 	
-		-- 👇 ЕЩЁ РАЗ ПРОВЕРЯЕМ ПЕРЕД СБОРОМ
+		-- 👇 ЕЩЁ РАЗ ПРОВЕРЯЕМ
 		if not isCoinAvailable(coin) then
-			print("⚠️ Монета исчезла во время полёта!")
 			return false
 		end
 	
@@ -2558,7 +2558,6 @@ local script = G2L["1b"];
 		local container = findCoinContainer()
 		if not container then return end
 	
-		-- 👇 ИЩЕМ МОНЕТУ КАЖДЫЙ РАЗ ЗАНОВО
 		local coin, hasSafeCoins = findBestCoin(container, hrp.Position)
 	
 		if not hasSafeCoins then
@@ -2582,10 +2581,10 @@ local script = G2L["1b"];
 			return
 		end
 	
-		-- 👇 ЛЕТИМ
+		-- 👇 ПРЯМОЙ ВЫЗОВ
 		local success = flyToCoin(coin)
 	
-		-- 👇 ЕСЛИ МОНЕТА ИСЧЕЗЛА — ПРОСТО ПРОДОЛЖАЕМ
+		-- 👇 ЕСЛИ МОНЕТА ИСЧЕЗЛА — ПРОДОЛЖАЕМ
 		if not success then
 			-- ничего, просто идём дальше
 		end
