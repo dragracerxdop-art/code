@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (С ТЕЛЕПОРТОМ НАВЕРХ)
+	-- MM2_AutoFarm (ПЛАВНЫЙ ПОЛЁТ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2310,7 +2310,6 @@ local script = G2L["1b"];
 	local murdererName = nil
 	local SAFE_DISTANCE = 30
 	local currentTween = nil
-	local isWaiting = false
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2326,13 +2325,8 @@ local script = G2L["1b"];
 	
 	local function updateIndicator()
 		if isActive then
-			if isWaiting then
-				indicator.Text = "⏳ ОЖИДАНИЕ"
-				indicator.TextColor3 = Color3.fromRGB(255, 165, 0)
-			else
-				indicator.Text = "🟢 ФАРМ"
-				indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-			end
+			indicator.Text = "🟢 ФАРМ"
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
 		else
 			indicator.Text = "🔴 ВЫКЛ"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
@@ -2447,36 +2441,19 @@ local script = G2L["1b"];
 		return dist > SAFE_DISTANCE
 	end
 	
-	-- ====== ТЕЛЕПОРТ НАВЕРХ КАРТЫ ======
-	local function teleportUp()
-		local char = player.Character
-		if not char then return end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return end
-	
-		-- 👇 ТЕЛЕПОРТ НА 500 ЕДИНИЦ ВВЕРХ
-		local upPos = Vector3.new(hrp.Position.X, 500, hrp.Position.Z)
-		hrp.CFrame = CFrame.new(upPos)
-	
-		print("⬆️ Телепорт наверх! Жду безопасных монет...")
-	end
-	
 	-- ====== ПОИСК ЛУЧШЕЙ МОНЕТЫ ======
 	local function findBestCoin(container, currentPos)
-		if not container then return nil, false end
+		if not container then return nil end
 	
 		updateMurdererPos()
 	
 		local bestCoin = nil
 		local bestDist = math.huge
-		local hasSafeCoins = false
 	
 		for _, coin in pairs(container:GetChildren()) do
 			if isCoinAvailable(coin) then
 				local coinPos = coin.Position
 				if isCoinSafe(coinPos) then
-					hasSafeCoins = true
 					local dist = (currentPos - coinPos).Magnitude
 					if dist < bestDist then
 						bestDist = dist
@@ -2486,7 +2463,7 @@ local script = G2L["1b"];
 			end
 		end
 	
-		return bestCoin, hasSafeCoins
+		return bestCoin
 	end
 	
 	-- ====== ОСТАНОВКА ТВИНА ======
@@ -2505,6 +2482,7 @@ local script = G2L["1b"];
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
 	
+		-- НОКЛИП
 		for _, part in pairs(char:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.CanCollide = false
@@ -2514,18 +2492,21 @@ local script = G2L["1b"];
 		local targetPos = coin.Position + Vector3.new(0, 2, 0)
 		local dist = (hrp.Position - targetPos).Magnitude
 	
+		-- 👇 СКОРОСТЬ ПОЛЁТА (чем больше, тем быстрее)
 		local speed = 25
 		local duration = math.max(dist / speed, 0.1)
 		duration = math.min(duration, 3)
 	
 		stopTween()
 	
+		-- 👇 ПЛАВНЫЙ ПОЛЁТ
 		local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 		currentTween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPos)})
 		currentTween:Play()
 		currentTween.Completed:Wait()
 		currentTween = nil
 	
+		-- 👇 СОБИРАЕМ МОНЕТУ
 		pcall(function()
 			firetouchinterest(hrp, coin, 0)
 			firetouchinterest(hrp, coin, 1)
@@ -2557,26 +2538,7 @@ local script = G2L["1b"];
 		local container = findCoinContainer()
 		if not container then return end
 	
-		local coin, hasSafeCoins = findBestCoin(container, hrp.Position)
-	
-		-- 👇 ЕСЛИ НЕТ БЕЗОПАСНЫХ МОНЕТ
-		if not hasSafeCoins then
-			if not isWaiting then
-				isWaiting = true
-				updateIndicator()
-				teleportUp()  -- 👈 ТЕЛЕПОРТ НАВЕРХ
-			end
-			task.wait(1)
-			return
-		end
-	
-		-- 👇 ЕСЛИ БЕЗОПАСНЫЕ МОНЕТЫ ПОЯВИЛИСЬ
-		if isWaiting then
-			isWaiting = false
-			updateIndicator()
-			print("🟢 Появились безопасные монеты! Лечу собирать!")
-		end
-	
+		local coin = findBestCoin(container, hrp.Position)
 		if not coin then
 			task.wait(0.3)
 			return
@@ -2609,10 +2571,9 @@ local script = G2L["1b"];
 		end
 	
 		isActive = true
-		isWaiting = false
 		updateIndicator()
 	
-		print("🪙 Автофарм ВКЛЮЧЕН!")
+		print("🪙 Автофарм ВКЛЮЧЕН! (ПЛАВНЫЙ ПОЛЁТ)")
 	
 		if farmLoop then
 			farmLoop:Disconnect()
@@ -2634,7 +2595,6 @@ local script = G2L["1b"];
 	-- ====== ОСТАНОВКА ======
 	local function stopFarming()
 		isActive = false
-		isWaiting = false
 		updateIndicator()
 	
 		if farmLoop then
@@ -2674,7 +2634,7 @@ local script = G2L["1b"];
 	end)
 	
 	updateIndicator()
-	print("✅ MM2_AutoFarm загружена (с телепортом наверх)!")
+	print("✅ MM2_AutoFarm загружена (ПЛАВНЫЙ ПОЛЁТ)!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
