@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ПЛАВНЫЙ TWEEN С ПРОВЕРКОЙ)
+	-- MM2_AutoFarm (ГАРАНТИРОВАННЫЙ СБОР)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2310,8 +2310,6 @@ local script = G2L["1b"];
 	local currentTween = nil
 	local isMoving = false
 	local gyro = nil
-	local lastPosition = nil
-	local stuckCount = 0
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2464,8 +2462,8 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ПЛАВНЫЙ ПОЛЕТ С ПРОВЕРКОЙ ======
-	local function flyTo(targetPos)
+	-- ====== ДВИЖЕНИЕ К МОНЕТЕ ======
+	local function moveToCoin(targetPos)
 		local char = player.Character
 		if not char then return false end
 	
@@ -2486,30 +2484,29 @@ local script = G2L["1b"];
 	
 		local distance = (hrp.Position - targetPos).Magnitude
 	
-		if distance < 3 then
+		-- ЕСЛИ УЖЕ ОЧЕНЬ БЛИЗКО - ТЕЛЕПОРТ
+		if distance < 10 then
+			hrp.CFrame = CFrame.new(targetPos)
+			task.wait(0.1)
 			return true
 		end
 	
-		-- МЕДЛЕННАЯ СКОРОСТЬ ЧТОБЫ НЕ ТРИГГЕРИТЬ АНТИЧИТ
-		local speed = 16
+		-- ДВИЖЕМСЯ TWEEN-ОМ
+		local speed = 22
 		local duration = distance / speed
-		duration = math.max(duration, 0.5)
-		duration = math.min(duration, 3.0)
+		duration = math.max(duration, 0.3)
+		duration = math.min(duration, 2.5)
 	
 		stopTween()
 		isMoving = true
 	
-		-- ФИКСИРУЕМ YAW ЧТОБЫ НЕ КРУТИЛО
-		local currentCFrame = hrp.CFrame
-		local yaw = currentCFrame.Yaw
-	
-		-- ДВИГАЕМ ТОЛЬКО POSITION, НЕ ТРОГАЕМ РОТАЦИЮ
 		local tweenInfo = TweenInfo.new(
 			duration,
-			Enum.EasingStyle.Linear,
+			Enum.EasingStyle.Quad,
 			Enum.EasingDirection.Out
 		)
 	
+		-- ДВИГАЕМ ПОЗИЦИЮ
 		currentTween = TweenService:Create(hrp, tweenInfo, {
 			Position = targetPos
 		})
@@ -2518,8 +2515,6 @@ local script = G2L["1b"];
 		currentTween.Completed:Connect(function()
 			completed = true
 			isMoving = false
-			-- ФИКС ПОСЛЕ ДВИЖЕНИЯ
-			hrp.CFrame = CFrame.new(hrp.Position) * CFrame.Angles(0, yaw, 0)
 		end)
 	
 		currentTween:Play()
@@ -2531,9 +2526,6 @@ local script = G2L["1b"];
 			if gyro then
 				gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
 			end
-	
-			-- ФИКС РОТАЦИИ ВО ВРЕМЯ ДВИЖЕНИЯ
-			hrp.CFrame = CFrame.new(hrp.Position) * CFrame.Angles(0, yaw, 0)
 	
 			if humanoid.Health <= 0 then
 				stopTween()
@@ -2562,6 +2554,11 @@ local script = G2L["1b"];
 	
 		currentTween = nil
 		isMoving = false
+	
+		-- ПОСЛЕ TWEEN-А ТЕЛЕПОРТИРУЕМ ТОЧНО НА МОНЕТУ
+		hrp.CFrame = CFrame.new(targetPos)
+		task.wait(0.1)
+	
 		return true
 	end
 	
@@ -2575,10 +2572,17 @@ local script = G2L["1b"];
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
 	
+		-- ПЫТАЕМСЯ ПОДОБРАТЬ
 		pcall(function()
 			firetouchinterest(hrp, coin, 0)
 			firetouchinterest(hrp, coin, 1)
+			task.wait(0.05)
+			firetouchinterest(hrp, coin, 0)
+			firetouchinterest(hrp, coin, 1)
 		end)
+	
+		-- ЖДЕМ ЧТОБЫ МОНЕТА ПОДОБРАЛАСЬ
+		task.wait(0.2)
 	
 		return true
 	end
@@ -2596,7 +2600,7 @@ local script = G2L["1b"];
 		local dist = (hrp.Position - safePoint).Magnitude
 		if dist < 5 then return end
 	
-		flyTo(safePoint)
+		moveToCoin(safePoint)
 	end
 	
 	-- ====== ОСНОВНОЙ ЦИКЛ ======
@@ -2662,7 +2666,8 @@ local script = G2L["1b"];
 		updateIndicator("🪙 " .. math.floor(dist) .. "ст", Color3.fromRGB(0, 255, 0))
 		currentTarget = nearest
 	
-		local success = flyTo(nearest.Position)
+		-- ДВИГАЕМСЯ К МОНЕТЕ
+		local success = moveToCoin(nearest.Position)
 	
 		if success then
 			pickCoin(nearest)
