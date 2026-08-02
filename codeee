@@ -2295,86 +2295,9 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (РАБОЧАЯ КНОПКА)
+	-- MM2_AutoFarm (ЖЕСТКИЙ ФИКС ВЕРТИКАЛИ)
 	-- ==========================================
-	
-	-- НАХУЙ script.Parent - ДАВАЙ ИСКАТЬ КНОПКУ ПО ИМЕНИ
-	local button = nil
-	
-	-- ИЩЕМ КНОПКУ ВО ВСЕМ GUI
-	local function findButton()
-		-- СНАЧАЛА ИЩЕМ В РОДИТЕЛЕ
-		if script.Parent:IsA("ImageButton") or script.Parent:IsA("TextButton") then
-			button = script.Parent
-			return true
-		end
-	
-		-- ИЩЕМ В CoreGui
-		local coreGui = game:GetService("CoreGui")
-		for _, gui in pairs(coreGui:GetChildren()) do
-			if gui:IsA("ScreenGui") then
-				for _, child in pairs(gui:GetAllChildren()) do
-					if (child:IsA("ImageButton") or child:IsA("TextButton")) and child.Name == "MM2_AutoFarm" then
-						button = child
-						return true
-					end
-				end
-			end
-		end
-	
-		-- ИЩЕМ В PlayerGui
-		local playerGui = game.Players.LocalPlayer:FindFirstChild("PlayerGui")
-		if playerGui then
-			for _, gui in pairs(playerGui:GetChildren()) do
-				if gui:IsA("ScreenGui") then
-					for _, child in pairs(gui:GetAllChildren()) do
-						if (child:IsA("ImageButton") or child:IsA("TextButton")) and child.Name == "MM2_AutoFarm" then
-							button = child
-							return true
-						end
-					end
-				end
-			end
-		end
-	
-		return false
-	end
-	
-	-- ЕСЛИ НЕ НАШЛИ - СОЗДАЕМ КНОПКУ
-	if not findButton() then
-		-- ПРОБУЕМ script.Parent
-		if script.Parent:IsA("ImageButton") or script.Parent:IsA("TextButton") then
-			button = script.Parent
-		else
-			-- СОЗДАЕМ НОВУЮ КНОПКУ
-			local screenGui = Instance.new("ScreenGui")
-			screenGui.Name = "MM2_AutoFarm_Gui"
-			screenGui.Parent = game:GetService("CoreGui")
-	
-			button = Instance.new("ImageButton")
-			button.Name = "MM2_AutoFarm"
-			button.Size = UDim2.new(0, 100, 0, 40)
-			button.Position = UDim2.new(0.5, -50, 0.5, -20)
-			button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-			button.Text = "FARM"
-			button.TextColor3 = Color3.fromRGB(255, 255, 255)
-			button.TextSize = 16
-			button.Font = Enum.Font.SourceSansBold
-			button.Parent = screenGui
-	
-			Instance.new("UICorner", button)
-	
-			print("✅ СОЗДАНА НОВАЯ КНОПКА!")
-		end
-	end
-	
-	if not button then
-		error("❌ НЕ НАШЕЛ КНОПКУ, БЛЯТЬ!")
-	end
-	
-	print("✅ КНОПКА НАЙДЕНА: " .. button.Name)
-	
-	-- ====== ОСТАЛЬНОЙ КОД ======
+	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
@@ -2386,7 +2309,6 @@ local script = G2L["1b"];
 	local currentTarget = nil
 	local currentTween = nil
 	local isMoving = false
-	local isWaitingForSafe = false
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2405,12 +2327,14 @@ local script = G2L["1b"];
 		indicator.TextColor3 = color or Color3.fromRGB(255, 0, 0)
 	end
 	
-	-- ====== ЖЕСТКИЙ ФИКС РОТАЦИИ ======
+	-- ====== ЖЕСТКИЙ ФИКС ВЕРТИКАЛИ (БЕЗ BODYGYRO) ======
 	local function fixRotation(hrp)
 		if not hrp then return end
-		local currentCFrame = hrp.CFrame
-		local yRotation = currentCFrame.Yaw
-		hrp.CFrame = CFrame.new(currentCFrame.Position) * CFrame.Angles(0, yRotation, 0)
+		-- СОХРАНЯЕМ ПОЗИЦИЮ И ПОВОРОТ ПО Y
+		local pos = hrp.Position
+		local yaw = hrp.CFrame.Yaw
+		-- СТАВИМ ВЕРТИКАЛЬНО
+		hrp.CFrame = CFrame.new(pos) * CFrame.Angles(0, yaw, 0)
 	end
 	
 	-- ====== ОСТАНОВКА ТВИНА ======
@@ -2523,7 +2447,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ПЛАВНЫЙ ПОЛЕТ ======
+	-- ====== ПЛАВНЫЙ ПОЛЕТ ЧЕРЕЗ TWEEN ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2534,12 +2458,14 @@ local script = G2L["1b"];
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then return false end
 	
+		-- НОКЛИП
 		for _, part in pairs(char:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.CanCollide = false
 			end
 		end
 	
+		-- ФИКС ВЕРТИКАЛИ ПЕРЕД ПОЛЕТОМ
 		fixRotation(hrp)
 	
 		local distance = (hrp.Position - targetPos).Magnitude
@@ -2579,16 +2505,9 @@ local script = G2L["1b"];
 		local timeout = tick() + duration + 1
 		repeat
 			task.wait()
-			fixRotation(hrp)
 	
-			if hrp.Position.Y < 0 then
-				stopTween()
-				if safePoint then
-					hrp.CFrame = CFrame.new(safePoint)
-					fixRotation(hrp)
-				end
-				return false
-			end
+			-- ЖЕСТКИЙ ФИКС ВО ВРЕМЯ ПОЛЕТА
+			fixRotation(hrp)
 	
 			if humanoid.Health <= 0 then
 				stopTween()
@@ -2597,6 +2516,16 @@ local script = G2L["1b"];
 	
 			if currentTarget and not isCoinValid(currentTarget) then
 				stopTween()
+				return false
+			end
+	
+			-- ЗАЩИТА ОТ ПАДЕНИЯ
+			if hrp.Position.Y < 0 then
+				stopTween()
+				if safePoint then
+					hrp.CFrame = CFrame.new(safePoint)
+					fixRotation(hrp)
+				end
 				return false
 			end
 	
@@ -2651,23 +2580,26 @@ local script = G2L["1b"];
 	
 	-- ====== ОСНОВНОЙ ЦИКЛ ======
 	local function farmTick()
+		-- РАУНД
 		if not isRoundActive() then
 			updateIndicator("⏳ ОЖИДАНИЕ", Color3.fromRGB(255, 165, 0))
-			isWaitingForSafe = false
 			return
 		end
 	
+		-- ПЕРСОНАЖ
 		local char = player.Character
 		if not char then return end
 	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return end
 	
+		-- ЖЕСТКИЙ ФИКС В КАЖДОМ ТИКЕ
 		fixRotation(hrp)
 	
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then return end
 	
+		-- ЗАЩИТА ОТ ПАДЕНИЯ
 		if hrp.Position.Y < 0 then
 			if safePoint then
 				hrp.CFrame = CFrame.new(safePoint)
@@ -2676,6 +2608,7 @@ local script = G2L["1b"];
 			return
 		end
 	
+		-- УБИЙЦА
 		local murderer = findMurderer()
 		local murdererPos = nil
 		if murderer and murderer.Character then
@@ -2685,38 +2618,35 @@ local script = G2L["1b"];
 			end
 		end
 	
-		if murdererPos then
-			local distToMurderer = (hrp.Position - murdererPos).Magnitude
-			if distToMurderer < 35 then
+		-- ЕСЛИ УБИЙЦА БЛИЗКО
+		if murdererPos and safePoint then
+			local dist = (hrp.Position - murdererPos).Magnitude
+			if dist < 30 then
 				updateIndicator("⚠️ УБИЙЦА", Color3.fromRGB(255, 0, 0))
-				isWaitingForSafe = true
-				if distToMurderer < 20 and safePoint then
-					if not isMoving then
-						goToSafe()
-					end
+				if not isMoving then
+					goToSafe()
 				end
 				return
 			end
 		end
 	
-		if isWaitingForSafe then
-			isWaitingForSafe = false
-			updateIndicator("🟢 ФАРМ", Color3.fromRGB(0, 255, 0))
-		end
-	
+		-- ЕСЛИ ЛЕТИМ - НЕ ТРОГАЕМ
 		if isMoving then
 			return
 		end
 	
+		-- КОНТЕЙНЕР
 		local container = findCoinContainer()
 		if not container then return end
 	
+		-- МОНЕТЫ
 		local coins = getCoins(container)
 		if #coins == 0 then
 			updateIndicator("⏳ НЕТ МОНЕТ", Color3.fromRGB(255, 165, 0))
 			return
 		end
 	
+		-- БЛИЖАЙШАЯ
 		local nearest, dist = findNearestCoin(coins, hrp.Position, murdererPos)
 	
 		if not nearest then
@@ -2724,9 +2654,11 @@ local script = G2L["1b"];
 			return
 		end
 	
+		-- ОБНОВЛЯЕМ ИНДИКАТОР
 		updateIndicator("🪙 " .. math.floor(dist) .. "ст", Color3.fromRGB(0, 255, 0))
 		currentTarget = nearest
 	
+		-- ЛЕТИМ
 		local success = flyTo(nearest.Position)
 	
 		if success then
@@ -2749,7 +2681,6 @@ local script = G2L["1b"];
 		end
 	
 		isActive = true
-		isWaitingForSafe = false
 		updateIndicator("🟢 ФАРМ", Color3.fromRGB(0, 255, 0))
 	
 		if farmConnection then
@@ -2767,14 +2698,11 @@ local script = G2L["1b"];
 			end
 			farmTick()
 		end)
-	
-		print("🪙 АВТОФАРМ ВКЛЮЧЕН!")
 	end
 	
 	-- ====== ОСТАНОВКА ======
 	local function stopFarming()
 		isActive = false
-		isWaitingForSafe = false
 		updateIndicator("ВЫКЛ", Color3.fromRGB(255, 0, 0))
 	
 		if farmConnection then
@@ -2795,12 +2723,10 @@ local script = G2L["1b"];
 		end
 	
 		currentTarget = nil
-		print("🪙 АВТОФАРМ ВЫКЛЮЧЕН!")
 	end
 	
-	-- ====== ПОДКЛЮЧЕНИЕ КНОПКИ ======
+	-- ====== КНОПКА ======
 	button.MouseButton1Click:Connect(function()
-		print("🔄 КЛИК ПО КНОПКЕ!")
 		if isActive then
 			stopFarming()
 		else
@@ -2824,7 +2750,6 @@ local script = G2L["1b"];
 	end)
 	
 	updateIndicator("ВЫКЛ", Color3.fromRGB(255, 0, 0))
-	print("✅ MM2_AutoFarm ЗАГРУЖЕНА!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
