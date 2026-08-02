@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ПЛАВНЫЙ TWEEN + ФИКС РОТАЦИИ)
+	-- MM2_AutoFarm (ЖЕСТКИЙ ФИКС + ЗАЩИТА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2309,7 +2309,8 @@ local script = G2L["1b"];
 	local currentTarget = nil
 	local currentTween = nil
 	local isMoving = false
-	local gyro = nil
+	local lastPosition = nil
+	local stuckCounter = 0
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2328,28 +2329,16 @@ local script = G2L["1b"];
 		indicator.TextColor3 = color or Color3.fromRGB(255, 0, 0)
 	end
 	
-	-- ====== ФИКС РОТАЦИИ ======
-	local function fixRotation(char)
-		if not char then return end
-		local hrp = char:FindFirstChild("HumanoidRootPart")
+	-- ====== ЖЕСТКИЙ ФИКС РОТАЦИИ ======
+	local function fixRotation(hrp)
 		if not hrp then return end
 	
-		if not gyro then
-			gyro = Instance.new("BodyGyro")
-			gyro.Parent = hrp
-			gyro.D = 500
-			gyro.P = 5000
-			gyro.MaxTorque = Vector3.new(4000, 4000, 4000)
-		end
+		-- СОХРАНЯЕМ ТОЛЬКО Y ПОВОРОТ
+		local currentCFrame = hrp.CFrame
+		local yRotation = currentCFrame.Yaw
 	
-		gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
-	end
-	
-	local function removeGyro()
-		if gyro then
-			gyro:Destroy()
-			gyro = nil
-		end
+		-- СТАВИМ ВЕРТИКАЛЬНО
+		hrp.CFrame = CFrame.new(currentCFrame.Position) * CFrame.Angles(0, yRotation, 0)
 	end
 	
 	-- ====== ОСТАНОВКА ТВИНА ======
@@ -2462,7 +2451,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ПЛАВНЫЙ ПОЛЕТ ЧЕРЕЗ TWEEN ======
+	-- ====== ПЛАВНЫЙ ПОЛЕТ ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2480,17 +2469,17 @@ local script = G2L["1b"];
 			end
 		end
 	
-		-- ФИКС РОТАЦИИ
-		fixRotation(char)
+		-- ЖЕСТКО ФИКСИРУЕМ ВЕРТИКАЛЬ
+		fixRotation(hrp)
 	
 		local distance = (hrp.Position - targetPos).Magnitude
 	
 		if distance < 3 then
-			removeGyro()
+			fixRotation(hrp)
 			return true
 		end
 	
-		-- СКОРОСТЬ ЧУТЬ БЫСТРЕЕ БЕГА (16 + 6 = 22)
+		-- СКОРОСТЬ
 		local speed = 22
 		local duration = distance / speed
 		duration = math.max(duration, 0.3)
@@ -2499,7 +2488,9 @@ local script = G2L["1b"];
 		stopTween()
 		isMoving = true
 	
-		-- ПЛАВНЫЙ TWEEN
+		-- СОХРАНЯЕМ YAW ДЛЯ ФИКСА
+		local yaw = hrp.CFrame.Yaw
+	
 		local tweenInfo = TweenInfo.new(
 			duration,
 			Enum.EasingStyle.Quad,
@@ -2514,7 +2505,8 @@ local script = G2L["1b"];
 		currentTween.Completed:Connect(function()
 			completed = true
 			isMoving = false
-			removeGyro()
+			-- ФИКС ПОСЛЕ ПОЛЕТА
+			fixRotation(hrp)
 		end)
 	
 		currentTween:Play()
@@ -2524,35 +2516,31 @@ local script = G2L["1b"];
 		repeat
 			task.wait()
 	
-			-- ОБНОВЛЯЕМ ФИКС РОТАЦИИ
-			if gyro then
-				gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
+			-- ПОСТОЯННЫЙ ФИКС ВО ВРЕМЯ ПОЛЕТА
+			fixRotation(hrp)
+	
+			-- ПРОВЕРКА ПОД КАРТУ
+			if hrp.Position.Y < 0 then
+				stopTween()
+				if safePoint then
+					hrp.CFrame = CFrame.new(safePoint)
+					fixRotation(hrp)
+				end
+				return false
 			end
 	
 			if humanoid.Health <= 0 then
 				stopTween()
-				removeGyro()
 				return false
 			end
 	
 			if currentTarget and not isCoinValid(currentTarget) then
 				stopTween()
-				removeGyro()
-				return false
-			end
-	
-			if hrp.Position.Y < -30 then
-				stopTween()
-				removeGyro()
-				if safePoint then
-					hrp.CFrame = CFrame.new(safePoint)
-				end
 				return false
 			end
 	
 			if tick() > timeout then
 				stopTween()
-				removeGyro()
 				return false
 			end
 	
@@ -2560,7 +2548,7 @@ local script = G2L["1b"];
 	
 		currentTween = nil
 		isMoving = false
-		removeGyro()
+		fixRotation(hrp)
 		return true
 	end
 	
@@ -2573,6 +2561,9 @@ local script = G2L["1b"];
 	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
+	
+		-- ФИКС ПЕРЕД ПОДБОРОМ
+		fixRotation(hrp)
 	
 		pcall(function()
 			firetouchinterest(hrp, coin, 0)
@@ -2613,8 +2604,20 @@ local script = G2L["1b"];
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return end
 	
+		-- ФИКС ВЕРТИКАЛИ В КАЖДОМ ТИКЕ
+		fixRotation(hrp)
+	
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then return end
+	
+		-- ЗАЩИТА ОТ ПАДЕНИЯ
+		if hrp.Position.Y < 0 then
+			if safePoint then
+				hrp.CFrame = CFrame.new(safePoint)
+				fixRotation(hrp)
+			end
+			return
+		end
 	
 		-- УБИЙЦА
 		local murderer = findMurderer()
@@ -2685,6 +2688,7 @@ local script = G2L["1b"];
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if hrp then
 			safePoint = hrp.Position
+			fixRotation(hrp)
 		end
 	
 		isActive = true
@@ -2718,7 +2722,6 @@ local script = G2L["1b"];
 		end
 	
 		stopTween()
-		removeGyro()
 	
 		local char = player.Character
 		if char then
@@ -2726,6 +2729,7 @@ local script = G2L["1b"];
 			if hrp then
 				hrp.Velocity = Vector3.zero
 				hrp.RotVelocity = Vector3.zero
+				fixRotation(hrp)
 			end
 		end
 	
@@ -2750,6 +2754,7 @@ local script = G2L["1b"];
 				local hrp = char:FindFirstChild("HumanoidRootPart")
 				if hrp then
 					safePoint = hrp.Position
+					fixRotation(hrp)
 				end
 			end
 		end
