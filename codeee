@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (НЕ ТЕПАЕМ К УБИЙЦЕ)
+	-- MM2_AutoFarm (БЕЗОПАСНАЯ ВЕРСИЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2308,6 +2308,7 @@ local script = G2L["1b"];
 	local octree = nil
 	local coinContainer = nil
 	local murdererName = nil
+	local isSafeMode = false  -- 👈 РЕЖИМ БЕЗ ПОИСКА УБИЙЦЫ
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2331,7 +2332,7 @@ local script = G2L["1b"];
 		end
 	end
 	
-	-- ====== ОКТОДЕРЕВО (УПРОЩЁННОЕ) ======
+	-- ====== ОКТОДЕРЕВО ======
 	local Octree = {}
 	Octree.__index = Octree
 	
@@ -2458,31 +2459,41 @@ local script = G2L["1b"];
 		remove(self)
 	end
 	
-	-- ====== ПОИСК УБИЙЦЫ ======
+	-- ====== ПОИСК УБИЙЦЫ (БЕЗОПАСНО) ======
 	local function findMurderer()
-		local getPlayerData = ReplicatedStorage:FindFirstChild("GetPlayerData", true)
-		if not getPlayerData then return nil end
+		-- Если включён безопасный режим — не ищем
+		if isSafeMode then return nil end
 	
-		local success, data = pcall(function()
-			return getPlayerData:InvokeServer()
-		end)
+		pcall(function()
+			local getPlayerData = ReplicatedStorage:FindFirstChild("GetPlayerData")
+			if not getPlayerData then 
+				isSafeMode = true
+				print("⚠️ GetPlayerData не найден, включаю безопасный режим")
+				return nil 
+			end
 	
-		if not success or not data then return nil end
+			local success, data = pcall(function()
+				return getPlayerData:InvokeServer()
+			end)
 	
-		for name, info in pairs(data) do
-			if info.Role == "Murderer" then
-				local plr = Players:FindFirstChild(name)
-				if plr and plr:GetAttribute("Alive") == true then
-					return plr
+			if success and data then
+				for name, info in pairs(data) do
+					if info.Role == "Murderer" then
+						local plr = Players:FindFirstChild(name)
+						if plr and plr:GetAttribute("Alive") == true then
+							return plr
+						end
+					end
 				end
 			end
-		end
+		end)
+	
 		return nil
 	end
 	
 	-- ====== ПРОВЕРКА: РЯДОМ С УБИЙЦЕЙ ======
 	local function isNearMurderer(position, radius)
-		if not murdererName then return false end
+		if isSafeMode or not murdererName then return false end
 	
 		local murderer = Players:FindFirstChild(murdererName)
 		if not murderer then return false end
@@ -2515,7 +2526,7 @@ local script = G2L["1b"];
 		return true
 	end
 	
-	-- ====== ПОПОЛНЕНИЕ ОКТОДЕРЕВА (ТОЛЬКО БЕЗОПАСНЫМИ МОНЕТАМИ) ======
+	-- ====== ПОПОЛНЕНИЕ ОКТОДЕРЕВА ======
 	local function populateOctree()
 		if not octree then
 			octree = Octree.new()
@@ -2526,11 +2537,10 @@ local script = G2L["1b"];
 		if not coinContainer then return 0
 	
 			local count = 0
-			local safeRadius = 15  -- 👈 НЕ ТЕПАЕМ К МОНЕТАМ В РАДИУСЕ 15 ОТ УБИЙЦЫ
+			local safeRadius = 15
 	
 			for _, descendant in pairs(coinContainer:GetDescendants()) do
 				if descendant:IsA("BasePart") and isCoinAvailable(descendant) then
-					-- 👇 ПРОВЕРКА: РЯДОМ С УБИЙЦЕЙ?
 					if not isNearMurderer(descendant.Position, safeRadius) then
 						octree:CreateNode(descendant.Position, descendant)
 						count = count + 1
@@ -2542,6 +2552,7 @@ local script = G2L["1b"];
 	
 		-- ====== ОБНОВЛЕНИЕ УБИЙЦЫ ======
 		local function updateMurderer()
+			if isSafeMode then return false end
 			local murderer = findMurderer()
 			if murderer then
 				murdererName = murderer.Name
@@ -2604,38 +2615,35 @@ local script = G2L["1b"];
 					return
 				end
 	
-				-- ОБНОВЛЯЕМ УБИЙЦУ
-				updateMurderer()
+				if not isSafeMode then
+					updateMurderer()
+				end
 	
 				if not coinContainer then
 					coinContainer = findCoinContainer()
 					if not coinContainer then return end
 					local count = populateOctree()
-					print("🪙 Безопасных монет: " .. count)
+					print("🪙 Монет в октодереве: " .. count)
 					if count == 0 then
 						task.wait(1)
 						return
 					end
 				end
 	
-				-- ОБНОВЛЯЕМ ОКТОДЕРЕВО
 				updateOctree()
 	
-				-- NOCLIP
 				for _, part in pairs(char:GetDescendants()) do
 					if part:IsA("BasePart") then
 						part.CanCollide = false
 					end
 				end
 	
-				-- ПОИСК БЛИЖАЙШЕЙ БЕЗОПАСНОЙ МОНЕТЫ
 				local nearestNodes = octree:GetNearest(hrp.Position, 500, 1)
 	
 				if #nearestNodes > 0 then
 					local coin = nearestNodes[1].object
 					if coin and coin.Parent and isCoinAvailable(coin) then
-						-- 👇 ДВОЙНАЯ ПРОВЕРКА: ВСЁ ЕЩЁ БЕЗОПАСНА?
-						if not isNearMurderer(coin.Position, 15) then
+						if isSafeMode or not isNearMurderer(coin.Position, 15) then
 							moveToCoin(coin)
 							task.wait(0.1)
 							pcall(function()
@@ -2644,14 +2652,12 @@ local script = G2L["1b"];
 							end)
 							octree:RemoveNode(coin)
 						else
-							-- Монета стала опасной, удаляем
 							octree:RemoveNode(coin)
 						end
 					else
 						updateOctree()
 					end
 				else
-					-- ПЕРЕЗАПОЛНЯЕМ ОКТОДЕРЕВО (БЕЗ ОПАСНЫХ МОНЕТ)
 					local count = populateOctree()
 					if count == 0 then
 						task.wait(1)
@@ -2675,13 +2681,15 @@ local script = G2L["1b"];
 					return
 				end
 	
-				-- Находим убийцу
-				updateMurderer()
-				if not murdererName then
-					print("❌ Убийца не найден!")
-					return
+				if not isSafeMode then
+					updateMurderer()
+					if murdererName then
+						print("🔴 Убийца: " .. murdererName)
+					else
+						print("⚠️ Убийца не найден, работаю в безопасном режиме")
+						isSafeMode = true
+					end
 				end
-				print("🔴 Убийца: " .. murdererName)
 	
 				coinContainer = findCoinContainer()
 				if not coinContainer then
@@ -2690,17 +2698,17 @@ local script = G2L["1b"];
 				end
 	
 				local count = populateOctree()
-				print("🪙 Безопасных монет: " .. count)
+				print("🪙 Найдено монет: " .. count)
 	
 				if count == 0 then
-					print("❌ Нет безопасных монет!")
+					print("❌ Нет доступных монет!")
 					return
 				end
 	
 				isActive = true
 				updateIndicator()
 	
-				print("🪙 Автофарм ВКЛЮЧЕН! (не тепаем к убийце)")
+				print("🪙 Автофарм ВКЛЮЧЕН!")
 	
 				if farmLoop then
 					farmLoop:Disconnect()
@@ -2759,7 +2767,7 @@ local script = G2L["1b"];
 			end)
 	
 			updateIndicator()
-			print("✅ MM2_AutoFarm загружена (не тепаем к монетам рядом с убийцей)!")
+			print("✅ MM2_AutoFarm загружена (БЕЗОПАСНАЯ ВЕРСИЯ)!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
