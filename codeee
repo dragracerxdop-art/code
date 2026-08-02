@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (script.Parent + МИНИМУМ)
+	-- MM2_AutoFarm (ПЛАВНЫЙ TWEEN + ФИКС РОТАЦИИ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2311,26 +2311,43 @@ local script = G2L["1b"];
 	local isMoving = false
 	local gyro = nil
 	
-	-- ====== ИНДИКАТОР НАХУЙ - УБИРАЕМ ЕГО ВООБЩЕ ======
-	-- ЧТОБЫ НЕ ПЕРЕКРЫВАЛ КНОПКУ
+	-- ====== ИНДИКАТОР ======
+	local indicator = Instance.new("TextLabel")
+	indicator.Name = "Indicator"
+	indicator.Size = UDim2.new(1, 0, 0.3, 0)
+	indicator.Position = UDim2.new(0, 0, 0.7, 0)
+	indicator.BackgroundTransparency = 1
+	indicator.Text = "ВЫКЛ"
+	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+	indicator.TextSize = 14
+	indicator.Font = Enum.Font.SourceSansBold
+	indicator.Parent = button
 	
-	-- ====== СОЗДАТЬ GYRO ======
-	local function createGyro(hrp)
+	local function updateIndicator(text, color)
+		indicator.Text = text
+		indicator.TextColor3 = color or Color3.fromRGB(255, 0, 0)
+	end
+	
+	-- ====== ФИКС РОТАЦИИ ======
+	local function fixRotation(char)
+		if not char then return end
+		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return end
-		if gyro then return end
 	
-		gyro = Instance.new("BodyGyro")
-		gyro.Parent = hrp
-		gyro.D = 500
-		gyro.P = 5000
-		gyro.MaxTorque = Vector3.new(4000, 4000, 4000)
+		if not gyro then
+			gyro = Instance.new("BodyGyro")
+			gyro.Parent = hrp
+			gyro.D = 500
+			gyro.P = 5000
+			gyro.MaxTorque = Vector3.new(4000, 4000, 4000)
+		end
+	
 		gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
 	end
 	
-	-- ====== УДАЛИТЬ GYRO ======
 	local function removeGyro()
 		if gyro then
-			pcall(function() gyro:Destroy() end)
+			gyro:Destroy()
 			gyro = nil
 		end
 	end
@@ -2445,7 +2462,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ПЛАВНЫЙ ПОЛЕТ ======
+	-- ====== ПЛАВНЫЙ ПОЛЕТ ЧЕРЕЗ TWEEN ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2463,16 +2480,17 @@ local script = G2L["1b"];
 			end
 		end
 	
-		if not gyro then
-			createGyro(hrp)
-		end
+		-- ФИКС РОТАЦИИ
+		fixRotation(char)
 	
 		local distance = (hrp.Position - targetPos).Magnitude
 	
 		if distance < 3 then
+			removeGyro()
 			return true
 		end
 	
+		-- СКОРОСТЬ ЧУТЬ БЫСТРЕЕ БЕГА (16 + 6 = 22)
 		local speed = 22
 		local duration = distance / speed
 		duration = math.max(duration, 0.3)
@@ -2481,6 +2499,7 @@ local script = G2L["1b"];
 		stopTween()
 		isMoving = true
 	
+		-- ПЛАВНЫЙ TWEEN
 		local tweenInfo = TweenInfo.new(
 			duration,
 			Enum.EasingStyle.Quad,
@@ -2495,30 +2514,36 @@ local script = G2L["1b"];
 		currentTween.Completed:Connect(function()
 			completed = true
 			isMoving = false
+			removeGyro()
 		end)
 	
 		currentTween:Play()
 	
+		-- ЖДЕМ ЗАВЕРШЕНИЯ
 		local timeout = tick() + duration + 1
 		repeat
 			task.wait()
 	
+			-- ОБНОВЛЯЕМ ФИКС РОТАЦИИ
 			if gyro then
 				gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
 			end
 	
 			if humanoid.Health <= 0 then
 				stopTween()
+				removeGyro()
 				return false
 			end
 	
 			if currentTarget and not isCoinValid(currentTarget) then
 				stopTween()
+				removeGyro()
 				return false
 			end
 	
 			if hrp.Position.Y < -30 then
 				stopTween()
+				removeGyro()
 				if safePoint then
 					hrp.CFrame = CFrame.new(safePoint)
 				end
@@ -2527,6 +2552,7 @@ local script = G2L["1b"];
 	
 			if tick() > timeout then
 				stopTween()
+				removeGyro()
 				return false
 			end
 	
@@ -2534,6 +2560,7 @@ local script = G2L["1b"];
 	
 		currentTween = nil
 		isMoving = false
+		removeGyro()
 		return true
 	end
 	
@@ -2573,10 +2600,13 @@ local script = G2L["1b"];
 	
 	-- ====== ОСНОВНОЙ ЦИКЛ ======
 	local function farmTick()
+		-- РАУНД
 		if not isRoundActive() then
+			updateIndicator("⏳ ОЖИДАНИЕ", Color3.fromRGB(255, 165, 0))
 			return
 		end
 	
+		-- ПЕРСОНАЖ
 		local char = player.Character
 		if not char then return end
 	
@@ -2586,10 +2616,7 @@ local script = G2L["1b"];
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then return end
 	
-		if gyro then
-			gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
-		end
-	
+		-- УБИЙЦА
 		local murderer = findMurderer()
 		local murdererPos = nil
 		if murderer and murderer.Character then
@@ -2599,9 +2626,11 @@ local script = G2L["1b"];
 			end
 		end
 	
+		-- ЕСЛИ УБИЙЦА БЛИЗКО
 		if murdererPos and safePoint then
 			local dist = (hrp.Position - murdererPos).Magnitude
 			if dist < 30 then
+				updateIndicator("⚠️ УБИЙЦА", Color3.fromRGB(255, 0, 0))
 				if not isMoving then
 					goToSafe()
 				end
@@ -2609,26 +2638,35 @@ local script = G2L["1b"];
 			end
 		end
 	
+		-- ЕСЛИ ЛЕТИМ - НЕ ТРОГАЕМ
 		if isMoving then
 			return
 		end
 	
+		-- КОНТЕЙНЕР
 		local container = findCoinContainer()
 		if not container then return end
 	
+		-- МОНЕТЫ
 		local coins = getCoins(container)
 		if #coins == 0 then
+			updateIndicator("⏳ НЕТ МОНЕТ", Color3.fromRGB(255, 165, 0))
 			return
 		end
 	
+		-- БЛИЖАЙШАЯ
 		local nearest, dist = findNearestCoin(coins, hrp.Position, murdererPos)
 	
 		if not nearest then
+			updateIndicator("⏳ НЕТ БЕЗОП", Color3.fromRGB(255, 165, 0))
 			return
 		end
 	
+		-- ОБНОВЛЯЕМ ИНДИКАТОР
+		updateIndicator("🪙 " .. math.floor(dist) .. "ст", Color3.fromRGB(0, 255, 0))
 		currentTarget = nearest
 	
+		-- ЛЕТИМ
 		local success = flyTo(nearest.Position)
 	
 		if success then
@@ -2647,10 +2685,10 @@ local script = G2L["1b"];
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if hrp then
 			safePoint = hrp.Position
-			createGyro(hrp)
 		end
 	
 		isActive = true
+		updateIndicator("🟢 ФАРМ", Color3.fromRGB(0, 255, 0))
 	
 		if farmConnection then
 			farmConnection:Disconnect()
@@ -2667,13 +2705,12 @@ local script = G2L["1b"];
 			end
 			farmTick()
 		end)
-	
-		print("🪙 АВТОФАРМ ВКЛЮЧЕН!")
 	end
 	
 	-- ====== ОСТАНОВКА ======
 	local function stopFarming()
 		isActive = false
+		updateIndicator("ВЫКЛ", Color3.fromRGB(255, 0, 0))
 	
 		if farmConnection then
 			farmConnection:Disconnect()
@@ -2693,12 +2730,10 @@ local script = G2L["1b"];
 		end
 	
 		currentTarget = nil
-		print("🪙 АВТОФАРМ ВЫКЛЮЧЕН!")
 	end
 	
 	-- ====== КНОПКА ======
 	button.MouseButton1Click:Connect(function()
-		print("🔄 КЛИК!")
 		if isActive then
 			stopFarming()
 		else
@@ -2715,13 +2750,12 @@ local script = G2L["1b"];
 				local hrp = char:FindFirstChild("HumanoidRootPart")
 				if hrp then
 					safePoint = hrp.Position
-					createGyro(hrp)
 				end
 			end
 		end
 	end)
 	
-	print("✅ ЗАГРУЖЕНО!")
+	updateIndicator("ВЫКЛ", Color3.fromRGB(255, 0, 0)) 
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
