@@ -2295,17 +2295,19 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (БЫСТРЫЙ КАК ПУЛЯ)
+	-- MM2_AutoFarm (TWEEN SERVICE - БЫСТРЫЙ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
+	local TweenService = game:GetService("TweenService")
 	
 	local isActive = false
 	local farmConnection = nil
 	local safePoint = nil
 	local currentTarget = nil
+	local currentTween = nil
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2322,6 +2324,14 @@ local script = G2L["1b"];
 	local function updateIndicator(text, color)
 		indicator.Text = text
 		indicator.TextColor3 = color or Color3.fromRGB(255, 0, 0)
+	end
+	
+	-- ====== ОСТАНОВКА ТВИНА ======
+	local function stopTween()
+		if currentTween then
+			pcall(function() currentTween:Cancel() end)
+			currentTween = nil
+		end
 	end
 	
 	-- ====== ПРОВЕРКА РАУНДА ======
@@ -2425,7 +2435,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== БЫСТРЫЙ ПОЛЕТ ======
+	-- ====== БЫСТРЫЙ ПОЛЕТ TWEEN ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2443,76 +2453,73 @@ local script = G2L["1b"];
 			end
 		end
 	
-		-- ВЫКЛЮЧАЕМ ГРАВИТАЦИЮ НАХУЙ
-		hrp.AssemblyLinearVelocity = Vector3.zero
-		hrp.AssemblyAngularVelocity = Vector3.zero
-	
 		local distance = (hrp.Position - targetPos).Magnitude
 	
-		-- ЕСЛИ УЖЕ БЛИЗКО
 		if distance < 5 then
 			return true
 		end
 	
-		-- СКОРОСТЬ - МАКСИМАЛКА
-		local speed = 350  -- БЫСТРО КАК ПУЛЯ
-	
-		-- РАССЧИТЫВАЕМ ВРЕМЯ
+		-- СКОРОСТЬ ПОЛЕТА
+		local speed = 80
 		local duration = distance / speed
-		duration = math.max(duration, 0.05)
-		duration = math.min(duration, 0.8)
+		duration = math.max(duration, 0.1)
+		duration = math.min(duration, 1.5)
 	
-		local startPos = hrp.Position
-		local startTime = tick()
+		stopTween()
 	
-		-- ЛЕТИМ
+		local tweenInfo = TweenInfo.new(
+			duration,
+			Enum.EasingStyle.Linear,
+			Enum.EasingDirection.Out
+		)
+	
+		currentTween = TweenService:Create(hrp, tweenInfo, {
+			Position = targetPos
+		})
+	
+		local completed = false
+		currentTween.Completed:Connect(function()
+			completed = true
+		end)
+	
+		currentTween:Play()
+	
+		-- ЖДЕМ С ПРОВЕРКАМИ
+		local timeout = tick() + duration + 1
 		repeat
 			task.wait()
 	
 			-- ПРОВЕРКА ЖИВ
 			if humanoid.Health <= 0 then
-				hrp.AssemblyLinearVelocity = Vector3.zero
+				stopTween()
 				return false
 			end
 	
 			-- ПРОВЕРКА МОНЕТЫ
 			if currentTarget and not isCoinValid(currentTarget) then
-				hrp.AssemblyLinearVelocity = Vector3.zero
+				stopTween()
 				return false
 			end
 	
 			-- ПРОВЕРКА ПОД КАРТУ
 			if hrp.Position.Y < -30 then
-				hrp.AssemblyLinearVelocity = Vector3.zero
+				stopTween()
 				if safePoint then
 					hrp.CFrame = CFrame.new(safePoint)
 				end
 				return false
 			end
 	
-			-- ВЫЧИСЛЯЕМ ПРОГРЕСС
-			local elapsed = tick() - startTime
-			local alpha = math.min(elapsed / duration, 1)
-	
-			-- ЛИНЕЙНАЯ ИНТЕРПОЛЯЦИЯ
-			local currentPos = startPos:Lerp(targetPos, alpha)
-			hrp.CFrame = CFrame.new(currentPos)
-	
-			-- ЕСЛИ ДОЛЕТЕЛИ
-			if alpha >= 1 then
-				hrp.AssemblyLinearVelocity = Vector3.zero
-				return true
-			end
-	
-			-- ОСТАНОВКА ЕСЛИ ЗАСТРЯЛ
-			if tick() - startTime > duration + 0.5 then
-				hrp.AssemblyLinearVelocity = Vector3.zero
+			-- ТАЙМАУТ
+			if tick() > timeout then
+				stopTween()
 				return false
 			end
 	
-		until false
+		until completed == true
 	
-		return false
+		currentTween = nil
+		return true
 	end
 	
 	-- ====== ПОДОБРАТЬ МОНЕТУ ======
@@ -2624,7 +2631,7 @@ local script = G2L["1b"];
 		updateIndicator("🪙 " .. math.floor(dist) .. "ст", Color3.fromRGB(0, 255, 0))
 		currentTarget = nearest
 	
-		-- ЛЕТИМ БЫСТРО
+		-- ЛЕТИМ
 		local success = flyTo(nearest.Position)
 	
 		if success then
@@ -2677,12 +2684,14 @@ local script = G2L["1b"];
 			farmConnection = nil
 		end
 	
+		stopTween()
+	
 		local char = player.Character
 		if char then
 			local hrp = char:FindFirstChild("HumanoidRootPart")
 			if hrp then
-				hrp.AssemblyLinearVelocity = Vector3.zero
-				hrp.AssemblyAngularVelocity = Vector3.zero
+				hrp.Velocity = Vector3.zero
+				hrp.RotVelocity = Vector3.zero
 			end
 		end
 	
