@@ -2295,20 +2295,22 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (БЫСТРЫЙ + ПРОВЕРКА РАУНДА)
+	-- MM2_AutoFarm (С ТЕЛЕПОРТОМ НАВЕРХ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local TweenService = game:GetService("TweenService")
 	
 	local isActive = false
 	local farmLoop = nil
 	local murdererPos = nil
 	local murdererName = nil
 	local SAFE_DISTANCE = 30
-	local isMoving = false
+	local currentTween = nil
+	local isWaiting = false
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2324,15 +2326,20 @@ local script = G2L["1b"];
 	
 	local function updateIndicator()
 		if isActive then
-			indicator.Text = "🟢 ФАРМ"
-			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+			if isWaiting then
+				indicator.Text = "⏳ ОЖИДАНИЕ"
+				indicator.TextColor3 = Color3.fromRGB(255, 165, 0)
+			else
+				indicator.Text = "🟢 ФАРМ"
+				indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+			end
 		else
 			indicator.Text = "🔴 ВЫКЛ"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 		end
 	end
 	
-	-- ====== ПРОВЕРКА: ИДЁТ ЛИ РАУНД ======
+	-- ====== ПРОВЕРКА РАУНДА ======
 	local function isRoundActive()
 		local mainGui = player.PlayerGui:FindFirstChild("MainGUI")
 		if not mainGui then return false end
@@ -2440,19 +2447,36 @@ local script = G2L["1b"];
 		return dist > SAFE_DISTANCE
 	end
 	
+	-- ====== ТЕЛЕПОРТ НАВЕРХ КАРТЫ ======
+	local function teleportUp()
+		local char = player.Character
+		if not char then return end
+	
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+	
+		-- 👇 ТЕЛЕПОРТ НА 500 ЕДИНИЦ ВВЕРХ
+		local upPos = Vector3.new(hrp.Position.X, 500, hrp.Position.Z)
+		hrp.CFrame = CFrame.new(upPos)
+	
+		print("⬆️ Телепорт наверх! Жду безопасных монет...")
+	end
+	
 	-- ====== ПОИСК ЛУЧШЕЙ МОНЕТЫ ======
 	local function findBestCoin(container, currentPos)
-		if not container then return nil end
+		if not container then return nil, false end
 	
 		updateMurdererPos()
 	
 		local bestCoin = nil
 		local bestDist = math.huge
+		local hasSafeCoins = false
 	
 		for _, coin in pairs(container:GetChildren()) do
 			if isCoinAvailable(coin) then
 				local coinPos = coin.Position
 				if isCoinSafe(coinPos) then
+					hasSafeCoins = true
 					local dist = (currentPos - coinPos).Magnitude
 					if dist < bestDist then
 						bestDist = dist
@@ -2462,11 +2486,19 @@ local script = G2L["1b"];
 			end
 		end
 	
-		return bestCoin
+		return bestCoin, hasSafeCoins
 	end
 	
-	-- ====== ДВИЖЕНИЕ К МОНЕТЕ (БЫСТРОЕ) ======
-	local function moveToCoin(coin)
+	-- ====== ОСТАНОВКА ТВИНА ======
+	local function stopTween()
+		if currentTween then
+			pcall(function() currentTween:Cancel() end)
+			currentTween = nil
+		end
+	end
+	
+	-- ====== ПЛАВНЫЙ ПОЛЁТ К МОНЕТЕ ======
+	local function flyToCoin(coin)
 		local char = player.Character
 		if not char then return false end
 	
@@ -2480,66 +2512,35 @@ local script = G2L["1b"];
 		end
 	
 		local targetPos = coin.Position + Vector3.new(0, 2, 0)
-		local speed = 30
-		local threshold = 3
+		local dist = (hrp.Position - targetPos).Magnitude
 	
-		isMoving = true
+		local speed = 25
+		local duration = math.max(dist / speed, 0.1)
+		duration = math.min(duration, 3)
 	
-		while isActive and isMoving do
-			-- 👇 ЛЁГКАЯ ПРОВЕРКА РАУНДА (ОДНА СТРОЧКА)
-			if not isRoundActive() then
-				isMoving = false
-				return false
-			end
+		stopTween()
 	
-			local currentPos = hrp.Position
-			local dist = (currentPos - targetPos).Magnitude
+		local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+		currentTween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPos)})
+		currentTween:Play()
+		currentTween.Completed:Wait()
+		currentTween = nil
 	
-			if dist < threshold then
-				break
-			end
+		pcall(function()
+			firetouchinterest(hrp, coin, 0)
+			firetouchinterest(hrp, coin, 1)
+		end)
 	
-			updateMurdererPos()
-			if murdererPos then
-				local distToMurderer = (targetPos - murdererPos).Magnitude
-				if distToMurderer < SAFE_DISTANCE then
-					isMoving = false
-					return false
-				end
-			end
-	
-			if not isCoinAvailable(coin) then
-				isMoving = false
-				return false
-			end
-	
-			local dir = (targetPos - currentPos).Unit
-			local step = dir * speed * 0.016
-	
-			if step.Magnitude > dist then
-				hrp.CFrame = CFrame.new(targetPos)
-			else
-				hrp.CFrame = hrp.CFrame + step
-			end
-	
-			RunService.Heartbeat:Wait()
-		end
-	
-		isMoving = false
-	
-		if (hrp.Position - targetPos).Magnitude < 5 then
-			pcall(function()
-				firetouchinterest(hrp, coin, 0)
-				firetouchinterest(hrp, coin, 1)
-			end)
-			return true
-		end
-	
-		return false
+		return true
 	end
 	
 	-- ====== ОСНОВНОЙ ЦИКЛ ======
 	local function farmLoopFunction()
+		if not isRoundActive() then
+			task.wait(0.5)
+			return
+		end
+	
 		local char = player.Character
 		if not char then return end
 	
@@ -2556,13 +2557,32 @@ local script = G2L["1b"];
 		local container = findCoinContainer()
 		if not container then return end
 	
-		local coin = findBestCoin(container, hrp.Position)
+		local coin, hasSafeCoins = findBestCoin(container, hrp.Position)
+	
+		-- 👇 ЕСЛИ НЕТ БЕЗОПАСНЫХ МОНЕТ
+		if not hasSafeCoins then
+			if not isWaiting then
+				isWaiting = true
+				updateIndicator()
+				teleportUp()  -- 👈 ТЕЛЕПОРТ НАВЕРХ
+			end
+			task.wait(1)
+			return
+		end
+	
+		-- 👇 ЕСЛИ БЕЗОПАСНЫЕ МОНЕТЫ ПОЯВИЛИСЬ
+		if isWaiting then
+			isWaiting = false
+			updateIndicator()
+			print("🟢 Появились безопасные монеты! Лечу собирать!")
+		end
+	
 		if not coin then
 			task.wait(0.3)
 			return
 		end
 	
-		moveToCoin(coin)
+		flyToCoin(coin)
 	end
 	
 	-- ====== ЗАПУСК ======
@@ -2589,6 +2609,7 @@ local script = G2L["1b"];
 		end
 	
 		isActive = true
+		isWaiting = false
 		updateIndicator()
 	
 		print("🪙 Автофарм ВКЛЮЧЕН!")
@@ -2613,6 +2634,7 @@ local script = G2L["1b"];
 	-- ====== ОСТАНОВКА ======
 	local function stopFarming()
 		isActive = false
+		isWaiting = false
 		updateIndicator()
 	
 		if farmLoop then
@@ -2620,7 +2642,7 @@ local script = G2L["1b"];
 			farmLoop = nil
 		end
 	
-		isMoving = false
+		stopTween()
 	
 		local char = player.Character
 		if char then
@@ -2652,7 +2674,7 @@ local script = G2L["1b"];
 	end)
 	
 	updateIndicator()
-	print("✅ MM2_AutoFarm загружена (БЫСТРАЯ ВЕРСИЯ)!")
+	print("✅ MM2_AutoFarm загружена (с телепортом наверх)!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
