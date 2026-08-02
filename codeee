@@ -2755,7 +2755,7 @@ local script = G2L["1b"];
 		end
 	end)
 	
-	updateIndicator("ВЫКЛ", Color3.fromRGB(255, 0, 0)) 
+	updateIndicator("ВЫКЛ", Color3.fromRGB(255, 0, 0))
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
