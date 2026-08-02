@@ -2295,14 +2295,22 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ПРОСТАЯ ВЕРСИЯ)
+	-- MM2_AutoFarm (С РАЗВОРОТОМ ОТ УБИЙЦЫ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
+	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local TweenService = game:GetService("TweenService")
 	
 	local isActive = false
 	local farmLoop = nil
+	local murdererPos = nil
+	local lastMurdererUpdate = 0
+	local currentTarget = nil
+	local isMoving = false
+	local SAFE_DISTANCE = 25  -- 👈 БЕЗОПАСНОЕ РАССТОЯНИЕ ОТ УБИЙЦЫ
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2326,7 +2334,37 @@ local script = G2L["1b"];
 		end
 	end
 	
-	-- ====== ПОИСК КОНТЕЙНЕРА С МОНЕТАМИ ======
+	-- ====== ПОИСК УБИЙЦЫ ======
+	local function updateMurdererPos()
+		if tick() - lastMurdererUpdate < 0.5 then return end
+		lastMurdererUpdate = tick()
+	
+		pcall(function()
+			local getPlayerData = ReplicatedStorage:FindFirstChild("GetPlayerData")
+			if not getPlayerData then return end
+	
+			local success, data = pcall(function()
+				return getPlayerData:InvokeServer()
+			end)
+	
+			if success and data then
+				for name, info in pairs(data) do
+					if info.Role == "Murderer" then
+						local plr = Players:FindFirstChild(name)
+						if plr and plr.Character then
+							local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+							if hrp then
+								murdererPos = hrp.Position
+								return
+							end
+						end
+					end
+				end
+			end
+		end)
+	end
+	
+	-- ====== ПОИСК КОНТЕЙНЕРА ======
 	local function findCoinContainer()
 		for _, obj in pairs(workspace:GetChildren()) do
 			if obj:IsA("Model") and obj:FindFirstChild("CoinContainer") then
@@ -2336,7 +2374,7 @@ local script = G2L["1b"];
 		return nil
 	end
 	
-	-- ====== ПРОВЕРКА: МОНЕТА ДОСТУПНА ======
+	-- ====== ПРОВЕРКА МОНЕТЫ ======
 	local function isCoinAvailable(coin)
 		if not coin then return false end
 		if coin.Transparency ~= 1 then return false end
@@ -2344,48 +2382,113 @@ local script = G2L["1b"];
 		return true
 	end
 	
-	-- ====== ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ ======
-	local function findNearestCoin(container)
-		if not container then return nil, math.huge end
+	-- ====== ПРОВЕРКА БЕЗОПАСНОСТИ ======
+	local function isCoinSafe(coinPos)
+		if not murdererPos then return true end
+		local dist = (coinPos - murdererPos).Magnitude
+		return dist > SAFE_DISTANCE
+	end
 	
-		local char = player.Character
-		if not char then return nil, math.huge end
+	-- ====== ПОИСК ЛУЧШЕЙ МОНЕТЫ ======
+	local function findBestCoin(container, currentPos)
+		if not container then return nil end
 	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return nil, math.huge end
-	
-		local nearest = nil
-		local minDist = math.huge
+		local bestCoin = nil
+		local bestScore = -math.huge
 	
 		for _, coin in pairs(container:GetChildren()) do
 			if isCoinAvailable(coin) then
-				local dist = (hrp.Position - coin.Position).Magnitude
-				if dist < minDist then
-					nearest = coin
-					minDist = dist
+				local coinPos = coin.Position
+				local dist = (currentPos - coinPos).Magnitude
+	
+				-- 👇 ПРОВЕРКА БЕЗОПАСНОСТИ
+				if not isCoinSafe(coinPos) then
+					continue
+				end
+	
+				local score = -dist
+				if score > bestScore then
+					bestScore = score
+					bestCoin = coin
 				end
 			end
 		end
 	
-		return nearest, minDist
+		return bestCoin
 	end
 	
-	-- ====== ТЕЛЕПОРТ К МОНЕТЕ ======
-	local function teleportToCoin(coin)
+	-- ====== ПЛАВНОЕ ДВИЖЕНИЕ С ДИНАМИЧЕСКОЙ ПРОВЕРКОЙ ======
+	local function moveToCoin(coin)
 		local char = player.Character
-		if not char then return end
+		if not char then return false end
 	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return end
-	
-		hrp.Velocity = Vector3.zero
-		hrp.RotVelocity = Vector3.zero
+		if not hrp then return false end
 	
 		local targetPos = coin.Position + Vector3.new(0, 2, 0)
-		hrp.CFrame = CFrame.new(targetPos)
+		local dist = (hrp.Position - targetPos).Magnitude
+	
+		local speed = 20
+		local duration = math.max(math.min(dist / speed, 2.5), 0.1)
+	
+		isMoving = true
+		currentTarget = coin
+	
+		local startPos = hrp.Position
+		local startTime = tick()
+		local interrupted = false
+	
+		-- 👇 ЦИКЛ ДВИЖЕНИЯ С ПОСТОЯННОЙ ПРОВЕРКОЙ
+		while isMoving and isActive do
+			local elapsed = tick() - startTime
+			local alpha = math.min(elapsed / duration, 1)
+	
+			-- 👇 ПРОВЕРЯЕМ: УБИЙЦА ПРИБЛИЗИЛСЯ К МОНЕТЕ?
+			updateMurdererPos()
+			if murdererPos and (murdererPos - targetPos).Magnitude < SAFE_DISTANCE then
+				print("⚠️ Убийца близко к монете! Разворачиваюсь...")
+				interrupted = true
+				break
+			end
+	
+			-- 👇 ПРОВЕРЯЕМ: МОНЕТА ЕЩЁ ДОСТУПНА?
+			if not isCoinAvailable(coin) then
+				print("⚠️ Монета уже собрана!")
+				interrupted = true
+				break
+			end
+	
+			local currentPos = startPos:Lerp(targetPos, alpha)
+			hrp.CFrame = CFrame.new(currentPos)
+	
+			if alpha >= 1 then
+				break
+			end
+	
+			RunService.Heartbeat:Wait()
+		end
+	
+		isMoving = false
+		currentTarget = nil
+	
+		-- 👇 ЕСЛИ ПРЕРВАЛИ — ВОЗВРАЩАЕМСЯ
+		if interrupted then
+			return false
+		end
+	
+		-- 👇 ПРОВЕРЯЕМ: ДОЛЕТЕЛИ?
+		if (hrp.Position - targetPos).Magnitude < 5 then
+			pcall(function()
+				firetouchinterest(hrp, coin, 0)
+				firetouchinterest(hrp, coin, 1)
+			end)
+			return true
+		end
+	
+		return false
 	end
 	
-	-- ====== ГЛАВНЫЙ ЦИКЛ ======
+	-- ====== ОСНОВНОЙ ЦИКЛ ======
 	local function farmLoopFunction()
 		local char = player.Character
 		if not char then return end
@@ -2399,25 +2502,26 @@ local script = G2L["1b"];
 			return
 		end
 	
+		-- ОБНОВЛЯЕМ ПОЗИЦИЮ УБИЙЦЫ
+		updateMurdererPos()
+	
 		local container = findCoinContainer()
 		if not container then return end
 	
-		local coin, dist = findNearestCoin(container)
-		if not coin then return end
-	
-		-- НОКЛИП
-		for _, part in pairs(char:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = false
-			end
+		-- 👇 ИЩЕМ ЛУЧШУЮ БЕЗОПАСНУЮ МОНЕТУ
+		local coin = findBestCoin(container, hrp.Position)
+		if not coin then
+			task.wait(0.5)
+			return
 		end
 	
-		teleportToCoin(coin)
+		-- 👇 ПЫТАЕМСЯ СОБРАТЬ МОНЕТУ
+		local success = moveToCoin(coin)
 	
-		pcall(function()
-			firetouchinterest(hrp, coin, 0)
-			firetouchinterest(hrp, coin, 1)
-		end)
+		-- 👇 ЕСЛИ ПРЕРВАЛИ — ИЩЕМ НОВУЮ МОНЕТУ
+		if not success then
+			task.wait(0.1)
+		end
 	end
 	
 	-- ====== ЗАПУСК ======
@@ -2434,6 +2538,13 @@ local script = G2L["1b"];
 		if not humanoid or humanoid.Health <= 0 then
 			print("❌ Персонаж мёртв!")
 			return
+		end
+	
+		updateMurdererPos()
+		if murdererPos then
+			print("🔴 Убийца найден! Безопасная дистанция: " .. SAFE_DISTANCE)
+		else
+			print("⚠️ Убийца не найден, работаю без проверки")
 		end
 	
 		isActive = true
@@ -2468,13 +2579,17 @@ local script = G2L["1b"];
 			farmLoop = nil
 		end
 	
-		local char = player.Character
-		if char then
-			local hrp = char:FindFirstChild("HumanoidRootPart")
-			if hrp then
-				hrp.Velocity = Vector3.zero
-				hrp.RotVelocity = Vector3.zero
+		if isMoving then
+			local char = player.Character
+			if char then
+				local hrp = char:FindFirstChild("HumanoidRootPart")
+				if hrp then
+					hrp.Velocity = Vector3.zero
+					hrp.RotVelocity = Vector3.zero
+				end
 			end
+			isMoving = false
+			currentTarget = nil
 		end
 	
 		print("🪙 Автофарм ВЫКЛЮЧЕН!")
@@ -2498,7 +2613,7 @@ local script = G2L["1b"];
 	end)
 	
 	updateIndicator()
-	print("✅ MM2_AutoFarm загружена!")
+	print("✅ MM2_AutoFarm загружена (С РАЗВОРОТОМ ОТ УБИЙЦЫ)!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
