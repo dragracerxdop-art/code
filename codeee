@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (БЫСТРЫЙ БЕЗ ЛАГОВ)
+	-- MM2_AutoFarm (БЫСТРЫЙ КАК ПУЛЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2306,7 +2306,6 @@ local script = G2L["1b"];
 	local farmConnection = nil
 	local safePoint = nil
 	local currentTarget = nil
-	local isMoving = false
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2409,11 +2408,10 @@ local script = G2L["1b"];
 		for _, coin in pairs(coins) do
 			local coinPos = coin.Position
 	
-			-- Проверяем безопасность
 			if murdererPos then
 				local distToMurderer = (coinPos - murdererPos).Magnitude
 				if distToMurderer < 35 then
-					continue -- Опасная монета
+					continue
 				end
 			end
 	
@@ -2427,8 +2425,8 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ДВИЖЕНИЕ К ЦЕЛИ ======
-	local function moveTo(targetPos)
+	-- ====== БЫСТРЫЙ ПОЛЕТ ======
+	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
 	
@@ -2438,71 +2436,79 @@ local script = G2L["1b"];
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then return false end
 	
-		-- ВКЛЮЧАЕМ НОКЛИП
+		-- НОКЛИП
 		for _, part in pairs(char:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.CanCollide = false
 			end
 		end
 	
-		-- РАССЧИТЫВАЕМ НАПРАВЛЕНИЕ
-		local direction = (targetPos - hrp.Position).Unit
+		-- ВЫКЛЮЧАЕМ ГРАВИТАЦИЮ НАХУЙ
+		hrp.AssemblyLinearVelocity = Vector3.zero
+		hrp.AssemblyAngularVelocity = Vector3.zero
+	
 		local distance = (hrp.Position - targetPos).Magnitude
 	
 		-- ЕСЛИ УЖЕ БЛИЗКО
-		if distance < 3 then
+		if distance < 5 then
 			return true
 		end
 	
-		-- СКОРОСТЬ
-		local speed = math.min(distance * 1.5, 80)
+		-- СКОРОСТЬ - МАКСИМАЛКА
+		local speed = 350  -- БЫСТРО КАК ПУЛЯ
 	
-		-- СТАВИМ ВЕЛОСИТИ
-		hrp.Velocity = direction * speed
-		hrp.RotVelocity = Vector3.zero
+		-- РАССЧИТЫВАЕМ ВРЕМЯ
+		local duration = distance / speed
+		duration = math.max(duration, 0.05)
+		duration = math.min(duration, 0.8)
 	
-		-- ПРОВЕРЯЕМ ПРИБЛИЖЕНИЕ
 		local startPos = hrp.Position
-		local timeout = tick() + 3
+		local startTime = tick()
 	
+		-- ЛЕТИМ
 		repeat
 			task.wait()
 	
-			-- ПРОВЕРЯЕМ НЕ УМЕР ЛИ
+			-- ПРОВЕРКА ЖИВ
 			if humanoid.Health <= 0 then
+				hrp.AssemblyLinearVelocity = Vector3.zero
 				return false
 			end
 	
-			-- ПРОВЕРЯЕМ НЕ УЛЕТЕЛ ЛИ ПОД КАРТУ
-			if hrp.Position.Y < -50 then
-				hrp.Velocity = Vector3.zero
-				hrp.CFrame = CFrame.new(safePoint or Vector3.new(0, 50, 0))
-				return false
-			end
-	
-			local currentDist = (hrp.Position - targetPos).Magnitude
-	
-			-- ЕСЛИ МОНЕТА ИСЧЕЗЛА
+			-- ПРОВЕРКА МОНЕТЫ
 			if currentTarget and not isCoinValid(currentTarget) then
-				hrp.Velocity = Vector3.zero
+				hrp.AssemblyLinearVelocity = Vector3.zero
 				return false
 			end
+	
+			-- ПРОВЕРКА ПОД КАРТУ
+			if hrp.Position.Y < -30 then
+				hrp.AssemblyLinearVelocity = Vector3.zero
+				if safePoint then
+					hrp.CFrame = CFrame.new(safePoint)
+				end
+				return false
+			end
+	
+			-- ВЫЧИСЛЯЕМ ПРОГРЕСС
+			local elapsed = tick() - startTime
+			local alpha = math.min(elapsed / duration, 1)
+	
+			-- ЛИНЕЙНАЯ ИНТЕРПОЛЯЦИЯ
+			local currentPos = startPos:Lerp(targetPos, alpha)
+			hrp.CFrame = CFrame.new(currentPos)
 	
 			-- ЕСЛИ ДОЛЕТЕЛИ
-			if currentDist < 3 then
-				hrp.Velocity = Vector3.zero
+			if alpha >= 1 then
+				hrp.AssemblyLinearVelocity = Vector3.zero
 				return true
 			end
 	
-			-- ЕСЛИ ЗАСТРЯЛИ
-			if tick() > timeout then
-				hrp.Velocity = Vector3.zero
+			-- ОСТАНОВКА ЕСЛИ ЗАСТРЯЛ
+			if tick() - startTime > duration + 0.5 then
+				hrp.AssemblyLinearVelocity = Vector3.zero
 				return false
 			end
-	
-			-- ОБНОВЛЯЕМ НАПРАВЛЕНИЕ
-			local newDir = (targetPos - hrp.Position).Unit
-			hrp.Velocity = newDir * speed
 	
 		until false
 	
@@ -2528,7 +2534,7 @@ local script = G2L["1b"];
 		return true
 	end
 	
-	-- ====== ВЕРНУТЬСЯ В БЕЗОПАСНОСТЬ ======
+	-- ====== ВЕРНУТЬСЯ В СЕЙВ ======
 	local function goToSafe()
 		if not safePoint then return end
 	
@@ -2541,19 +2547,17 @@ local script = G2L["1b"];
 		local dist = (hrp.Position - safePoint).Magnitude
 		if dist < 5 then return end
 	
-		moveTo(safePoint)
+		flyTo(safePoint)
 	end
 	
 	-- ====== ОСНОВНОЙ ЦИКЛ ======
 	local function farmTick()
-		-- 1. ПРОВЕРКА РАУНДА
 		if not isRoundActive() then
 			updateIndicator("⏳ ОЖИДАНИЕ", Color3.fromRGB(255, 165, 0))
 			task.wait(0.5)
 			return
 		end
 	
-		-- 2. ПРОВЕРКА ПЕРСОНАЖА
 		local char = player.Character
 		if not char then
 			task.wait(0.5)
@@ -2572,7 +2576,7 @@ local script = G2L["1b"];
 			return
 		end
 	
-		-- 3. ПОИСК УБИЙЦЫ
+		-- УБИЙЦА
 		local murderer = findMurderer()
 		local murdererPos = nil
 		if murderer and murderer.Character then
@@ -2582,7 +2586,7 @@ local script = G2L["1b"];
 			end
 		end
 	
-		-- 4. ЕСЛИ УБИЙЦА БЛИЗКО - В СЕЙВ
+		-- ЕСЛИ УБИЙЦА БЛИЗКО
 		if murdererPos and safePoint then
 			local dist = (hrp.Position - murdererPos).Magnitude
 			if dist < 30 then
@@ -2593,14 +2597,14 @@ local script = G2L["1b"];
 			end
 		end
 	
-		-- 5. ПОИСК КОНТЕЙНЕРА
+		-- КОНТЕЙНЕР
 		local container = findCoinContainer()
 		if not container then
 			task.wait(0.3)
 			return
 		end
 	
-		-- 6. ПОЛУЧАЕМ МОНЕТЫ
+		-- МОНЕТЫ
 		local coins = getCoins(container)
 		if #coins == 0 then
 			updateIndicator("⏳ НЕТ МОНЕТ", Color3.fromRGB(255, 165, 0))
@@ -2608,24 +2612,22 @@ local script = G2L["1b"];
 			return
 		end
 	
-		-- 7. ИЩЕМ БЛИЖАЙШУЮ
+		-- БЛИЖАЙШАЯ
 		local nearest, dist = findNearestCoin(coins, hrp.Position, murdererPos)
 	
 		if not nearest then
-			updateIndicator("⏳ НЕТ БЕЗОПАСНЫХ", Color3.fromRGB(255, 165, 0))
+			updateIndicator("⏳ НЕТ БЕЗОП", Color3.fromRGB(255, 165, 0))
 			task.wait(0.3)
 			return
 		end
 	
-		-- 8. ОБНОВЛЯЕМ ИНДИКАТОР
 		updateIndicator("🪙 " .. math.floor(dist) .. "ст", Color3.fromRGB(0, 255, 0))
 		currentTarget = nearest
 	
-		-- 9. ЛЕТИМ К МОНЕТЕ
-		local success = moveTo(nearest.Position)
+		-- ЛЕТИМ БЫСТРО
+		local success = flyTo(nearest.Position)
 	
 		if success then
-			-- 10. ПОДБИРАЕМ
 			pickCoin(nearest)
 			currentTarget = nil
 		end
@@ -2679,8 +2681,8 @@ local script = G2L["1b"];
 		if char then
 			local hrp = char:FindFirstChild("HumanoidRootPart")
 			if hrp then
-				hrp.Velocity = Vector3.zero
-				hrp.RotVelocity = Vector3.zero
+				hrp.AssemblyLinearVelocity = Vector3.zero
+				hrp.AssemblyAngularVelocity = Vector3.zero
 			end
 		end
 	
