@@ -2295,14 +2295,19 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ПРОСТОЙ И РАБОЧИЙ)
+	-- MM2_AutoFarm (С ОКТОДЕРЕВОМ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
+	local HttpService = game:GetService("HttpService")
 	
 	local isActive = false
 	local farmLoop = nil
+	local octree = nil
+	local touchedCoins = {}
+	local coinContainer = nil
+	local isCleaning = false
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2326,6 +2331,152 @@ local script = G2L["1b"];
 		end
 	end
 	
+	-- ====== ОКТОДЕРЕВО (УПРОЩЁННАЯ ВЕРСИЯ) ======
+	local Octree = {}
+	Octree.__index = Octree
+	
+	function Octree.new(min, max)
+		local self = {
+			min = min or Vector3.new(-1000, -1000, -1000),
+			max = max or Vector3.new(1000, 1000, 1000),
+			children = {},
+			objects = {},
+			isLeaf = true
+		}
+		setmetatable(self, Octree)
+		return self
+	end
+	
+	function Octree:CreateNode(position, object)
+		if self.isLeaf then
+			table.insert(self.objects, {position = position, object = object})
+			if #self.objects > 8 then
+				self:Subdivide()
+			end
+		else
+			local child = self:FindChild(position)
+			if child then
+				child:CreateNode(position, object)
+			end
+		end
+	end
+	
+	function Octree:Subdivide()
+		local mid = (self.min + self.max) / 2
+		local corners = {
+			{self.min, Vector3.new(mid.X, mid.Y, mid.Z)},
+			{Vector3.new(mid.X, self.min.Y, self.min.Z), Vector3.new(self.max.X, mid.Y, mid.Z)},
+			{Vector3.new(self.min.X, mid.Y, self.min.Z), Vector3.new(mid.X, self.max.Y, mid.Z)},
+			{Vector3.new(mid.X, mid.Y, self.min.Z), Vector3.new(self.max.X, self.max.Y, mid.Z)},
+			{Vector3.new(self.min.X, self.min.Y, mid.Z), Vector3.new(mid.X, mid.Y, self.max.Z)},
+			{Vector3.new(mid.X, self.min.Y, mid.Z), Vector3.new(self.max.X, mid.Y, self.max.Z)},
+			{Vector3.new(self.min.X, mid.Y, mid.Z), Vector3.new(mid.X, self.max.Y, self.max.Z)},
+			{Vector3.new(mid.X, mid.Y, mid.Z), Vector3.new(self.max.X, self.max.Y, self.max.Z)},
+		}
+	
+		for _, corner in pairs(corners) do
+			local child = Octree.new(corner[1], corner[2])
+			table.insert(self.children, child)
+		end
+	
+		self.isLeaf = false
+		for _, obj in pairs(self.objects) do
+			local child = self:FindChild(obj.position)
+			if child then
+				child:CreateNode(obj.position, obj.object)
+			end
+		end
+		self.objects = {}
+	end
+	
+	function Octree:FindChild(position)
+		for _, child in pairs(self.children) do
+			if position.X >= child.min.X and position.X <= child.max.X and
+				position.Y >= child.min.Y and position.Y <= child.max.Y and
+				position.Z >= child.min.Z and position.Z <= child.max.Z then
+				return child
+			end
+		end
+		return nil
+	end
+	
+	function Octree:GetNearest(position, radius, maxResults)
+		local results = {}
+		local function search(node)
+			if node.isLeaf then
+				for _, obj in pairs(node.objects) do
+					local dist = (position - obj.position).Magnitude
+					if dist <= radius then
+						table.insert(results, {object = obj.object, distance = dist})
+					end
+				end
+			else
+				for _, child in pairs(node.children) do
+					local center = (child.min + child.max) / 2
+					local dist = (position - center).Magnitude
+					if dist <= radius then
+						search(child)
+					end
+				end
+			end
+		end
+	
+		search(self)
+		table.sort(results, function(a, b) return a.distance < b.distance end)
+	
+		local finalResults = {}
+		for i = 1, math.min(maxResults or #results, #results) do
+			table.insert(finalResults, results[i])
+		end
+		return finalResults
+	end
+	
+	function Octree:ClearAllNodes()
+		self.objects = {}
+		self.children = {}
+		self.isLeaf = true
+	end
+	
+	function Octree:RemoveNode(object)
+		local function remove(node)
+			if node.isLeaf then
+				for i, obj in pairs(node.objects) do
+					if obj.object == object then
+						table.remove(node.objects, i)
+						return true
+					end
+				end
+			else
+				for _, child in pairs(node.children) do
+					if remove(child) then
+						return true
+					end
+				end
+			end
+			return false
+		end
+		remove(self)
+	end
+	
+	function Octree:FindFirstNode(object)
+		local function find(node)
+			if node.isLeaf then
+				for _, obj in pairs(node.objects) do
+					if obj.object == object then
+						return node
+					end
+				end
+			else
+				for _, child in pairs(node.children) do
+					local result = find(child)
+					if result then return result end
+				end
+			end
+			return nil
+		end
+		return find(self)
+	end
+	
 	-- ====== ПОИСК КОНТЕЙНЕРА ======
 	local function findCoinContainer()
 		for _, obj in pairs(workspace:GetChildren()) do
@@ -2336,7 +2487,7 @@ local script = G2L["1b"];
 		return nil
 	end
 	
-	-- ====== ПРОВЕРКА: МОНЕТА ДОСТУПНА ======
+	-- ====== ПРОВЕРКА МОНЕТЫ ======
 	local function isCoinAvailable(coin)
 		if not coin then return false end
 		if coin.Transparency ~= 1 then return false end
@@ -2344,34 +2495,37 @@ local script = G2L["1b"];
 		return true
 	end
 	
-	-- ====== ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ ======
-	local function findNearestCoin(container)
-		if not container then return nil, math.huge end
-	
-		local char = player.Character
-		if not char then return nil, math.huge end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return nil, math.huge end
-	
-		local nearest = nil
-		local minDist = math.huge
-	
-		for _, coin in pairs(container:GetChildren()) do
-			if isCoinAvailable(coin) then
-				local dist = (hrp.Position - coin.Position).Magnitude
-				if dist < minDist then
-					nearest = coin
-					minDist = dist
-				end
+	-- ====== ОТМЕТИТЬ МОНЕТУ КАК СОБРАННУЮ ======
+	local function markCoinAsTouched(coin)
+		touchedCoins[coin] = true
+		if octree then
+			local node = octree:FindFirstNode(coin)
+			if node then
+				octree:RemoveNode(node)
 			end
 		end
-	
-		return nearest, minDist
 	end
 	
-	-- ====== ТЕЛЕПОРТ К МОНЕТЕ ======
-	local function teleportToCoin(coin)
+	-- ====== ПОПОЛНЕНИЕ ОКТОДЕРЕВА ======
+	local function populateOctree()
+		if not octree then
+			octree = Octree.new(Vector3.new(-1000, -1000, -1000), Vector3.new(1000, 1000, 1000))
+		end
+		octree:ClearAllNodes()
+		touchedCoins = {}
+	
+		coinContainer = findCoinContainer()
+		if not coinContainer then return end
+	
+		for _, descendant in pairs(coinContainer:GetDescendants()) do
+			if descendant:IsA("BasePart") and isCoinAvailable(descendant) then
+				octree:CreateNode(descendant.Position, descendant)
+			end
+		end
+	end
+	
+	-- ====== ПЛАВНОЕ ДВИЖЕНИЕ К МОНЕТЕ ======
+	local function moveToCoin(coin)
 		local char = player.Character
 		if not char then return end
 	
@@ -2385,7 +2539,7 @@ local script = G2L["1b"];
 		hrp.CFrame = CFrame.new(targetPos)
 	end
 	
-	-- ====== ГЛАВНЫЙ ЦИКЛ ======
+	-- ====== ОСНОВНОЙ ЦИКЛ ======
 	local function farmLoopFunction()
 		local char = player.Character
 		if not char then return end
@@ -2399,25 +2553,35 @@ local script = G2L["1b"];
 			return
 		end
 	
-		local container = findCoinContainer()
-		if not container then return end
+		if not coinContainer then
+			coinContainer = findCoinContainer()
+			if not coinContainer then return end
+			populateOctree()
+		end
 	
-		local coin, dist = findNearestCoin(container)
-		if not coin then return end
-	
-		-- НОКЛИП
+		-- NOCLIP
 		for _, part in pairs(char:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.CanCollide = false
 			end
 		end
 	
-		teleportToCoin(coin)
-	
-		pcall(function()
-			firetouchinterest(hrp, coin, 0)
-			firetouchinterest(hrp, coin, 1)
-		end)
+		-- ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ
+		local nearestNodes = octree:GetNearest(hrp.Position, 500, 1)
+		if #nearestNodes > 0 then
+			local coin = nearestNodes[1].object
+			if not touchedCoins[coin] and isCoinAvailable(coin) then
+				moveToCoin(coin)
+				task.wait(0.1)
+				pcall(function()
+					firetouchinterest(hrp, coin, 0)
+					firetouchinterest(hrp, coin, 1)
+				end)
+				markCoinAsTouched(coin)
+			end
+		else
+			task.wait(0.5)
+		end
 	end
 	
 	-- ====== ЗАПУСК ======
@@ -2436,10 +2600,18 @@ local script = G2L["1b"];
 			return
 		end
 	
+		coinContainer = findCoinContainer()
+		if not coinContainer then
+			print("❌ Контейнер с монетами не найден!")
+			return
+		end
+	
+		populateOctree()
+	
 		isActive = true
 		updateIndicator()
 	
-		print("🪙 Автофарм ВКЛЮЧЕН!")
+		print("🪙 Автофарм С ОКТОДЕРЕВОМ ВКЛЮЧЕН!")
 	
 		if farmLoop then
 			farmLoop:Disconnect()
@@ -2498,7 +2670,7 @@ local script = G2L["1b"];
 	end)
 	
 	updateIndicator()
-	print("✅ MM2_AutoFarm загружена!")
+	print("✅ MM2_AutoFarm загружена (с октодеревом)!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
