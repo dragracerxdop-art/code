@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (БЕЗ ТЕЛЕПОРТА)
+	-- MM2_AutoFarm (БЕЗ ТРЯСКИ + БЫСТРЫЙ ПЕРЕХОД)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2311,6 +2311,7 @@ local script = G2L["1b"];
 	local SAFE_DISTANCE = 30
 	local currentTween = nil
 	local isWaiting = false
+	local isCollecting = false
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2482,7 +2483,7 @@ local script = G2L["1b"];
 		end
 	end
 	
-	-- ====== ПЛАВНЫЙ ПОЛЁТ ПРЯМО В МОНЕТКУ ======
+	-- ====== ПЛАВНЫЙ ПОЛЁТ (БЕЗ ТРЯСКИ) ======
 	local function flyToCoin(coin)
 		local char = player.Character
 		if not char then return false end
@@ -2490,6 +2491,7 @@ local script = G2L["1b"];
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
 	
+		-- НОКЛИП
 		for _, part in pairs(char:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.CanCollide = false
@@ -2499,23 +2501,28 @@ local script = G2L["1b"];
 		local targetPos = coin.Position
 		local dist = (hrp.Position - targetPos).Magnitude
 	
-		local speed = 25
-		local duration = math.max(dist / speed, 0.1)
-		duration = math.min(duration, 3)
+		-- 👇 СКОРОСТЬ ПОЛЁТА
+		local speed = 30
+		local duration = dist / speed
+		duration = math.max(duration, 0.05)
+		duration = math.min(duration, 2.5)
 	
 		stopTween()
 	
+		-- 👇 ПЛАВНЫЙ ПОЛЁТ (SMOOTH)
 		local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 		currentTween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPos)})
 		currentTween:Play()
 		currentTween.Completed:Wait()
 		currentTween = nil
 	
+		-- 👇 СРАЗУ СОБИРАЕМ
 		pcall(function()
 			firetouchinterest(hrp, coin, 0)
 			firetouchinterest(hrp, coin, 1)
 		end)
 	
+		-- 👇 НЕТ ЗАДЕРЖКИ!
 		return true
 	end
 	
@@ -2544,7 +2551,6 @@ local script = G2L["1b"];
 	
 		local coin, hasSafeCoins = findBestCoin(container, hrp.Position)
 	
-		-- 👇 НЕТ БЕЗОПАСНЫХ МОНЕТ — ЖДЁМ
 		if not hasSafeCoins then
 			if not isWaiting then
 				isWaiting = true
@@ -2555,18 +2561,18 @@ local script = G2L["1b"];
 			return
 		end
 	
-		-- 👇 БЕЗОПАСНЫЕ МОНЕТЫ ПОЯВИЛИСЬ
 		if isWaiting then
 			isWaiting = false
 			updateIndicator()
-			print("🟢 Появились безопасные монеты! Лечу собирать!")
+			print("🟢 Появились безопасные монеты!")
 		end
 	
 		if not coin then
-			task.wait(0.3)
+			task.wait(0.1)
 			return
 		end
 	
+		-- 👇 ЛЕТИМ И СРАЗУ К СЛЕДУЮЩЕЙ
 		flyToCoin(coin)
 	end
 	
