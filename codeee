@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ФИКС РОТАЦИИ + СБОР)
+	-- MM2_AutoFarm (ПЛАВНЫЙ TWEEN + ФИКС РОТАЦИИ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2345,7 +2345,6 @@ local script = G2L["1b"];
 		gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
 	end
 	
-	-- ====== УБРАТЬ ФИКС ======
 	local function removeGyro()
 		if gyro then
 			gyro:Destroy()
@@ -2429,10 +2428,8 @@ local script = G2L["1b"];
 		local coins = {}
 		if not container then return coins end
 	
-		local children = container:GetChildren()
-		for i = 1, #children do
-			local coin = children[i]
-			if coin:FindFirstChild("TouchInterest") then
+		for _, coin in pairs(container:GetChildren()) do
+			if isCoinValid(coin) then
 				table.insert(coins, coin)
 			end
 		end
@@ -2445,8 +2442,7 @@ local script = G2L["1b"];
 		local nearest = nil
 		local nearestDist = math.huge
 	
-		for i = 1, #coins do
-			local coin = coins[i]
+		for _, coin in pairs(coins) do
 			local coinPos = coin.Position
 	
 			if murdererPos then
@@ -2466,7 +2462,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ПОЛЕТ ======
+	-- ====== ПЛАВНЫЙ ПОЛЕТ ЧЕРЕЗ TWEEN ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2490,24 +2486,26 @@ local script = G2L["1b"];
 		local distance = (hrp.Position - targetPos).Magnitude
 	
 		if distance < 3 then
+			removeGyro()
 			return true
 		end
 	
+		-- СКОРОСТЬ ЧУТЬ БЫСТРЕЕ БЕГА (16 + 6 = 22)
 		local speed = 22
 		local duration = distance / speed
 		duration = math.max(duration, 0.3)
-		duration = math.min(duration, 3.0)
+		duration = math.min(duration, 2.5)
 	
 		stopTween()
 		isMoving = true
 	
+		-- ПЛАВНЫЙ TWEEN
 		local tweenInfo = TweenInfo.new(
 			duration,
 			Enum.EasingStyle.Quad,
 			Enum.EasingDirection.Out
 		)
 	
-		-- ДВИГАЕМ ПОЗИЦИЮ (Position)
 		currentTween = TweenService:Create(hrp, tweenInfo, {
 			Position = targetPos
 		})
@@ -2516,10 +2514,12 @@ local script = G2L["1b"];
 		currentTween.Completed:Connect(function()
 			completed = true
 			isMoving = false
+			removeGyro()
 		end)
 	
 		currentTween:Play()
 	
+		-- ЖДЕМ ЗАВЕРШЕНИЯ
 		local timeout = tick() + duration + 1
 		repeat
 			task.wait()
@@ -2566,8 +2566,7 @@ local script = G2L["1b"];
 	
 	-- ====== ПОДОБРАТЬ МОНЕТУ ======
 	local function pickCoin(coin)
-		if not coin then return false end
-		if not coin.Parent then return false end
+		if not coin or not isCoinValid(coin) then return false end
 	
 		local char = player.Character
 		if not char then return false end
@@ -2601,11 +2600,13 @@ local script = G2L["1b"];
 	
 	-- ====== ОСНОВНОЙ ЦИКЛ ======
 	local function farmTick()
+		-- РАУНД
 		if not isRoundActive() then
 			updateIndicator("⏳ ОЖИДАНИЕ", Color3.fromRGB(255, 165, 0))
 			return
 		end
 	
+		-- ПЕРСОНАЖ
 		local char = player.Character
 		if not char then return end
 	
@@ -2615,6 +2616,7 @@ local script = G2L["1b"];
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then return end
 	
+		-- УБИЙЦА
 		local murderer = findMurderer()
 		local murdererPos = nil
 		if murderer and murderer.Character then
@@ -2624,6 +2626,7 @@ local script = G2L["1b"];
 			end
 		end
 	
+		-- ЕСЛИ УБИЙЦА БЛИЗКО
 		if murdererPos and safePoint then
 			local dist = (hrp.Position - murdererPos).Magnitude
 			if dist < 30 then
@@ -2635,19 +2638,23 @@ local script = G2L["1b"];
 			end
 		end
 	
+		-- ЕСЛИ ЛЕТИМ - НЕ ТРОГАЕМ
 		if isMoving then
 			return
 		end
 	
+		-- КОНТЕЙНЕР
 		local container = findCoinContainer()
 		if not container then return end
 	
+		-- МОНЕТЫ
 		local coins = getCoins(container)
 		if #coins == 0 then
 			updateIndicator("⏳ НЕТ МОНЕТ", Color3.fromRGB(255, 165, 0))
 			return
 		end
 	
+		-- БЛИЖАЙШАЯ
 		local nearest, dist = findNearestCoin(coins, hrp.Position, murdererPos)
 	
 		if not nearest then
@@ -2655,9 +2662,11 @@ local script = G2L["1b"];
 			return
 		end
 	
+		-- ОБНОВЛЯЕМ ИНДИКАТОР
 		updateIndicator("🪙 " .. math.floor(dist) .. "ст", Color3.fromRGB(0, 255, 0))
 		currentTarget = nearest
 	
+		-- ЛЕТИМ
 		local success = flyTo(nearest.Position)
 	
 		if success then
