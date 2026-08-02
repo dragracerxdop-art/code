@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (С ПРОВЕРКОЙ РАУНДА)
+	-- MM2_AutoFarm (БЫСТРЫЙ + ПРОВЕРКА РАУНДА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2309,7 +2309,6 @@ local script = G2L["1b"];
 	local murdererName = nil
 	local SAFE_DISTANCE = 30
 	local isMoving = false
-	local isWaitingForRound = false
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2325,13 +2324,8 @@ local script = G2L["1b"];
 	
 	local function updateIndicator()
 		if isActive then
-			if isWaitingForRound then
-				indicator.Text = "⏳ ОЖИДАНИЕ"
-				indicator.TextColor3 = Color3.fromRGB(255, 165, 0)
-			else
-				indicator.Text = "🟢 ФАРМ"
-				indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-			end
+			indicator.Text = "🟢 ФАРМ"
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
 		else
 			indicator.Text = "🔴 ВЫКЛ"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
@@ -2340,42 +2334,19 @@ local script = G2L["1b"];
 	
 	-- ====== ПРОВЕРКА: ИДЁТ ЛИ РАУНД ======
 	local function isRoundActive()
-		local mainGui = player:FindFirstChild("PlayerGui"):FindFirstChild("MainGUI")
+		local mainGui = player.PlayerGui:FindFirstChild("MainGUI")
 		if not mainGui then return false end
 	
 		local gameFrame = mainGui:FindFirstChild("Game")
 		if not gameFrame then return false end
 	
-		-- ПРОВЕРЯЕМ ПО ТАЙМЕРУ
 		local timer = gameFrame:FindFirstChild("Timer")
 		if timer and timer.Visible then
 			return true
 		end
 	
-		-- ПРОВЕРЯЕМ ПО ОКНУ СМЕРТИ
-		local deathScreen = mainGui:FindFirstChild("Death")
-		if deathScreen and deathScreen.Visible then
-			return false
-		end
-	
-		-- ПРОВЕРЯЕМ АТРИБУТ "Alive"
 		if player:GetAttribute("Alive") == true then
 			return true
-		end
-	
-		-- ЕСЛИ НЕТ МОНЕТ — РАУНД ЗАКОНЧИЛСЯ
-		local container = findCoinContainer()
-		if container then
-			local hasCoins = false
-			for _, coin in pairs(container:GetChildren()) do
-				if coin:IsA("BasePart") and coin.Transparency == 1 then
-					hasCoins = true
-					break
-				end
-			end
-			if not hasCoins then
-				return false
-			end
 		end
 	
 		return false
@@ -2423,7 +2394,7 @@ local script = G2L["1b"];
 		end)
 	end
 	
-	-- ====== ОБНОВЛЕНИЕ ПОЗИЦИИ УБИЙЦЫ ======
+	-- ====== ОБНОВЛЕНИЕ УБИЙЦЫ ======
 	local function updateMurdererPos()
 		if not murdererName then
 			findMurderer()
@@ -2494,7 +2465,7 @@ local script = G2L["1b"];
 		return bestCoin
 	end
 	
-	-- ====== ДВИЖЕНИЕ К МОНЕТЕ ======
+	-- ====== ДВИЖЕНИЕ К МОНЕТЕ (БЫСТРОЕ) ======
 	local function moveToCoin(coin)
 		local char = player.Character
 		if not char then return false end
@@ -2502,7 +2473,6 @@ local script = G2L["1b"];
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
 	
-		-- НОКЛИП
 		for _, part in pairs(char:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.CanCollide = false
@@ -2516,12 +2486,9 @@ local script = G2L["1b"];
 		isMoving = true
 	
 		while isActive and isMoving do
-			-- 👇 ПРОВЕРКА: РАУНД ЕЩЁ ИДЁТ?
+			-- 👇 ЛЁГКАЯ ПРОВЕРКА РАУНДА (ОДНА СТРОЧКА)
 			if not isRoundActive() then
-				print("⏳ Раунд закончился! Жду нового...")
 				isMoving = false
-				isWaitingForRound = true
-				updateIndicator()
 				return false
 			end
 	
@@ -2573,24 +2540,6 @@ local script = G2L["1b"];
 	
 	-- ====== ОСНОВНОЙ ЦИКЛ ======
 	local function farmLoopFunction()
-		-- 👇 ПРОВЕРКА: РАУНД АКТИВЕН?
-		if not isRoundActive() then
-			if not isWaitingForRound then
-				isWaitingForRound = true
-				updateIndicator()
-				print("⏳ Ожидание начала раунда...")
-			end
-			task.wait(1)
-			return
-		end
-	
-		if isWaitingForRound then
-			isWaitingForRound = false
-			updateIndicator()
-			print("🟢 Раунд начался!")
-			findMurderer()
-		end
-	
 		local char = player.Character
 		if not char then return end
 	
@@ -2609,7 +2558,7 @@ local script = G2L["1b"];
 	
 		local coin = findBestCoin(container, hrp.Position)
 		if not coin then
-			task.wait(0.5)
+			task.wait(0.3)
 			return
 		end
 	
@@ -2640,7 +2589,6 @@ local script = G2L["1b"];
 		end
 	
 		isActive = true
-		isWaitingForRound = false
 		updateIndicator()
 	
 		print("🪙 Автофарм ВКЛЮЧЕН!")
@@ -2665,7 +2613,6 @@ local script = G2L["1b"];
 	-- ====== ОСТАНОВКА ======
 	local function stopFarming()
 		isActive = false
-		isWaitingForRound = false
 		updateIndicator()
 	
 		if farmLoop then
@@ -2705,7 +2652,7 @@ local script = G2L["1b"];
 	end)
 	
 	updateIndicator()
-	print("✅ MM2_AutoFarm загружена (с проверкой раунда)!")
+	print("✅ MM2_AutoFarm загружена (БЫСТРАЯ ВЕРСИЯ)!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
