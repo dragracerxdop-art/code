@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (МГНОВЕННАЯ ПРОВЕРКА)
+	-- MM2_AutoFarm (ФИКС ВЕРТИКАЛИ + СКОРОСТЬ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2388,23 +2388,21 @@ local script = G2L["1b"];
 		return nil
 	end
 	
-	-- ====== ПРОВЕРКА МОНЕТЫ (БЫСТРАЯ) ======
+	-- ====== ПРОВЕРКА МОНЕТЫ ======
 	local function isCoinValid(coin)
 		if not coin then return false end
 		if not coin.Parent then return false end
-		-- ПРОВЕРЯЕМ ТОЛЬКО TouchInterest
 		if coin:FindFirstChild("TouchInterest") then
 			return true
 		end
 		return false
 	end
 	
-	-- ====== ПОЛУЧИТЬ ВСЕ МОНЕТЫ (БЫСТРО) ======
+	-- ====== ПОЛУЧИТЬ ВСЕ МОНЕТЫ ======
 	local function getCoins(container)
 		local coins = {}
 		if not container then return coins end
 	
-		-- ПРЯМОЙ ПЕРЕБОР БЕЗ ЛИШНИХ ПРОВЕРОК
 		local children = container:GetChildren()
 		for i = 1, #children do
 			local coin = children[i]
@@ -2442,7 +2440,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ПЛАВНЫЙ ПОЛЕТ ======
+	-- ====== ПОЛЕТ С ФИКСИРОВАННОЙ ВЕРТИКАЛЬЮ ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2466,13 +2464,18 @@ local script = G2L["1b"];
 			return true
 		end
 	
-		local speed = 45
+		-- СКОРОСТЬ КАК БЕГ (16) + НЕМНОГО БЫСТРЕЕ
+		local speed = 22
 		local duration = distance / speed
 		duration = math.max(duration, 0.3)
-		duration = math.min(duration, 2.5)
+		duration = math.min(duration, 3.0)
 	
 		stopTween()
 		isMoving = true
+	
+		-- ФИКСИРУЕМ ВЕРТИКАЛЬ (СТОИМ ПРЯМО)
+		local currentCFrame = hrp.CFrame
+		local targetCFrame = CFrame.new(targetPos) * CFrame.Angles(0, currentCFrame.Yaw, 0)
 	
 		local tweenInfo = TweenInfo.new(
 			duration,
@@ -2480,8 +2483,9 @@ local script = G2L["1b"];
 			Enum.EasingDirection.Out
 		)
 	
+		-- ДВИГАЕМ CFrame, А НЕ Position (ЧТОБЫ НЕ ПЕРЕКРУЧИВАЛО)
 		currentTween = TweenService:Create(hrp, tweenInfo, {
-			Position = targetPos
+			CFrame = targetCFrame
 		})
 	
 		local completed = false
@@ -2561,15 +2565,13 @@ local script = G2L["1b"];
 		flyTo(safePoint)
 	end
 	
-	-- ====== ОСНОВНОЙ ЦИКЛ (МАКСИМАЛЬНО БЫСТРЫЙ) ======
+	-- ====== ОСНОВНОЙ ЦИКЛ ======
 	local function farmTick()
-		-- РАУНД
 		if not isRoundActive() then
 			updateIndicator("⏳ ОЖИДАНИЕ", Color3.fromRGB(255, 165, 0))
 			return
 		end
 	
-		-- ПЕРСОНАЖ
 		local char = player.Character
 		if not char then return end
 	
@@ -2579,7 +2581,6 @@ local script = G2L["1b"];
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then return end
 	
-		-- УБИЙЦА
 		local murderer = findMurderer()
 		local murdererPos = nil
 		if murderer and murderer.Character then
@@ -2589,7 +2590,6 @@ local script = G2L["1b"];
 			end
 		end
 	
-		-- ЕСЛИ УБИЙЦА БЛИЗКО
 		if murdererPos and safePoint then
 			local dist = (hrp.Position - murdererPos).Magnitude
 			if dist < 30 then
@@ -2601,23 +2601,19 @@ local script = G2L["1b"];
 			end
 		end
 	
-		-- ЕСЛИ ЛЕТИМ - НЕ ТРОГАЕМ
 		if isMoving then
 			return
 		end
 	
-		-- КОНТЕЙНЕР
 		local container = findCoinContainer()
 		if not container then return end
 	
-		-- МОНЕТЫ (БЫСТРО)
 		local coins = getCoins(container)
 		if #coins == 0 then
 			updateIndicator("⏳ НЕТ МОНЕТ", Color3.fromRGB(255, 165, 0))
 			return
 		end
 	
-		-- БЛИЖАЙШАЯ (БЫСТРО)
 		local nearest, dist = findNearestCoin(coins, hrp.Position, murdererPos)
 	
 		if not nearest then
@@ -2625,17 +2621,14 @@ local script = G2L["1b"];
 			return
 		end
 	
-		-- ОБНОВЛЯЕМ ИНДИКАТОР
 		updateIndicator("🪙 " .. math.floor(dist) .. "ст", Color3.fromRGB(0, 255, 0))
 		currentTarget = nearest
 	
-		-- ЛЕТИМ
 		local success = flyTo(nearest.Position)
 	
 		if success then
 			pickCoin(nearest)
 			currentTarget = nil
-			-- МГНОВЕННО ПЕРЕХОДИМ К СЛЕДУЮЩЕЙ
 		end
 	end
 	
