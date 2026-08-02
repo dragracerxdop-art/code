@@ -2295,21 +2295,20 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ПЛАВНЫЙ TWEEN + ФИКС РОТАЦИИ)
+	-- MM2_AutoFarm (БЕЗ CFrame - ТОЛЬКО VELOCITY)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
-	local TweenService = game:GetService("TweenService")
 	
 	local isActive = false
 	local farmConnection = nil
 	local safePoint = nil
 	local currentTarget = nil
-	local currentTween = nil
 	local isMoving = false
-	local gyro = nil
+	local bodyVelocity = nil
+	local bodyGyro = nil
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2328,35 +2327,47 @@ local script = G2L["1b"];
 		indicator.TextColor3 = color or Color3.fromRGB(255, 0, 0)
 	end
 	
-	-- ====== ФИКС РОТАЦИИ ======
-	local function fixRotation(char)
-		if not char then return end
-		local hrp = char:FindFirstChild("HumanoidRootPart")
+	-- ====== СОЗДАТЬ BODYGYRO ДЛЯ ФИКСА ВЕРТИКАЛИ ======
+	local function createGyro(hrp)
 		if not hrp then return end
+		if bodyGyro then return end
 	
-		if not gyro then
-			gyro = Instance.new("BodyGyro")
-			gyro.Parent = hrp
-			gyro.D = 500
-			gyro.P = 5000
-			gyro.MaxTorque = Vector3.new(4000, 4000, 4000)
-		end
-	
-		gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
+		bodyGyro = Instance.new("BodyGyro")
+		bodyGyro.Parent = hrp
+		bodyGyro.D = 500
+		bodyGyro.P = 5000
+		bodyGyro.MaxTorque = Vector3.new(4000, 4000, 4000)
+		bodyGyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
 	end
 	
 	local function removeGyro()
-		if gyro then
-			gyro:Destroy()
-			gyro = nil
+		if bodyGyro then
+			pcall(function() bodyGyro:Destroy() end)
+			bodyGyro = nil
 		end
 	end
 	
-	-- ====== ОСТАНОВКА ТВИНА ======
-	local function stopTween()
-		if currentTween then
-			pcall(function() currentTween:Cancel() end)
-			currentTween = nil
+	-- ====== СОЗДАТЬ BODYVELOCITY ДЛЯ ДВИЖЕНИЯ ======
+	local function createVelocity(hrp)
+		if not hrp then return end
+		if bodyVelocity then return end
+	
+		bodyVelocity = Instance.new("BodyVelocity")
+		bodyVelocity.Parent = hrp
+		bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
+	end
+	
+	local function removeVelocity()
+		if bodyVelocity then
+			pcall(function() bodyVelocity:Destroy() end)
+			bodyVelocity = nil
+		end
+	end
+	
+	-- ====== ОСТАНОВКА ДВИЖЕНИЯ ======
+	local function stopMoving()
+		if bodyVelocity then
+			bodyVelocity.Velocity = Vector3.zero
 		end
 		isMoving = false
 	end
@@ -2462,7 +2473,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ПЛАВНЫЙ ПОЛЕТ ЧЕРЕЗ TWEEN ======
+	-- ====== ДВИЖЕНИЕ ЧЕРЕЗ VELOCITY ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2480,70 +2491,58 @@ local script = G2L["1b"];
 			end
 		end
 	
-		-- ФИКС РОТАЦИИ
-		fixRotation(char)
+		-- ФИКС ВЕРТИКАЛИ
+		createGyro(hrp)
+	
+		-- ВЕЛОСИТИ ДЛЯ ДВИЖЕНИЯ
+		createVelocity(hrp)
 	
 		local distance = (hrp.Position - targetPos).Magnitude
 	
 		if distance < 3 then
-			removeGyro()
+			stopMoving()
 			return true
 		end
 	
-		-- СКОРОСТЬ ЧУТЬ БЫСТРЕЕ БЕГА (16 + 6 = 22)
+		-- СКОРОСТЬ
 		local speed = 22
-		local duration = distance / speed
-		duration = math.max(duration, 0.3)
-		duration = math.min(duration, 2.5)
+		local direction = (targetPos - hrp.Position).Unit
 	
-		stopTween()
+		-- СТАВИМ СКОРОСТЬ
+		bodyVelocity.Velocity = direction * speed
+	
 		isMoving = true
 	
-		-- ПЛАВНЫЙ TWEEN
-		local tweenInfo = TweenInfo.new(
-			duration,
-			Enum.EasingStyle.Quad,
-			Enum.EasingDirection.Out
-		)
-	
-		currentTween = TweenService:Create(hrp, tweenInfo, {
-			Position = targetPos
-		})
-	
-		local completed = false
-		currentTween.Completed:Connect(function()
-			completed = true
-			isMoving = false
-			removeGyro()
-		end)
-	
-		currentTween:Play()
-	
-		-- ЖДЕМ ЗАВЕРШЕНИЯ
-		local timeout = tick() + duration + 1
+		-- ЖДЕМ ПОКА ДОЛЕТИМ
+		local timeout = tick() + distance / speed + 1
 		repeat
 			task.wait()
 	
-			-- ОБНОВЛЯЕМ ФИКС РОТАЦИИ
-			if gyro then
-				gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
+			-- ОБНОВЛЯЕМ GYRO
+			if bodyGyro then
+				bodyGyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
+			end
+	
+			-- ПРОВЕРЯЕМ ПРИБЛИЖЕНИЕ
+			local currentDist = (hrp.Position - targetPos).Magnitude
+	
+			if currentDist < 3 then
+				stopMoving()
+				return true
 			end
 	
 			if humanoid.Health <= 0 then
-				stopTween()
-				removeGyro()
+				stopMoving()
 				return false
 			end
 	
 			if currentTarget and not isCoinValid(currentTarget) then
-				stopTween()
-				removeGyro()
+				stopMoving()
 				return false
 			end
 	
 			if hrp.Position.Y < -30 then
-				stopTween()
-				removeGyro()
+				stopMoving()
 				if safePoint then
 					hrp.CFrame = CFrame.new(safePoint)
 				end
@@ -2551,16 +2550,16 @@ local script = G2L["1b"];
 			end
 	
 			if tick() > timeout then
-				stopTween()
-				removeGyro()
+				stopMoving()
 				return false
 			end
 	
-		until completed == true
+			-- КОРРЕКТИРУЕМ НАПРАВЛЕНИЕ
+			local newDir = (targetPos - hrp.Position).Unit
+			bodyVelocity.Velocity = newDir * speed
 	
-		currentTween = nil
-		isMoving = false
-		removeGyro()
+		until false
+	
 		return true
 	end
 	
@@ -2600,13 +2599,11 @@ local script = G2L["1b"];
 	
 	-- ====== ОСНОВНОЙ ЦИКЛ ======
 	local function farmTick()
-		-- РАУНД
 		if not isRoundActive() then
 			updateIndicator("⏳ ОЖИДАНИЕ", Color3.fromRGB(255, 165, 0))
 			return
 		end
 	
-		-- ПЕРСОНАЖ
 		local char = player.Character
 		if not char then return end
 	
@@ -2616,7 +2613,10 @@ local script = G2L["1b"];
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then return end
 	
-		-- УБИЙЦА
+		if bodyGyro then
+			bodyGyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
+		end
+	
 		local murderer = findMurderer()
 		local murdererPos = nil
 		if murderer and murderer.Character then
@@ -2626,7 +2626,6 @@ local script = G2L["1b"];
 			end
 		end
 	
-		-- ЕСЛИ УБИЙЦА БЛИЗКО
 		if murdererPos and safePoint then
 			local dist = (hrp.Position - murdererPos).Magnitude
 			if dist < 30 then
@@ -2638,23 +2637,19 @@ local script = G2L["1b"];
 			end
 		end
 	
-		-- ЕСЛИ ЛЕТИМ - НЕ ТРОГАЕМ
 		if isMoving then
 			return
 		end
 	
-		-- КОНТЕЙНЕР
 		local container = findCoinContainer()
 		if not container then return end
 	
-		-- МОНЕТЫ
 		local coins = getCoins(container)
 		if #coins == 0 then
 			updateIndicator("⏳ НЕТ МОНЕТ", Color3.fromRGB(255, 165, 0))
 			return
 		end
 	
-		-- БЛИЖАЙШАЯ
 		local nearest, dist = findNearestCoin(coins, hrp.Position, murdererPos)
 	
 		if not nearest then
@@ -2662,11 +2657,9 @@ local script = G2L["1b"];
 			return
 		end
 	
-		-- ОБНОВЛЯЕМ ИНДИКАТОР
 		updateIndicator("🪙 " .. math.floor(dist) .. "ст", Color3.fromRGB(0, 255, 0))
 		currentTarget = nearest
 	
-		-- ЛЕТИМ
 		local success = flyTo(nearest.Position)
 	
 		if success then
@@ -2717,8 +2710,9 @@ local script = G2L["1b"];
 			farmConnection = nil
 		end
 	
-		stopTween()
+		stopMoving()
 		removeGyro()
+		removeVelocity()
 	
 		local char = player.Character
 		if char then
