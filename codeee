@@ -2325,7 +2325,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (МЕДЛЕННАЯ СКОРОСТЬ)
+	-- MM2_AutoFarm (ФИКС ДЕРГАНИЯ + СКОРОСТЬ 20)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2507,7 +2507,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== МЕДЛЕННЫЙ ПОЛЕТ ======
+	-- ====== ПОЛЕТ (БЕЗ ДЕРГАНИЯ) ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2523,15 +2523,16 @@ local script = G2L["1b"];
 	
 		local distance = (hrp.Position - targetPos).Magnitude
 	
-		if distance < 3 then
+		-- ЕСЛИ УЖЕ БЛИЗКО - НЕ ДВИГАЕМ
+		if distance < 5 then
 			return true
 		end
 	
-		-- МЕДЛЕННАЯ СКОРОСТЬ (16 - КАК БЕГ)
-		local speed = 16
+		-- СКОРОСТЬ 20
+		local speed = 20
 		local duration = distance / speed
-		duration = math.max(duration, 0.5)
-		duration = math.min(duration, 4.0)
+		duration = math.max(duration, 0.3)
+		duration = math.min(duration, 3.0)
 	
 		stopTween()
 		isMoving = true
@@ -2542,8 +2543,9 @@ local script = G2L["1b"];
 			Enum.EasingDirection.Out
 		)
 	
+		-- ДВИГАЕМ POSITION, А НЕ CFrame (ЧТОБЫ НЕ ДЕРГАЛО)
 		currentTween = TweenService:Create(hrp, tweenInfo, {
-			CFrame = CFrame.new(targetPos)
+			Position = targetPos
 		})
 	
 		local completed = false
@@ -2560,6 +2562,13 @@ local script = G2L["1b"];
 	
 			if gyro then
 				gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
+			end
+	
+			-- ПРОВЕРЯЕМ ДИСТАНЦИЮ В ЦИКЛЕ
+			local currentDist = (hrp.Position - targetPos).Magnitude
+			if currentDist < 5 then
+				stopTween()
+				return true
 			end
 	
 			if humanoid.Health <= 0 then
