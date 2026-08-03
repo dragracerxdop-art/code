@@ -7566,66 +7566,27 @@ task.spawn(C_e6);
 local function C_ea()
 local script = G2L["ea"];
 	-- ==========================================
-	-- NOCLIP TOGGLE (ДЛЯ IMAGEBUTTON 149x73)
+	-- NOCLIP TOGGLE (ПРОСТАЯ ВЕРСИЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	
 	local noclipActive = false
 	local noclipConnection = nil
-	local character = nil
 	
-	-- УДАЛЯЕМ СТАРЫЙ ИНДИКАТОР ЕСЛИ ЕСТЬ
+	-- ====== УДАЛЯЕМ ВСЕ ЛИШНИЕ ИНДИКАТОРЫ ======
 	local oldIndicator = button:FindFirstChild("Indicator")
 	if oldIndicator then oldIndicator:Destroy() end
-	
-	-- ====== ИНДИКАТОР В БЛЭК ФРЭЙМЕ СПРАВА ======
-	local indicatorFrame = Instance.new("Frame")
-	indicatorFrame.Name = "IndicatorFrame"
-	indicatorFrame.Size = UDim2.new(0, 40, 1, 0)
-	indicatorFrame.Position = UDim2.new(1, 5, 0, 0)
-	indicatorFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	indicatorFrame.BackgroundTransparency = 0.7
-	indicatorFrame.BorderSizePixel = 0
-	indicatorFrame.Parent = button
-	
-	local indicator = Instance.new("TextLabel")
-	indicator.Name = "Indicator"
-	indicator.Size = UDim2.new(1, 0, 1, 0)
-	indicator.Position = UDim2.new(0, 0, 0, 0)
-	indicator.BackgroundTransparency = 1
-	indicator.Text = "❌"
-	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-	indicator.TextSize = 20
-	indicator.Font = Enum.Font.SourceSansBold
-	indicator.Parent = indicatorFrame
-	
-	local indicatorText = Instance.new("TextLabel")
-	indicatorText.Name = "IndicatorText"
-	indicatorText.Size = UDim2.new(1, 0, 0, 12)
-	indicatorText.Position = UDim2.new(0, 0, 1, 0)
-	indicatorText.BackgroundTransparency = 1
-	indicatorText.Text = "OFF"
-	indicatorText.TextColor3 = Color3.fromRGB(255, 0, 0)
-	indicatorText.TextSize = 10
-	indicatorText.Font = Enum.Font.SourceSansBold
-	indicatorText.Parent = indicatorFrame
-	
-	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
-	local function updateIndicator(icon, text, color)
-		indicator.Text = icon
-		indicator.TextColor3 = color or Color3.fromRGB(255, 0, 0)
-		indicatorText.Text = text
-		indicatorText.TextColor3 = color or Color3.fromRGB(255, 0, 0)
-	end
+	local oldFrame = button:FindFirstChild("IndicatorFrame")
+	if oldFrame then oldFrame:Destroy() end
 	
 	-- ====== ФУНКЦИЯ ВКЛ/ВЫКЛ ======
 	local function toggleNoclip()
 		noclipActive = not noclipActive
 	
 		if noclipActive then
-			button.ImageColor3 = Color3.fromRGB(50, 200, 50)
-			updateIndicator("✅", "ON", Color3.fromRGB(0, 255, 0))
+			button.Text = "NOCLIP ✅"
+			button.ImageColor3 = Color3.fromRGB(0, 255, 0)
 			print("🔓 NOCLIP ВКЛЮЧЕН!")
 	
 			if noclipConnection then
@@ -7635,10 +7596,10 @@ local script = G2L["ea"];
 	
 			noclipConnection = game:GetService("RunService").Stepped:Connect(function()
 				if noclipActive then
-					character = player.Character
-					if character then
-						for _, part in pairs(character:GetDescendants()) do
-							if part:IsA("BasePart") and part.CanCollide then
+					local char = player.Character
+					if char then
+						for _, part in pairs(char:GetDescendants()) do
+							if part:IsA("BasePart") then
 								part.CanCollide = false
 							end
 						end
@@ -7647,8 +7608,8 @@ local script = G2L["ea"];
 			end)
 	
 		else
-			button.ImageColor3 = Color3.fromRGB(200, 50, 50)
-			updateIndicator("❌", "OFF", Color3.fromRGB(255, 0, 0))
+			button.Text = "NOCLIP ❌"
+			button.ImageColor3 = Color3.fromRGB(255, 0, 0)
 			print("🔒 NOCLIP ВЫКЛЮЧЕН!")
 	
 			if noclipConnection then
@@ -7656,9 +7617,9 @@ local script = G2L["ea"];
 				noclipConnection = nil
 			end
 	
-			character = player.Character
-			if character then
-				for _, part in pairs(character:GetDescendants()) do
+			local char = player.Character
+			if char then
+				for _, part in pairs(char:GetDescendants()) do
 					if part:IsA("BasePart") then
 						part.CanCollide = true
 					end
@@ -7674,9 +7635,9 @@ local script = G2L["ea"];
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
 		if noclipActive then
-			character = player.Character
-			if character then
-				for _, part in pairs(character:GetDescendants()) do
+			local char = player.Character
+			if char then
+				for _, part in pairs(char:GetDescendants()) do
 					if part:IsA("BasePart") then
 						part.CanCollide = false
 					end
@@ -7686,8 +7647,8 @@ local script = G2L["ea"];
 	end)
 	
 	-- СТАРТ
-	button.ImageColor3 = Color3.fromRGB(200, 50, 50)
-	updateIndicator("❌", "OFF", Color3.fromRGB(255, 0, 0))
+	button.Text = "NOCLIP ❌"
+	button.ImageColor3 = Color3.fromRGB(255, 0, 0)
 	
 	print("✅ NOCLIP ЗАГРУЖЕНА!")
 end;
