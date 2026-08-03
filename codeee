@@ -2325,7 +2325,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ЗАЩИТА ОТ ВЫЛЕТА)
+	-- MM2_AutoFarm (РАБОЧАЯ ВЕРСИЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2458,7 +2458,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ПОЛЕТ С ЗАЩИТОЙ ======
+	-- ====== ПОЛЕТ ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2469,17 +2469,12 @@ local script = G2L["1b"];
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then return false end
 	
-		-- ЗАЩИТА - НЕ ЛЕТИМ СЛИШКОМ ДАЛЕКО
 		local distance = (hrp.Position - targetPos).Magnitude
-		if distance > 500 then
-			return false
-		end
 	
 		if distance < 5 then
 			return true
 		end
 	
-		-- СКОРОСТЬ 22
 		local speed = 22
 		local duration = distance / speed
 		duration = math.max(duration, 0.2)
@@ -2509,23 +2504,6 @@ local script = G2L["1b"];
 		local timeout = tick() + duration + 1
 		repeat
 			task.wait()
-	
-			-- ЗАЩИТА ОТ ВЫЛЕТА ЗА КАРТУ
-			if hrp.Position.Y < -5 then
-				stopTween()
-				if safePoint then
-					hrp.CFrame = CFrame.new(safePoint)
-				end
-				return false
-			end
-	
-			if math.abs(hrp.Position.X) > 300 or math.abs(hrp.Position.Z) > 300 then
-				stopTween()
-				if safePoint then
-					hrp.CFrame = CFrame.new(safePoint)
-				end
-				return false
-			end
 	
 			if humanoid.Health <= 0 then
 				stopTween()
@@ -2590,14 +2568,6 @@ local script = G2L["1b"];
 	
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then return end
-	
-		-- ПРОВЕРКА - НЕ В ЛОББИ
-		if hrp.Position.Y < -5 or math.abs(hrp.Position.X) > 200 or math.abs(hrp.Position.Z) > 200 then
-			if safePoint then
-				hrp.CFrame = CFrame.new(safePoint)
-			end
-			return
-		end
 	
 		local murderer = findMurderer()
 		local murdererPos = nil
