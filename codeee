@@ -7575,7 +7575,7 @@ local script = G2L["ea"];
 	local noclipActive = false
 	local noclipConnection = nil
 	
-	-- ====== УДАЛЯЕМ ВСЕ СТАРЫЕ ДЕТИ ======
+	-- ====== УДАЛЯЕМ ВСЕ ЛИШНИЕ ДЕТИ ======
 	for _, child in pairs(button:GetChildren()) do
 		child:Destroy()
 	end
@@ -7583,7 +7583,7 @@ local script = G2L["ea"];
 	-- ====== ТЕКСТ НА КНОПКЕ (TextLabel поверх ImageButton) ======
 	local textLabel = Instance.new("TextLabel")
 	textLabel.Name = "TextLabel"
-	textLabel.Size = UDim2.new(1, 0, 0.6, 0)
+	textLabel.Size = UDim2.new(1, 0, 0.55, 0)
 	textLabel.Position = UDim2.new(0, 0, 0, 0)
 	textLabel.BackgroundTransparency = 1
 	textLabel.Text = "NOCLIP"
@@ -7593,10 +7593,10 @@ local script = G2L["ea"];
 	textLabel.ZIndex = 2
 	textLabel.Parent = button
 	
-	-- ====== ИНДИКАТОР СНИЗУ ======
+	-- ====== ИНДИКАТОР СНИЗУ (TextLabel) ======
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
-	indicator.Size = UDim2.new(1, 0, 0.4, 0)
+	indicator.Size = UDim2.new(1, 0, 0.3, 0)
 	indicator.Position = UDim2.new(0, 0, 0.6, 0)
 	indicator.BackgroundTransparency = 1
 	indicator.Text = "OFF"
@@ -7609,11 +7609,11 @@ local script = G2L["ea"];
 	-- ====== ОБНОВЛЕНИЕ UI ======
 	local function updateUI()
 		if noclipActive then
-			indicator.Text = "ON ✅"
+			indicator.Text = "ON"
 			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
 			button.ImageColor3 = Color3.fromRGB(50, 200, 50)
 		else
-			indicator.Text = "OFF ❌"
+			indicator.Text = "OFF"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 			button.ImageColor3 = Color3.fromRGB(200, 50, 50)
 		end
