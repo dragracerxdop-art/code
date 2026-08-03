@@ -4797,7 +4797,7 @@ task.spawn(C_7b);
 local function C_7f()
 local script = G2L["7f"];
 	-- ==========================================
-	-- MM2_ESP (ПОДСВЕТКА ИГРОКОВ ПО РОЛЯМ)
+	-- MM2_ESP (РАБОЧАЯ ВЕРСИЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -4811,7 +4811,7 @@ local script = G2L["7f"];
 	local Sheriff = ""
 	local Hero = ""
 	
-	-- Индикатор
+	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
 	indicator.Size = UDim2.new(1, 0, 0.3, 0)
@@ -4869,18 +4869,22 @@ local script = G2L["7f"];
 		return false
 	end
 	
-	-- ===== СОЗДАНИЕ/ОБНОВЛЕНИЕ ПОДСВЕТКИ =====
-	local function updateESP()
-		if not isEnabled then
-			-- Удаляем все подсветки
-			for _, plr in pairs(game.Players:GetPlayers()) do
-				if plr.Character then
-					local highlight = plr.Character:FindFirstChild("MM2Highlight")
-					if highlight then
-						highlight:Destroy()
-					end
+	-- ===== УДАЛЕНИЕ ВСЕХ ПОДСВЕТОК =====
+	local function removeAllHighlights()
+		for _, plr in pairs(game.Players:GetPlayers()) do
+			if plr.Character then
+				local highlight = plr.Character:FindFirstChild("MM2Highlight")
+				if highlight then
+					highlight:Destroy()
 				end
 			end
+		end
+	end
+	
+	-- ===== ОБНОВЛЕНИЕ ESP =====
+	local function updateESP()
+		if not isEnabled then
+			removeAllHighlights()
 			return
 		end
 	
@@ -4903,16 +4907,28 @@ local script = G2L["7f"];
 	
 			if plr.Name == Murder and alive then
 				highlight.FillColor = Color3.fromRGB(255, 0, 0)  -- Красный (маньяк)
+				highlight.FillTransparency = 0.5
 			elseif plr.Name == Sheriff and alive then
 				highlight.FillColor = Color3.fromRGB(0, 0, 255)  -- Синий (шериф)
+				highlight.FillTransparency = 0.5
 			elseif plr.Name == Hero and alive and not isAlive(Sheriff) then
 				highlight.FillColor = Color3.fromRGB(255, 255, 0)  -- Жёлтый (герой)
+				highlight.FillTransparency = 0.5
 			elseif alive then
 				highlight.FillColor = Color3.fromRGB(0, 255, 0)  -- Зелёный (невинный)
+				highlight.FillTransparency = 0.5
 			else
 				highlight.FillColor = Color3.fromRGB(100, 100, 100)  -- Серый (мёртвый)
 				highlight.FillTransparency = 0.7
 			end
+		end
+	end
+	
+	-- ===== СОБЫТИЕ ПРИ ДОБАВЛЕНИИ ПЕРСОНАЖА =====
+	local function onCharacterAdded(plr)
+		if isEnabled and plr.Character then
+			task.wait(0.1)
+			updateESP()
 		end
 	end
 	
@@ -4928,21 +4944,38 @@ local script = G2L["7f"];
 			end
 			espLoop = runService.RenderStepped:Connect(updateESP)
 			updateESP()
-			print("🟣 MM2 ESP включён!")
+			print("🟣 MM2 ESP ВКЛЮЧЁН!")
 		else
 			if espLoop then
 				espLoop:Disconnect()
 				espLoop = nil
 			end
-			updateESP()
-			print("🟣 MM2 ESP выключен!")
+			removeAllHighlights()
+			print("🟣 MM2 ESP ВЫКЛЮЧЕН!")
 		end
 	end
 	
+	-- ===== КЛИК ПО КНОПКЕ =====
 	button.MouseButton1Click:Connect(toggleESP)
 	
+	-- ===== ПРИ ДОБАВЛЕНИИ НОВОГО ИГРОКА =====
+	game.Players.PlayerAdded:Connect(function(plr)
+		plr.CharacterAdded:Connect(function()
+			onCharacterAdded(plr)
+		end)
+	end)
+	
+	-- ===== ПРИ ДОБАВЛЕНИИ ПЕРСОНАЖА У СУЩЕСТВУЮЩИХ =====
+	for _, plr in pairs(game.Players:GetPlayers()) do
+		if plr ~= player then
+			plr.CharacterAdded:Connect(function()
+				onCharacterAdded(plr)
+			end)
+		end
+	end
+	
 	updateState()
-	print("✅ MM2_ESP загружена!")
+	print("✅ MM2_ESP ЗАГРУЖЕНА!")
 end;
 task.spawn(C_7f);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_GunESP.LocalScript
@@ -7533,7 +7566,7 @@ task.spawn(C_e6);
 local function C_ea()
 local script = G2L["ea"];
 	-- ==========================================
-	-- NOCLIP TOGGLE (РАЗЪЕБИСТАЯ ВЕРСИЯ)
+	-- NOCLIP TOGGLE (РАБОЧАЯ КНОПКА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -7542,22 +7575,20 @@ local script = G2L["ea"];
 	local noclipConnection = nil
 	local character = nil
 	
-	-- ====== ИНДИКАТОР ======
+	-- ====== ИНДИКАТОР (СВЕРХУ КНОПКИ, НЕ ПЕРЕКРЫВАЕТ) ======
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
-	indicator.Size = UDim2.new(1, 0, 0.3, 0)
-	indicator.Position = UDim2.new(0, 0, 0.7, 0)
+	indicator.Size = UDim2.new(0, 80, 0, 20)
+	indicator.Position = UDim2.new(0, -85, 0.5, -10)
 	indicator.BackgroundTransparency = 1
-	indicator.Text = "ВЫКЛ"
+	indicator.Text = "🚫"
 	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-	indicator.TextSize = 14
+	indicator.TextSize = 18
 	indicator.Font = Enum.Font.SourceSansBold
 	indicator.Parent = button
 	
-	local function updateIndicator(text, color)
-		indicator.Text = text
-		indicator.TextColor3 = color or Color3.fromRGB(255, 0, 0)
-	end
+	-- ====== ТЕКСТ НА КНОПКЕ ======
+	button.Text = "NOCLIP"
 	
 	-- ====== ФУНКЦИЯ ВКЛ/ВЫКЛ ======
 	local function toggleNoclip()
@@ -7565,12 +7596,12 @@ local script = G2L["ea"];
 	
 		if noclipActive then
 			-- ВКЛЮЧАЕМ
-			button.Text = "NOCLIP: 🚀"
+			button.Text = "NOCLIP ✅"
 			button.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
-			updateIndicator("✅ ПОШЕЛ НАХУЙ", Color3.fromRGB(0, 255, 0))
+			indicator.Text = "🔓"
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
 			print("🔓 NOCLIP ВКЛЮЧЕН!")
 	
-			-- ЗАПУСКАЕМ ЦИКЛ
 			if noclipConnection then
 				noclipConnection:Disconnect()
 				noclipConnection = nil
@@ -7591,18 +7622,17 @@ local script = G2L["ea"];
 	
 		else
 			-- ВЫКЛЮЧАЕМ
-			button.Text = "NOCLIP: 🚫"
+			button.Text = "NOCLIP ❌"
 			button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-			updateIndicator("❌ ИДЕМ ВМЕСТЕ", Color3.fromRGB(255, 0, 0))
+			indicator.Text = "🔒"
+			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 			print("🔒 NOCLIP ВЫКЛЮЧЕН!")
 	
-			-- ОТКЛЮЧАЕМ ЦИКЛ
 			if noclipConnection then
 				noclipConnection:Disconnect()
 				noclipConnection = nil
 			end
 	
-			-- ВКЛЮЧАЕМ КОЛЛИЗИИ ОБРАТНО
 			character = player.Character
 			if character then
 				for _, part in pairs(character:GetDescendants()) do
@@ -7614,7 +7644,7 @@ local script = G2L["ea"];
 		end
 	end
 	
-	-- ====== КНОПКА ======
+	-- ====== КЛИК ПО КНОПКЕ ======
 	button.MouseButton1Click:Connect(toggleNoclip)
 	
 	-- ====== ПРИ РЕСПАВНЕ ======
@@ -7632,10 +7662,11 @@ local script = G2L["ea"];
 		end
 	end)
 	
-	-- ====== СТАРТОВЫЙ ИНДИКАТОР ======
-	updateIndicator("❌ ИДЕМ ВМЕСТЕ", Color3.fromRGB(255, 0, 0))
-	button.Text = "NOCLIP: 🚫"
+	-- СТАРТ
+	button.Text = "NOCLIP ❌"
 	button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+	indicator.Text = "🔒"
+	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 	
 	print("✅ NOCLIP ЗАГРУЖЕНА!")
 end;
