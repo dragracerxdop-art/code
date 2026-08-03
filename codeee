@@ -7566,7 +7566,7 @@ task.spawn(C_e6);
 local function C_ea()
 local script = G2L["ea"];
 	-- ==========================================
-	-- NOCLIP TOGGLE (ДЛЯ IMAGEBUTTON)
+	-- NOCLIP TOGGLE (ТОЛЬКО ВКЛ/ВЫКЛ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -7580,7 +7580,7 @@ local script = G2L["ea"];
 		child:Destroy()
 	end
 	
-	-- ====== ИНДИКАТОР (ВНУТРИ КНОПКИ) ======
+	-- ====== ИНДИКАТОР (ПО ВСЕЙ КНОПКЕ) ======
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
 	indicator.Size = UDim2.new(1, 0, 1, 0)
@@ -7593,7 +7593,7 @@ local script = G2L["ea"];
 	indicator.ZIndex = 2
 	indicator.Parent = button
 	
-	-- ====== ОБНОВЛЕНИЕ UI ======
+	-- ====== ОБНОВЛЕНИЕ ======
 	local function updateUI()
 		if noclipActive then
 			indicator.Text = "ВКЛ"
@@ -7606,65 +7606,43 @@ local script = G2L["ea"];
 		end
 	end
 	
-	-- ====== ВКЛ ======
-	local function enableNoclip()
-		noclipActive = true
+	-- ====== ТОГГЛ ======
+	local function toggleNoclip()
+		noclipActive = not noclipActive
 		updateUI()
-		print("🔓 NOCLIP ВКЛЮЧЕН!")
 	
-		if noclipConnection then
-			noclipConnection:Disconnect()
-			noclipConnection = nil
-		end
-	
-		noclipConnection = RunService.Stepped:Connect(function()
-			if noclipActive then
-				local char = player.Character
-				if char then
-					for _, part in pairs(char:GetDescendants()) do
-						if part:IsA("BasePart") then
-							part.CanCollide = false
+		if noclipActive then
+			if noclipConnection then noclipConnection:Disconnect() end
+			noclipConnection = RunService.Stepped:Connect(function()
+				if noclipActive then
+					local char = player.Character
+					if char then
+						for _, part in pairs(char:GetDescendants()) do
+							if part:IsA("BasePart") then
+								part.CanCollide = false
+							end
 						end
 					end
 				end
+			end)
+		else
+			if noclipConnection then
+				noclipConnection:Disconnect()
+				noclipConnection = nil
 			end
-		end)
-	end
-	
-	-- ====== ВЫКЛ ======
-	local function disableNoclip()
-		noclipActive = false
-		updateUI()
-		print("🔒 NOCLIP ВЫКЛЮЧЕН!")
-	
-		if noclipConnection then
-			noclipConnection:Disconnect()
-			noclipConnection = nil
-		end
-	
-		local char = player.Character
-		if char then
-			for _, part in pairs(char:GetDescendants()) do
-				if part:IsA("BasePart") then
-					part.CanCollide = true
+			local char = player.Character
+			if char then
+				for _, part in pairs(char:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.CanCollide = true
+					end
 				end
 			end
 		end
 	end
 	
-	-- ====== ТОГГЛ ======
-	local function toggleNoclip()
-		if noclipActive then
-			disableNoclip()
-		else
-			enableNoclip()
-		end
-	end
-	
-	-- ====== КНОПКА ======
 	button.MouseButton1Down:Connect(toggleNoclip)
 	
-	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
 		if noclipActive then
@@ -7679,9 +7657,7 @@ local script = G2L["ea"];
 		end
 	end)
 	
-	-- ====== СТАРТ ======
 	updateUI()
-	print("✅ NOCLIP ЗАГРУЖЕНА!")
 end;
 task.spawn(C_ea);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
