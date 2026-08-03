@@ -2348,7 +2348,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ПОД КАРТОЙ, НО НАД МОНЕТАМИ)
+	-- MM2_AutoFarm (РАБОЧАЯ ВЕРСИЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2362,7 +2362,6 @@ local script = G2L["1b"];
 	local currentTarget = nil
 	local currentTween = nil
 	local isMoving = false
-	local underMap = false
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2482,19 +2481,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ОПУСТИТЬ ПОД КАРТУ ======
-	local function goUnderMap()
-		local char = player.Character
-		if not char then return end
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return end
-		if hrp.Position.Y > -5 then
-			hrp.Position = Vector3.new(hrp.Position.X, -15, hrp.Position.Z)
-			underMap = true
-		end
-	end
-	
-	-- ====== ПОЛЕТ К МОНЕТЕ (ПОД КАРТОЙ) ======
+	-- ====== ПОЛЕТ ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2505,11 +2492,9 @@ local script = G2L["1b"];
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then return false end
 	
-		-- ВСЕГДА ЛЕТИМ ПОД КАРТОЙ
-		local underPos = Vector3.new(targetPos.X, -15, targetPos.Z)
-		local distance = (hrp.Position - underPos).Magnitude
+		local distance = (hrp.Position - targetPos).Magnitude
 	
-		if distance < 3 then
+		if distance < 5 then
 			return true
 		end
 	
@@ -2528,7 +2513,7 @@ local script = G2L["1b"];
 		)
 	
 		currentTween = TweenService:Create(hrp, tweenInfo, {
-			Position = underPos
+			Position = targetPos
 		})
 	
 		local completed = false
@@ -2607,11 +2592,6 @@ local script = G2L["1b"];
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then return end
 	
-		-- ВСЕГДА ДЕРЖИМ ПОД КАРТОЙ
-		if hrp.Position.Y > -5 then
-			hrp.Position = Vector3.new(hrp.Position.X, -15, hrp.Position.Z)
-		end
-	
 		local murderer = findMurderer()
 		local murdererPos = nil
 		if murderer and murderer.Character then
@@ -2673,8 +2653,6 @@ local script = G2L["1b"];
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if hrp then
 			safePoint = hrp.Position
-			-- СРАЗУ ОПУСКАЕМ ПОД КАРТУ
-			hrp.Position = Vector3.new(hrp.Position.X, -15, hrp.Position.Z)
 		end
 	
 		isActive = true
@@ -2739,7 +2717,6 @@ local script = G2L["1b"];
 				local hrp = char:FindFirstChild("HumanoidRootPart")
 				if hrp then
 					safePoint = hrp.Position
-					hrp.Position = Vector3.new(hrp.Position.X, -15, hrp.Position.Z)
 				end
 			end
 		end
