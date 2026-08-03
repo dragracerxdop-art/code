@@ -2325,22 +2325,21 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (BODYVELOCITY + ФИКС ВЫЛЕТА)
+	-- MM2_AutoFarm (CFrame + ФИКС ВЫЛЕТА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
+	local TweenService = game:GetService("TweenService")
 	
 	local isActive = false
 	local farmConnection = nil
 	local safePoint = nil
 	local currentTarget = nil
+	local currentTween = nil
 	local isMoving = false
-	local bodyVelocity = nil
 	local gyro = nil
-	local stuckTimer = 0
-	local lastPos = nil
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2378,26 +2377,30 @@ local script = G2L["1b"];
 		end
 	end
 	
-	-- ====== СОЗДАТЬ BODYVELOCITY ======
-	local function createVelocity(hrp)
-		if not hrp then return end
-		if bodyVelocity then return end
-		bodyVelocity = Instance.new("BodyVelocity")
-		bodyVelocity.Parent = hrp
-		bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
-	end
-	
-	local function removeVelocity()
-		if bodyVelocity then
-			pcall(function() bodyVelocity:Destroy() end)
-			bodyVelocity = nil
+	-- ====== НОКЛИП ======
+	local function enableNoclip(char)
+		if not char then return end
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
 		end
 	end
 	
-	-- ====== ОСТАНОВКА ДВИЖЕНИЯ ======
-	local function stopMoving()
-		if bodyVelocity then
-			bodyVelocity.Velocity = Vector3.zero
+	local function disableNoclip(char)
+		if not char then return end
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = true
+			end
+		end
+	end
+	
+	-- ====== ОСТАНОВКА ТВИНА ======
+	local function stopTween()
+		if currentTween then
+			pcall(function() currentTween:Cancel() end)
+			currentTween = nil
 		end
 		isMoving = false
 	end
@@ -2494,26 +2497,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== НОКЛИП ======
-	local function enableNoclip(char)
-		if not char then return end
-		for _, part in pairs(char:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = false
-			end
-		end
-	end
-	
-	local function disableNoclip(char)
-		if not char then return end
-		for _, part in pairs(char:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = true
-			end
-		end
-	end
-	
-	-- ====== ДВИЖЕНИЕ ЧЕРЕЗ VELOCITY ======
+	-- ====== ПОЛЕТ ЧЕРЕЗ CFrame (РАБОТАЕТ) ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2526,25 +2510,42 @@ local script = G2L["1b"];
 	
 		enableNoclip(char)
 		createGyro(hrp)
-		createVelocity(hrp)
 	
 		local distance = (hrp.Position - targetPos).Magnitude
 	
 		if distance < 5 then
-			stopMoving()
 			return true
 		end
 	
 		-- СКОРОСТЬ 20
 		local speed = 20
-		local direction = (targetPos - hrp.Position).Unit
+		local duration = distance / speed
+		duration = math.max(duration, 0.3)
+		duration = math.min(duration, 3.0)
 	
-		bodyVelocity.Velocity = direction * speed
+		stopTween()
 		isMoving = true
 	
-		local startPos = hrp.Position
-		local timeout = tick() + distance / speed + 2
+		local tweenInfo = TweenInfo.new(
+			duration,
+			Enum.EasingStyle.Linear,
+			Enum.EasingDirection.Out
+		)
 	
+		-- ДВИГАЕМ CFrame (РАБОТАЕТ)
+		currentTween = TweenService:Create(hrp, tweenInfo, {
+			CFrame = CFrame.new(targetPos)
+		})
+	
+		local completed = false
+		currentTween.Completed:Connect(function()
+			completed = true
+			isMoving = false
+		end)
+	
+		currentTween:Play()
+	
+		local timeout = tick() + duration + 1
 		repeat
 			task.wait()
 	
@@ -2552,25 +2553,17 @@ local script = G2L["1b"];
 				gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
 			end
 	
-			local currentDist = (hrp.Position - targetPos).Magnitude
-	
-			if currentDist < 5 then
-				stopMoving()
-				return true
-			end
-	
-			-- ЗАЩИТА ОТ ВЫЛЕТА ЗА КАРТУ
+			-- ЗАЩИТА ОТ ВЫЛЕТА
 			if hrp.Position.Y < -10 then
-				stopMoving()
+				stopTween()
 				if safePoint then
 					hrp.CFrame = CFrame.new(safePoint)
 				end
 				return false
 			end
 	
-			-- ЗАЩИТА ОТ ВЫЛЕТА В ЛОББИ (слишком далеко по X или Z)
 			if math.abs(hrp.Position.X) > 500 or math.abs(hrp.Position.Z) > 500 then
-				stopMoving()
+				stopTween()
 				if safePoint then
 					hrp.CFrame = CFrame.new(safePoint)
 				end
@@ -2578,26 +2571,24 @@ local script = G2L["1b"];
 			end
 	
 			if humanoid.Health <= 0 then
-				stopMoving()
+				stopTween()
 				return false
 			end
 	
 			if currentTarget and not isCoinValid(currentTarget) then
-				stopMoving()
+				stopTween()
 				return false
 			end
 	
 			if tick() > timeout then
-				stopMoving()
+				stopTween()
 				return false
 			end
 	
-			-- КОРРЕКТИРУЕМ НАПРАВЛЕНИЕ
-			local newDir = (targetPos - hrp.Position).Unit
-			bodyVelocity.Velocity = newDir * speed
+		until completed == true
 	
-		until false
-	
+		currentTween = nil
+		isMoving = false
 		return true
 	end
 	
@@ -2740,9 +2731,8 @@ local script = G2L["1b"];
 			farmConnection = nil
 		end
 	
-		stopMoving()
+		stopTween()
 		removeGyro()
-		removeVelocity()
 	
 		local char = player.Character
 		if char then
