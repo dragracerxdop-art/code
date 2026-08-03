@@ -7566,123 +7566,56 @@ task.spawn(C_e6);
 local function C_ea()
 local script = G2L["ea"];
 	-- ==========================================
-	-- NOCLIP TOGGLE (100% РАБОЧАЯ)
+	-- ДИАГНОСТИКА MISC_Noclip
 	-- ==========================================
 	local button = script.Parent
-	local player = game.Players.LocalPlayer
-	local RunService = game:GetService("RunService")
 	
-	local noclipActive = false
-	local noclipConnection = nil
+	print("===== ИНФО О КНОПКЕ =====")
+	print("Имя:", button.Name)
+	print("Тип:", button.ClassName)
+	print("Visible:", button.Visible)
+	print("Active:", button.Active)
+	print("Size:", button.Size)
+	print("Position:", button.Position)
+	print("ZIndex:", button.ZIndex)
+	print("Parent:", button.Parent and button.Parent.Name)
 	
-	-- ====== УДАЛЯЕМ ВСЕ ИНДИКАТОРЫ НАХУЙ ======
-	for _, child in pairs(button:GetChildren()) do
-		if child:IsA("TextLabel") or child:IsA("Frame") then
-			child:Destroy()
-		end
+	-- ПРОВЕРЯЕМ РОДИТЕЛЯ
+	local parent = button.Parent
+	if parent then
+		print("Родитель Visible:", parent.Visible)
+		print("Родитель Active:", parent.Active)
+		print("Родитель ZIndex:", parent.ZIndex)
 	end
 	
-	-- ====== ПРОСТО МЕНЯЕМ ТЕКСТ КНОПКИ ======
-	button.Text = "NOCLIP: OFF"
-	button.TextColor3 = Color3.fromRGB(255, 255, 255)
-	button.TextSize = 14
-	button.Font = Enum.Font.SourceSansBold
-	button.TextScaled = false
-	
-	-- ====== ПРОВЕРКА ЧТО КНОПКА ВООБЩЕ СУЩЕСТВУЕТ ======
-	if not button then
-		error("❌ КНОПКА НЕ НАЙДЕНА!")
-	end
-	
-	print("🔍 КНОПКА НАЙДЕНА: " .. button.Name)
-	print("🔍 ТИП КНОПКИ: " .. button.ClassName)
-	
-	-- ====== ФУНКЦИЯ ВКЛ/ВЫКЛ ======
-	local function toggleNoclip()
-		print("🔄 КЛИК ПО КНОПКЕ!")
-	
-		noclipActive = not noclipActive
-	
-		if noclipActive then
-			button.Text = "NOCLIP: ON ✅"
-			button.ImageColor3 = Color3.fromRGB(50, 200, 50)
-			button.TextColor3 = Color3.fromRGB(0, 0, 0)
-			print("🔓 NOCLIP ВКЛЮЧЕН!")
-	
-			if noclipConnection then
-				noclipConnection:Disconnect()
-				noclipConnection = nil
-			end
-	
-			noclipConnection = RunService.Stepped:Connect(function()
-				if noclipActive then
-					local char = player.Character
-					if char then
-						for _, part in pairs(char:GetDescendants()) do
-							if part:IsA("BasePart") and part.CanCollide then
-								part.CanCollide = false
-							end
-						end
-					end
-				end
-			end)
-	
-		else
-			button.Text = "NOCLIP: OFF ❌"
-			button.ImageColor3 = Color3.fromRGB(200, 50, 50)
-			button.TextColor3 = Color3.fromRGB(255, 255, 255)
-			print("🔒 NOCLIP ВЫКЛЮЧЕН!")
-	
-			if noclipConnection then
-				noclipConnection:Disconnect()
-				noclipConnection = nil
-			end
-	
-			local char = player.Character
-			if char then
-				for _, part in pairs(char:GetDescendants()) do
-					if part:IsA("BasePart") then
-						part.CanCollide = true
-					end
+	-- ПРОВЕРЯЕМ ЧТО ПЕРЕКРЫВАЕТ КНОПКУ
+	print("\n===== ДЕТИ RightFrame =====")
+	local rightFrame = button.Parent
+	if rightFrame then
+		for _, child in pairs(rightFrame:GetChildren()) do
+			if child ~= button then
+				if child:IsA("ImageButton") or child:IsA("TextButton") or child:IsA("Frame") or child:IsA("ScrollingFrame") then
+					print(child.Name, "| Тип:", child.ClassName, "| ZIndex:", child.ZIndex, "| Visible:", child.Visible)
 				end
 			end
 		end
 	end
 	
-	-- ====== КНОПКА ======
-	button.MouseButton1Click:Connect(toggleNoclip)
+	-- ПОДНИМАЕМ КНОПКУ НА ВЕРХ
+	button.ZIndex = 999
+	button.Active = true
+	button.Visible = true
 	
-	-- ДУБЛИРУЕМ НА ВСЯКИЙ СЛУЧАЙ
+	-- ТЕСТ КЛИКА
+	button.MouseButton1Click:Connect(function()
+		print("🔄 КНОПКА MISC_Noclip РАБОТАЕТ!")
+	end)
+	
 	button.MouseButton1Down:Connect(function()
-		print("🔄 НАЖАТИЕ КНОПКИ (MouseButton1Down)!")
+		print("🔄 MouseButton1Down СРАБОТАЛ!")
 	end)
 	
-	button.MouseButton1Up:Connect(function()
-		print("🔄 ОТПУСКАНИЕ КНОПКИ (MouseButton1Up)!")
-	end)
-	
-	-- ====== ПРИ РЕСПАВНЕ ======
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		if noclipActive then
-			local char = player.Character
-			if char then
-				for _, part in pairs(char:GetDescendants()) do
-					if part:IsA("BasePart") then
-						part.CanCollide = false
-					end
-				end
-			end
-		end
-	end)
-	
-	-- ====== СТАРТ ======
-	button.Text = "NOCLIP: OFF ❌"
-	button.ImageColor3 = Color3.fromRGB(200, 50, 50)
-	button.TextColor3 = Color3.fromRGB(255, 255, 255)
-	
-	print("✅ NOCLIP ЗАГРУЖЕНА!")
-	print("🔍 НАЖМИ КНОПКУ И СМОТРИ КОНСОЛЬ!")
+	print("\n✅ НАЖМИ КНОПКУ MISC_Noclip!")
 end;
 task.spawn(C_ea);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
