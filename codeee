@@ -7533,27 +7533,76 @@ task.spawn(C_e6);
 local function C_ea()
 local script = G2L["ea"];
 	-- ==========================================
-	-- NOCLIP TOGGLE (ДЛЯ КНОПКИ)
+	-- NOCLIP TOGGLE (РАЗЪЕБИСТАЯ ВЕРСИЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	
 	local noclipActive = false
+	local noclipConnection = nil
 	local character = nil
 	
-	-- ФУНКЦИЯ ВКЛ/ВЫКЛ НОКЛИПА
+	-- ====== ИНДИКАТОР ======
+	local indicator = Instance.new("TextLabel")
+	indicator.Name = "Indicator"
+	indicator.Size = UDim2.new(1, 0, 0.3, 0)
+	indicator.Position = UDim2.new(0, 0, 0.7, 0)
+	indicator.BackgroundTransparency = 1
+	indicator.Text = "ВЫКЛ"
+	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+	indicator.TextSize = 14
+	indicator.Font = Enum.Font.SourceSansBold
+	indicator.Parent = button
+	
+	local function updateIndicator(text, color)
+		indicator.Text = text
+		indicator.TextColor3 = color or Color3.fromRGB(255, 0, 0)
+	end
+	
+	-- ====== ФУНКЦИЯ ВКЛ/ВЫКЛ ======
 	local function toggleNoclip()
 		noclipActive = not noclipActive
 	
 		if noclipActive then
-			button.Text = "NOCLIP: ON"
+			-- ВКЛЮЧАЕМ
+			button.Text = "NOCLIP: 🚀"
 			button.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
-			print("✅ NOCLIP ВКЛЮЧЕН!")
-		else
-			button.Text = "NOCLIP: OFF"
-			button.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+			updateIndicator("✅ ПОШЕЛ НАХУЙ", Color3.fromRGB(0, 255, 0))
+			print("🔓 NOCLIP ВКЛЮЧЕН!")
 	
-			-- ВЫКЛЮЧАЕМ КОЛЛИЗИИ ОБРАТНО
+			-- ЗАПУСКАЕМ ЦИКЛ
+			if noclipConnection then
+				noclipConnection:Disconnect()
+				noclipConnection = nil
+			end
+	
+			noclipConnection = game:GetService("RunService").Stepped:Connect(function()
+				if noclipActive then
+					character = player.Character
+					if character then
+						for _, part in pairs(character:GetDescendants()) do
+							if part:IsA("BasePart") and part.CanCollide then
+								part.CanCollide = false
+							end
+						end
+					end
+				end
+			end)
+	
+		else
+			-- ВЫКЛЮЧАЕМ
+			button.Text = "NOCLIP: 🚫"
+			button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+			updateIndicator("❌ ИДЕМ ВМЕСТЕ", Color3.fromRGB(255, 0, 0))
+			print("🔒 NOCLIP ВЫКЛЮЧЕН!")
+	
+			-- ОТКЛЮЧАЕМ ЦИКЛ
+			if noclipConnection then
+				noclipConnection:Disconnect()
+				noclipConnection = nil
+			end
+	
+			-- ВКЛЮЧАЕМ КОЛЛИЗИИ ОБРАТНО
 			character = player.Character
 			if character then
 				for _, part in pairs(character:GetDescendants()) do
@@ -7562,14 +7611,13 @@ local script = G2L["ea"];
 					end
 				end
 			end
-			print("❌ NOCLIP ВЫКЛЮЧЕН!")
 		end
 	end
 	
-	-- КЛИК ПО КНОПКЕ
+	-- ====== КНОПКА ======
 	button.MouseButton1Click:Connect(toggleNoclip)
 	
-	-- ОБНОВЛЕНИЕ ПРИ РЕСПАВНЕ
+	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
 		if noclipActive then
@@ -7584,21 +7632,12 @@ local script = G2L["ea"];
 		end
 	end)
 	
-	-- ЦИКЛ ДЛЯ ПОДДЕРЖАНИЯ НОКЛИПА
-	game:GetService("RunService").Stepped:Connect(function()
-		if noclipActive then
-			character = player.Character
-			if character then
-				for _, part in pairs(character:GetDescendants()) do
-					if part:IsA("BasePart") and part.CanCollide then
-						part.CanCollide = false
-					end
-				end
-			end
-		end
-	end)
+	-- ====== СТАРТОВЫЙ ИНДИКАТОР ======
+	updateIndicator("❌ ИДЕМ ВМЕСТЕ", Color3.fromRGB(255, 0, 0))
+	button.Text = "NOCLIP: 🚫"
+	button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 	
-	print("✅ NOCLIP КНОПКА ЗАГРУЖЕНА!")
+	print("✅ NOCLIP ЗАГРУЖЕНА!")
 end;
 task.spawn(C_ea);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
