@@ -7566,7 +7566,7 @@ task.spawn(C_e6);
 local function C_ea()
 local script = G2L["ea"];
 	-- ==========================================
-	-- NOCLIP TOGGLE (ДЛЯ КНОПКИ 149px)
+	-- NOCLIP TOGGLE (ДЛЯ IMAGEBUTTON 149x73)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -7579,25 +7579,44 @@ local script = G2L["ea"];
 	local oldIndicator = button:FindFirstChild("Indicator")
 	if oldIndicator then oldIndicator:Destroy() end
 	
-	-- ====== ИНДИКАТОР (СВЕРХУ КНОПКИ) ======
+	-- ====== ИНДИКАТОР В БЛЭК ФРЭЙМЕ СПРАВА ======
+	local indicatorFrame = Instance.new("Frame")
+	indicatorFrame.Name = "IndicatorFrame"
+	indicatorFrame.Size = UDim2.new(0, 40, 1, 0)
+	indicatorFrame.Position = UDim2.new(1, 5, 0, 0)
+	indicatorFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	indicatorFrame.BackgroundTransparency = 0.7
+	indicatorFrame.BorderSizePixel = 0
+	indicatorFrame.Parent = button
+	
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
-	indicator.Size = UDim2.new(1, 0, 0, 20)  -- НА ВСЮ ШИРИНУ КНОПКИ
-	indicator.Position = UDim2.new(0, 0, -0.6, 0)  -- СВЕРХУ
+	indicator.Size = UDim2.new(1, 0, 1, 0)
+	indicator.Position = UDim2.new(0, 0, 0, 0)
 	indicator.BackgroundTransparency = 1
-	indicator.Text = "🔒 ВЫКЛ"
+	indicator.Text = "❌"
 	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-	indicator.TextSize = 13
+	indicator.TextSize = 20
 	indicator.Font = Enum.Font.SourceSansBold
-	indicator.TextScaled = true
-	indicator.Parent = button
+	indicator.Parent = indicatorFrame
 	
-	-- ====== ИЗМЕНЯЕМ ТЕКСТ НА КНОПКЕ ======
-	button.Text = "NOCLIP"
+	local indicatorText = Instance.new("TextLabel")
+	indicatorText.Name = "IndicatorText"
+	indicatorText.Size = UDim2.new(1, 0, 0, 12)
+	indicatorText.Position = UDim2.new(0, 0, 1, 0)
+	indicatorText.BackgroundTransparency = 1
+	indicatorText.Text = "OFF"
+	indicatorText.TextColor3 = Color3.fromRGB(255, 0, 0)
+	indicatorText.TextSize = 10
+	indicatorText.Font = Enum.Font.SourceSansBold
+	indicatorText.Parent = indicatorFrame
 	
-	local function updateIndicator(text, color)
-		indicator.Text = text
+	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
+	local function updateIndicator(icon, text, color)
+		indicator.Text = icon
 		indicator.TextColor3 = color or Color3.fromRGB(255, 0, 0)
+		indicatorText.Text = text
+		indicatorText.TextColor3 = color or Color3.fromRGB(255, 0, 0)
 	end
 	
 	-- ====== ФУНКЦИЯ ВКЛ/ВЫКЛ ======
@@ -7605,9 +7624,8 @@ local script = G2L["ea"];
 		noclipActive = not noclipActive
 	
 		if noclipActive then
-			button.Text = "✅ NOCLIP"
-			button.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
-			updateIndicator("🔓 ВКЛ", Color3.fromRGB(0, 255, 0))
+			button.ImageColor3 = Color3.fromRGB(50, 200, 50)
+			updateIndicator("✅", "ON", Color3.fromRGB(0, 255, 0))
 			print("🔓 NOCLIP ВКЛЮЧЕН!")
 	
 			if noclipConnection then
@@ -7629,9 +7647,8 @@ local script = G2L["ea"];
 			end)
 	
 		else
-			button.Text = "❌ NOCLIP"
-			button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-			updateIndicator("🔒 ВЫКЛ", Color3.fromRGB(255, 0, 0))
+			button.ImageColor3 = Color3.fromRGB(200, 50, 50)
+			updateIndicator("❌", "OFF", Color3.fromRGB(255, 0, 0))
 			print("🔒 NOCLIP ВЫКЛЮЧЕН!")
 	
 			if noclipConnection then
@@ -7669,9 +7686,8 @@ local script = G2L["ea"];
 	end)
 	
 	-- СТАРТ
-	button.Text = "❌ NOCLIP"
-	button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-	updateIndicator("🔒 ВЫКЛ", Color3.fromRGB(255, 0, 0))
+	button.ImageColor3 = Color3.fromRGB(200, 50, 50)
+	updateIndicator("❌", "OFF", Color3.fromRGB(255, 0, 0))
 	
 	print("✅ NOCLIP ЗАГРУЖЕНА!")
 end;
