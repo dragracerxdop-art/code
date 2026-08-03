@@ -7575,11 +7575,9 @@ local script = G2L["ea"];
 	local noclipActive = false
 	local noclipConnection = nil
 	
-	-- ====== УДАЛЯЕМ СТАРЫЕ ИНДИКАТОРЫ ======
+	-- ====== УДАЛЯЕМ ВСЕ СТАРЫЕ ДЕТИ ======
 	for _, child in pairs(button:GetChildren()) do
-		if child:IsA("TextLabel") or child:IsA("Frame") then
-			child:Destroy()
-		end
+		child:Destroy()
 	end
 	
 	-- ====== ТЕКСТ НА КНОПКЕ (TextLabel поверх ImageButton) ======
