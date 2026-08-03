@@ -7566,7 +7566,7 @@ task.spawn(C_e6);
 local function C_ea()
 local script = G2L["ea"];
 	-- ==========================================
-	-- NOCLIP TOGGLE (С ИНДИКАТОРОМ СНИЗУ)
+	-- NOCLIP TOGGLE (ИЗ ПРИМЕРА + ИНДИКАТОР)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -7586,7 +7586,7 @@ local script = G2L["ea"];
 	indicator.Size = UDim2.new(1, 0, 0, 20)
 	indicator.Position = UDim2.new(0, 0, 1, 2)
 	indicator.BackgroundTransparency = 1
-	indicator.Text = "▬▬▬▬▬▬▬▬▬▬"
+	indicator.Text = "OFF"
 	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 	indicator.TextSize = 12
 	indicator.Font = Enum.Font.SourceSansBold
@@ -7594,22 +7594,24 @@ local script = G2L["ea"];
 	
 	local function updateIndicator()
 		if noclipActive then
-			indicator.Text = "═════ ВКЛ ═════"
+			indicator.Text = "✅ ON"
 			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+			button.Text = "NOCLIP: ON"
+			button.ImageColor3 = Color3.fromRGB(50, 200, 50)
 		else
-			indicator.Text = "═════ ВЫКЛ ═════"
+			indicator.Text = "❌ OFF"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+			button.Text = "NOCLIP: OFF"
+			button.ImageColor3 = Color3.fromRGB(200, 50, 50)
 		end
 	end
 	
 	-- ====== ФУНКЦИЯ ВКЛ/ВЫКЛ ======
 	local function toggleNoclip()
 		noclipActive = not noclipActive
+		updateIndicator()
 	
 		if noclipActive then
-			button.Text = "NOCLIP ✅"
-			button.ImageColor3 = Color3.fromRGB(0, 200, 0)
-			updateIndicator()
 			print("🔓 NOCLIP ВКЛЮЧЕН!")
 	
 			if noclipConnection then
@@ -7622,7 +7624,7 @@ local script = G2L["ea"];
 					local char = player.Character
 					if char then
 						for _, part in pairs(char:GetDescendants()) do
-							if part:IsA("BasePart") then
+							if part:IsA("BasePart") and part.CanCollide then
 								part.CanCollide = false
 							end
 						end
@@ -7631,9 +7633,6 @@ local script = G2L["ea"];
 			end)
 	
 		else
-			button.Text = "NOCLIP ❌"
-			button.ImageColor3 = Color3.fromRGB(200, 0, 0)
-			updateIndicator()
 			print("🔒 NOCLIP ВЫКЛЮЧЕН!")
 	
 			if noclipConnection then
@@ -7671,9 +7670,9 @@ local script = G2L["ea"];
 	end)
 	
 	-- СТАРТ
-	button.Text = "NOCLIP ❌"
-	button.ImageColor3 = Color3.fromRGB(200, 0, 0)
-	indicator.Text = "═════ ВЫКЛ ═════"
+	button.Text = "NOCLIP: OFF"
+	button.ImageColor3 = Color3.fromRGB(200, 50, 50)
+	indicator.Text = "❌ OFF"
 	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 	
 	print("✅ NOCLIP ЗАГРУЖЕНА!")
