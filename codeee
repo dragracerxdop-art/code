@@ -2295,7 +2295,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ПРАВИЛЬНЫЙ НОКЛИП)
+	-- MM2_AutoFarm (МЕДЛЕННАЯ СКОРОСТЬ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2348,19 +2348,11 @@ local script = G2L["1b"];
 		end
 	end
 	
-	-- ====== ПРАВИЛЬНЫЙ НОКЛИП ======
+	-- ====== НОКЛИП ======
 	local function enableNoclip(char)
 		if not char then return end
-	
-		-- ВЫКЛЮЧАЕМ ТОЛЬКО У HRP
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if hrp then
-			hrp.CanCollide = false
-		end
-	
-		-- ВЫКЛЮЧАЕМ У ВСЕХ ОСТАЛЬНЫХ ЧАСТЕЙ
 		for _, part in pairs(char:GetDescendants()) do
-			if part:IsA("BasePart") and part ~= hrp then
+			if part:IsA("BasePart") then
 				part.CanCollide = false
 			end
 		end
@@ -2368,8 +2360,6 @@ local script = G2L["1b"];
 	
 	local function disableNoclip(char)
 		if not char then return end
-	
-		-- ВКЛЮЧАЕМ ОБРАТНО
 		for _, part in pairs(char:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.CanCollide = true
@@ -2487,7 +2477,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ПЛАВНЫЙ ПОЛЕТ С НОКЛИПОМ ======
+	-- ====== МЕДЛЕННЫЙ ПОЛЕТ ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2498,9 +2488,7 @@ local script = G2L["1b"];
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then return false end
 	
-		-- ВКЛЮЧАЕМ НОКЛИП
 		enableNoclip(char)
-	
 		createGyro(hrp)
 	
 		local distance = (hrp.Position - targetPos).Magnitude
@@ -2509,21 +2497,21 @@ local script = G2L["1b"];
 			return true
 		end
 	
-		local speed = 22
+		-- МЕДЛЕННАЯ СКОРОСТЬ (16 - КАК БЕГ)
+		local speed = 16
 		local duration = distance / speed
-		duration = math.max(duration, 0.3)
-		duration = math.min(duration, 2.5)
+		duration = math.max(duration, 0.5)
+		duration = math.min(duration, 4.0)
 	
 		stopTween()
 		isMoving = true
 	
 		local tweenInfo = TweenInfo.new(
 			duration,
-			Enum.EasingStyle.Quad,
+			Enum.EasingStyle.Linear,
 			Enum.EasingDirection.Out
 		)
 	
-		-- ДВИГАЕМ CFrame ЧТОБЫ ЛЕТЕТЬ СКВОЗЬ СТЕНЫ
 		currentTween = TweenService:Create(hrp, tweenInfo, {
 			CFrame = CFrame.new(targetPos)
 		})
@@ -2726,9 +2714,7 @@ local script = G2L["1b"];
 	
 		local char = player.Character
 		if char then
-			-- ВЫКЛЮЧАЕМ НОКЛИП
 			disableNoclip(char)
-	
 			local hrp = char:FindFirstChild("HumanoidRootPart")
 			if hrp then
 				hrp.Velocity = Vector3.zero
