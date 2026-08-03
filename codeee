@@ -7566,7 +7566,7 @@ task.spawn(C_e6);
 local function C_ea()
 local script = G2L["ea"];
 	-- ==========================================
-	-- NOCLIP TOGGLE (ИЗ ПРИМЕРА)
+	-- NOCLIP TOGGLE (100% РАБОЧАЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -7575,40 +7575,38 @@ local script = G2L["ea"];
 	local noclipActive = false
 	local noclipConnection = nil
 	
-	-- ====== УДАЛЯЕМ ВСЕ СТАРЫЕ ИНДИКАТОРЫ ======
+	-- ====== УДАЛЯЕМ ВСЕ ИНДИКАТОРЫ НАХУЙ ======
 	for _, child in pairs(button:GetChildren()) do
-		if child.Name == "Indicator" or child.Name == "IndicatorFrame" then
+		if child:IsA("TextLabel") or child:IsA("Frame") then
 			child:Destroy()
 		end
 	end
 	
-	-- ====== ИНДИКАТОР ВНУТРИ КНОПКИ СНИЗУ ======
-	local indicator = Instance.new("TextLabel")
-	indicator.Name = "Indicator"
-	indicator.Size = UDim2.new(1, 0, 0, 18)
-	indicator.Position = UDim2.new(0, 0, 0.7, 0)
-	indicator.BackgroundTransparency = 1
-	indicator.Text = "NOCLIP: OFF"
-	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-	indicator.TextSize = 12
-	indicator.Font = Enum.Font.SourceSansBold
-	indicator.ZIndex = 2
-	indicator.Parent = button
-	
-	-- ====== ИЗМЕНЯЕМ ТЕКСТ КНОПКИ ======
-	button.Text = ""
-	button.TextYAlignment = Enum.TextYAlignment.Top
-	button.TextScaled = false
+	-- ====== ПРОСТО МЕНЯЕМ ТЕКСТ КНОПКИ ======
+	button.Text = "NOCLIP: OFF"
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
 	button.TextSize = 14
+	button.Font = Enum.Font.SourceSansBold
+	button.TextScaled = false
+	
+	-- ====== ПРОВЕРКА ЧТО КНОПКА ВООБЩЕ СУЩЕСТВУЕТ ======
+	if not button then
+		error("❌ КНОПКА НЕ НАЙДЕНА!")
+	end
+	
+	print("🔍 КНОПКА НАЙДЕНА: " .. button.Name)
+	print("🔍 ТИП КНОПКИ: " .. button.ClassName)
 	
 	-- ====== ФУНКЦИЯ ВКЛ/ВЫКЛ ======
 	local function toggleNoclip()
+		print("🔄 КЛИК ПО КНОПКЕ!")
+	
 		noclipActive = not noclipActive
 	
 		if noclipActive then
-			indicator.Text = "NOCLIP: ON"
-			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+			button.Text = "NOCLIP: ON ✅"
 			button.ImageColor3 = Color3.fromRGB(50, 200, 50)
+			button.TextColor3 = Color3.fromRGB(0, 0, 0)
 			print("🔓 NOCLIP ВКЛЮЧЕН!")
 	
 			if noclipConnection then
@@ -7630,9 +7628,9 @@ local script = G2L["ea"];
 			end)
 	
 		else
-			indicator.Text = "NOCLIP: OFF"
-			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+			button.Text = "NOCLIP: OFF ❌"
 			button.ImageColor3 = Color3.fromRGB(200, 50, 50)
+			button.TextColor3 = Color3.fromRGB(255, 255, 255)
 			print("🔒 NOCLIP ВЫКЛЮЧЕН!")
 	
 			if noclipConnection then
@@ -7654,6 +7652,15 @@ local script = G2L["ea"];
 	-- ====== КНОПКА ======
 	button.MouseButton1Click:Connect(toggleNoclip)
 	
+	-- ДУБЛИРУЕМ НА ВСЯКИЙ СЛУЧАЙ
+	button.MouseButton1Down:Connect(function()
+		print("🔄 НАЖАТИЕ КНОПКИ (MouseButton1Down)!")
+	end)
+	
+	button.MouseButton1Up:Connect(function()
+		print("🔄 ОТПУСКАНИЕ КНОПКИ (MouseButton1Up)!")
+	end)
+	
 	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
@@ -7670,11 +7677,12 @@ local script = G2L["ea"];
 	end)
 	
 	-- ====== СТАРТ ======
-	indicator.Text = "NOCLIP: OFF"
-	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+	button.Text = "NOCLIP: OFF ❌"
 	button.ImageColor3 = Color3.fromRGB(200, 50, 50)
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
 	
 	print("✅ NOCLIP ЗАГРУЖЕНА!")
+	print("🔍 НАЖМИ КНОПКУ И СМОТРИ КОНСОЛЬ!")
 end;
 task.spawn(C_ea);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
