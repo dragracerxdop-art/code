@@ -2325,7 +2325,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (CFrame + ФИКС ВЫЛЕТА)
+	-- MM2_AutoFarm (РАБОЧАЯ ВЕРСИЯ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2339,7 +2339,6 @@ local script = G2L["1b"];
 	local currentTarget = nil
 	local currentTween = nil
 	local isMoving = false
-	local gyro = nil
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2356,44 +2355,6 @@ local script = G2L["1b"];
 	local function updateIndicator(text, color)
 		indicator.Text = text
 		indicator.TextColor3 = color or Color3.fromRGB(255, 0, 0)
-	end
-	
-	-- ====== ФИКС РОТАЦИИ ======
-	local function createGyro(hrp)
-		if not hrp then return end
-		if gyro then return end
-		gyro = Instance.new("BodyGyro")
-		gyro.Parent = hrp
-		gyro.D = 500
-		gyro.P = 5000
-		gyro.MaxTorque = Vector3.new(4000, 4000, 4000)
-		gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
-	end
-	
-	local function removeGyro()
-		if gyro then
-			pcall(function() gyro:Destroy() end)
-			gyro = nil
-		end
-	end
-	
-	-- ====== НОКЛИП ======
-	local function enableNoclip(char)
-		if not char then return end
-		for _, part in pairs(char:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = false
-			end
-		end
-	end
-	
-	local function disableNoclip(char)
-		if not char then return end
-		for _, part in pairs(char:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = true
-			end
-		end
 	end
 	
 	-- ====== ОСТАНОВКА ТВИНА ======
@@ -2497,7 +2458,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ПОЛЕТ ЧЕРЕЗ CFrame (РАБОТАЕТ) ======
+	-- ====== ПОЛЕТ ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2508,20 +2469,16 @@ local script = G2L["1b"];
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then return false end
 	
-		enableNoclip(char)
-		createGyro(hrp)
-	
 		local distance = (hrp.Position - targetPos).Magnitude
 	
 		if distance < 5 then
 			return true
 		end
 	
-		-- СКОРОСТЬ 20
 		local speed = 20
 		local duration = distance / speed
 		duration = math.max(duration, 0.3)
-		duration = math.min(duration, 3.0)
+		duration = math.min(duration, 2.5)
 	
 		stopTween()
 		isMoving = true
@@ -2532,9 +2489,8 @@ local script = G2L["1b"];
 			Enum.EasingDirection.Out
 		)
 	
-		-- ДВИГАЕМ CFrame (РАБОТАЕТ)
 		currentTween = TweenService:Create(hrp, tweenInfo, {
-			CFrame = CFrame.new(targetPos)
+			Position = targetPos
 		})
 	
 		local completed = false
@@ -2548,27 +2504,6 @@ local script = G2L["1b"];
 		local timeout = tick() + duration + 1
 		repeat
 			task.wait()
-	
-			if gyro then
-				gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
-			end
-	
-			-- ЗАЩИТА ОТ ВЫЛЕТА
-			if hrp.Position.Y < -10 then
-				stopTween()
-				if safePoint then
-					hrp.CFrame = CFrame.new(safePoint)
-				end
-				return false
-			end
-	
-			if math.abs(hrp.Position.X) > 500 or math.abs(hrp.Position.Z) > 500 then
-				stopTween()
-				if safePoint then
-					hrp.CFrame = CFrame.new(safePoint)
-				end
-				return false
-			end
 	
 			if humanoid.Health <= 0 then
 				stopTween()
@@ -2633,10 +2568,6 @@ local script = G2L["1b"];
 	
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if not humanoid or humanoid.Health <= 0 then return end
-	
-		if gyro then
-			gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
-		end
 	
 		local murderer = findMurderer()
 		local murdererPos = nil
@@ -2732,11 +2663,9 @@ local script = G2L["1b"];
 		end
 	
 		stopTween()
-		removeGyro()
 	
 		local char = player.Character
 		if char then
-			disableNoclip(char)
 			local hrp = char:FindFirstChild("HumanoidRootPart")
 			if hrp then
 				hrp.Velocity = Vector3.zero
