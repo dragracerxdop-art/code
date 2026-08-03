@@ -7566,7 +7566,7 @@ task.spawn(C_e6);
 local function C_ea()
 local script = G2L["ea"];
 	-- ==========================================
-	-- NOCLIP TOGGLE (ИЗ SPEED HUB V4.0)
+	-- NOCLIP TOGGLE (ДЛЯ IMAGEBUTTON)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -7582,33 +7582,40 @@ local script = G2L["ea"];
 		end
 	end
 	
-	-- ====== ИНДИКАТОР ВНУТРИ КНОПКИ ======
+	-- ====== ТЕКСТ НА КНОПКЕ (TextLabel поверх ImageButton) ======
+	local textLabel = Instance.new("TextLabel")
+	textLabel.Name = "TextLabel"
+	textLabel.Size = UDim2.new(1, 0, 0.6, 0)
+	textLabel.Position = UDim2.new(0, 0, 0, 0)
+	textLabel.BackgroundTransparency = 1
+	textLabel.Text = "NOCLIP"
+	textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	textLabel.TextSize = 13
+	textLabel.Font = Enum.Font.GothamBold
+	textLabel.ZIndex = 2
+	textLabel.Parent = button
+	
+	-- ====== ИНДИКАТОР СНИЗУ ======
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
-	indicator.Size = UDim2.new(1, 0, 0, 18)
-	indicator.Position = UDim2.new(0, 0, 0.7, 0)
+	indicator.Size = UDim2.new(1, 0, 0.4, 0)
+	indicator.Position = UDim2.new(0, 0, 0.6, 0)
 	indicator.BackgroundTransparency = 1
 	indicator.Text = "OFF"
 	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-	indicator.TextSize = 11
+	indicator.TextSize = 10
 	indicator.Font = Enum.Font.GothamBold
 	indicator.ZIndex = 2
 	indicator.Parent = button
 	
-	-- ====== ТЕКСТ КНОПКИ ======
-	button.Text = "NOCLIP"
-	button.TextYAlignment = Enum.TextYAlignment.Top
-	button.TextSize = 13
-	button.TextColor3 = Color3.fromRGB(255, 255, 255)
-	
 	-- ====== ОБНОВЛЕНИЕ UI ======
 	local function updateUI()
 		if noclipActive then
-			indicator.Text = "✅ ON"
+			indicator.Text = "ON ✅"
 			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
 			button.ImageColor3 = Color3.fromRGB(50, 200, 50)
 		else
-			indicator.Text = "❌ OFF"
+			indicator.Text = "OFF ❌"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 			button.ImageColor3 = Color3.fromRGB(200, 50, 50)
 		end
@@ -7625,7 +7632,6 @@ local script = G2L["ea"];
 			noclipConnection = nil
 		end
 	
-		-- ТОЧНО КАК В SPEED HUB
 		noclipConnection = RunService.Stepped:Connect(function()
 			if noclipActive then
 				local char = player.Character
