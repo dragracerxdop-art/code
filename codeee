@@ -7566,10 +7566,11 @@ task.spawn(C_e6);
 local function C_ea()
 local script = G2L["ea"];
 	-- ==========================================
-	-- NOCLIP TOGGLE (РАБОЧАЯ ВЕРСИЯ)
+	-- NOCLIP TOGGLE (ИЗ ПРИМЕРА)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
+	local RunService = game:GetService("RunService")
 	
 	local noclipActive = false
 	local noclipConnection = nil
@@ -7587,7 +7588,7 @@ local script = G2L["ea"];
 	indicator.Size = UDim2.new(1, 0, 0, 18)
 	indicator.Position = UDim2.new(0, 0, 0.7, 0)
 	indicator.BackgroundTransparency = 1
-	indicator.Text = "◄ ВЫКЛ ►"
+	indicator.Text = "NOCLIP: OFF"
 	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 	indicator.TextSize = 12
 	indicator.Font = Enum.Font.SourceSansBold
@@ -7595,30 +7596,19 @@ local script = G2L["ea"];
 	indicator.Parent = button
 	
 	-- ====== ИЗМЕНЯЕМ ТЕКСТ КНОПКИ ======
-	button.Text = "NOCLIP"
+	button.Text = ""
 	button.TextYAlignment = Enum.TextYAlignment.Top
 	button.TextScaled = false
 	button.TextSize = 14
 	
-	-- ====== ОБНОВЛЕНИЕ ИНДИКАТОРА ======
-	local function updateIndicator()
-		if noclipActive then
-			indicator.Text = "◄ ВКЛ ►"
-			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-			button.ImageColor3 = Color3.fromRGB(50, 200, 50)
-		else
-			indicator.Text = "◄ ВЫКЛ ►"
-			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-			button.ImageColor3 = Color3.fromRGB(200, 50, 50)
-		end
-	end
-	
 	-- ====== ФУНКЦИЯ ВКЛ/ВЫКЛ ======
 	local function toggleNoclip()
 		noclipActive = not noclipActive
-		updateIndicator()
 	
 		if noclipActive then
+			indicator.Text = "NOCLIP: ON"
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+			button.ImageColor3 = Color3.fromRGB(50, 200, 50)
 			print("🔓 NOCLIP ВКЛЮЧЕН!")
 	
 			if noclipConnection then
@@ -7626,12 +7616,12 @@ local script = G2L["ea"];
 				noclipConnection = nil
 			end
 	
-			noclipConnection = game:GetService("RunService").Stepped:Connect(function()
+			noclipConnection = RunService.Stepped:Connect(function()
 				if noclipActive then
 					local char = player.Character
 					if char then
 						for _, part in pairs(char:GetDescendants()) do
-							if part:IsA("BasePart") then
+							if part:IsA("BasePart") and part.CanCollide then
 								part.CanCollide = false
 							end
 						end
@@ -7640,6 +7630,9 @@ local script = G2L["ea"];
 			end)
 	
 		else
+			indicator.Text = "NOCLIP: OFF"
+			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+			button.ImageColor3 = Color3.fromRGB(200, 50, 50)
 			print("🔒 NOCLIP ВЫКЛЮЧЕН!")
 	
 			if noclipConnection then
@@ -7663,7 +7656,7 @@ local script = G2L["ea"];
 	
 	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
-		task.wait(1)
+		task.wait(0.5)
 		if noclipActive then
 			local char = player.Character
 			if char then
@@ -7677,7 +7670,10 @@ local script = G2L["ea"];
 	end)
 	
 	-- ====== СТАРТ ======
-	updateIndicator()
+	indicator.Text = "NOCLIP: OFF"
+	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+	button.ImageColor3 = Color3.fromRGB(200, 50, 50)
+	
 	print("✅ NOCLIP ЗАГРУЖЕНА!")
 end;
 task.spawn(C_ea);
