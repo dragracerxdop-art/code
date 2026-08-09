@@ -2342,7 +2342,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ТЕЛЕПОРТ + ЗАПОМИНАНИЕ МОНЕТ)
+	-- MM2_AutoFarm (ТЕЛЕПОРТ + ЗАДЕРЖКА + ПАДЕНИЕ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2351,8 +2351,8 @@ local script = G2L["1b"];
 	
 	local isActive = false
 	local farmConnection = nil
-	local safePoint = nil
 	local isBagFull = false
+	local teleportCooldown = 0
 	
 	-- ====== ЗАПОМИНАНИЕ СОБРАННЫХ МОНЕТ ======
 	local collectedCoins = {}
@@ -2510,7 +2510,6 @@ local script = G2L["1b"];
 		if not coin then return false end
 		if not coin.Parent then return false end
 		if not coin:FindFirstChild("TouchInterest") then return false end
-		-- ПРОВЕРЯЕМ НЕ СОБРАЛИ ЛИ МЫ ЕЁ УЖЕ
 		if collectedCoins[coin] then return false end
 		return true
 	end
@@ -2578,7 +2577,7 @@ local script = G2L["1b"];
 		return nil, "none"
 	end
 	
-	-- ====== ТЕЛЕПОРТ НА МОНЕТУ ======
+	-- ====== ТЕЛЕПОРТ НА МОНЕТУ (ПРЯМО НА НЕЁ) ======
 	local function teleportToCoin(coin)
 		local char = player.Character
 		if not char then return false end
@@ -2588,7 +2587,8 @@ local script = G2L["1b"];
 	
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
-		hrp.CFrame = CFrame.new(coin.Position + Vector3.new(0, 2, 0))
+		-- ТЕЛЕПОРТ ПРЯМО НА МОНЕТУ (Y = 0)
+		hrp.CFrame = CFrame.new(coin.Position)
 	
 		return true
 	end
@@ -2611,10 +2611,8 @@ local script = G2L["1b"];
 			firetouchinterest(hrp, coin, 1)
 		end)
 	
-		-- ПОМЕЧАЕМ МОНЕТУ КАК СОБРАННУЮ
 		collectedCoins[coin] = true
 	
-		-- ЧЕРЕЗ 3 СЕКУНДЫ УДАЛЯЕМ ИЗ ПАМЯТИ (ЕСЛИ МОНЕТА РЕСПАВНУЛАСЬ)
 		if collectedCoinsTimer[coin] then
 			collectedCoinsTimer[coin]:Disconnect()
 		end
@@ -2644,6 +2642,12 @@ local script = G2L["1b"];
 				isBagFull = false
 				updateIndicator("🟢 ФАРМ + NOCLIP", Color3.fromRGB(0, 255, 0))
 			end
+		end
+	
+		-- КУЛДАУН МЕЖДУ ТЕЛЕПОРТАМИ
+		if teleportCooldown > 0 then
+			teleportCooldown = teleportCooldown - 0.1
+			return
 		end
 	
 		local char = player.Character
@@ -2698,9 +2702,13 @@ local script = G2L["1b"];
 			updateIndicator("⚡ ТЕЛЕПОРТ", Color3.fromRGB(0, 255, 0))
 		end
 	
+		-- ТЕЛЕПОРТ НА МОНЕТУ
 		teleportToCoin(targetCoin)
 		task.wait(0.1)
 		pickCoin(targetCoin)
+	
+		-- ЗАДЕРЖКА МЕЖДУ ТЕЛЕПОРТАМИ (0.3-0.5 СЕК)
+		teleportCooldown = 0.3
 	end
 	
 	-- ====== ЗАПУСК ======
@@ -2722,6 +2730,7 @@ local script = G2L["1b"];
 		isActive = true
 		isBagFull = false
 		collectedCoins = {}
+		teleportCooldown = 0
 	
 		enableNoclip()
 	
@@ -2749,6 +2758,7 @@ local script = G2L["1b"];
 		isActive = false
 		isBagFull = false
 		collectedCoins = {}
+		teleportCooldown = 0
 	
 		for _, timer in pairs(collectedCoinsTimer) do
 			pcall(function() timer:Disconnect() end)
@@ -2788,13 +2798,6 @@ local script = G2L["1b"];
 		task.wait(0.5)
 		collectedCoins = {}
 		if isActive then
-			local char = player.Character
-			if char then
-				local hrp = char:FindFirstChild("HumanoidRootPart")
-				if hrp then
-					safePoint = hrp.Position
-				end
-			end
 			enableNoclip()
 		end
 	end)
