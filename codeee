@@ -2342,7 +2342,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ТЕЛЕПОРТ + УБИЙЦА + МЕШОК)
+	-- MM2_AutoFarm (ТЕЛЕПОРТ + ЗАПОМИНАНИЕ МОНЕТ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2352,9 +2352,11 @@ local script = G2L["1b"];
 	local isActive = false
 	local farmConnection = nil
 	local safePoint = nil
-	local currentTarget = nil
 	local isBagFull = false
-	local isMoving = false
+	
+	-- ====== ЗАПОМИНАНИЕ СОБРАННЫХ МОНЕТ ======
+	local collectedCoins = {}
+	local collectedCoinsTimer = {}
 	
 	-- ====== NOCLIP ======
 	local noclipActive = false
@@ -2507,10 +2509,10 @@ local script = G2L["1b"];
 	local function isCoinValid(coin)
 		if not coin then return false end
 		if not coin.Parent then return false end
-		if coin:FindFirstChild("TouchInterest") then
-			return true
-		end
-		return false
+		if not coin:FindFirstChild("TouchInterest") then return false end
+		-- ПРОВЕРЯЕМ НЕ СОБРАЛИ ЛИ МЫ ЕЁ УЖЕ
+		if collectedCoins[coin] then return false end
+		return true
 	end
 	
 	-- ====== ПОЛУЧИТЬ ВСЕ МОНЕТЫ ======
@@ -2531,7 +2533,6 @@ local script = G2L["1b"];
 	local function findSafeCoin(coins, position, murdererPos)
 		local safeCoins = {}
 	
-		-- СОБИРАЕМ ВСЕ БЕЗОПАСНЫЕ (ДАЛЕКО ОТ УБИЙЦЫ)
 		for _, coin in pairs(coins) do
 			local coinPos = coin.Position
 			local isSafe = true
@@ -2548,7 +2549,6 @@ local script = G2L["1b"];
 			end
 		end
 	
-		-- ЕСЛИ ЕСТЬ БЕЗОПАСНЫЕ - БЛИЖАЙШАЯ ИЗ НИХ
 		if #safeCoins > 0 then
 			local nearest = nil
 			local nearestDist = math.huge
@@ -2562,7 +2562,6 @@ local script = G2L["1b"];
 			return nearest, "safe"
 		end
 	
-		-- ЕСЛИ НЕТ БЕЗОПАСНЫХ - САМАЯ ДАЛЕКАЯ ОТ УБИЙЦЫ
 		if murdererPos then
 			local farthest = nil
 			local farthestDist = -math.huge
@@ -2612,6 +2611,18 @@ local script = G2L["1b"];
 			firetouchinterest(hrp, coin, 1)
 		end)
 	
+		-- ПОМЕЧАЕМ МОНЕТУ КАК СОБРАННУЮ
+		collectedCoins[coin] = true
+	
+		-- ЧЕРЕЗ 3 СЕКУНДЫ УДАЛЯЕМ ИЗ ПАМЯТИ (ЕСЛИ МОНЕТА РЕСПАВНУЛАСЬ)
+		if collectedCoinsTimer[coin] then
+			collectedCoinsTimer[coin]:Disconnect()
+		end
+		collectedCoinsTimer[coin] = task.delay(3, function()
+			collectedCoins[coin] = nil
+			collectedCoinsTimer[coin] = nil
+		end)
+	
 		return true
 	end
 	
@@ -2654,7 +2665,6 @@ local script = G2L["1b"];
 			end
 		end
 	
-		-- ИЩЕМ УБИЙЦУ
 		local murderer = findMurderer()
 		local murdererPos = nil
 		if murderer and murderer.Character then
@@ -2673,15 +2683,13 @@ local script = G2L["1b"];
 			return
 		end
 	
-		-- ИЩЕМ БЕЗОПАСНУЮ МОНЕТУ
 		local targetCoin, mode = findSafeCoin(coins, hrp.Position, murdererPos)
 	
 		if not targetCoin then
-			updateIndicator("⏳ НЕТ МОНЕТ", Color3.fromRGB(255, 165, 0))
+			updateIndicator("⏳ НЕТ ДОСТУПНЫХ", Color3.fromRGB(255, 165, 0))
 			return
 		end
 	
-		-- ПОКАЗЫВАЕМ СТАТУС
 		if mode == "safe" then
 			updateIndicator("⚡ ТЕЛЕПОРТ ✅", Color3.fromRGB(0, 255, 255))
 		elseif mode == "farthest" then
@@ -2690,11 +2698,8 @@ local script = G2L["1b"];
 			updateIndicator("⚡ ТЕЛЕПОРТ", Color3.fromRGB(0, 255, 0))
 		end
 	
-		-- ТЕЛЕПОРТ НА МОНЕТУ
 		teleportToCoin(targetCoin)
 		task.wait(0.1)
-	
-		-- ПОДБИРАЕМ
 		pickCoin(targetCoin)
 	end
 	
@@ -2716,6 +2721,7 @@ local script = G2L["1b"];
 	
 		isActive = true
 		isBagFull = false
+		collectedCoins = {}
 	
 		enableNoclip()
 	
@@ -2742,6 +2748,12 @@ local script = G2L["1b"];
 	local function stopFarming()
 		isActive = false
 		isBagFull = false
+		collectedCoins = {}
+	
+		for _, timer in pairs(collectedCoinsTimer) do
+			pcall(function() timer:Disconnect() end)
+		end
+		collectedCoinsTimer = {}
 	
 		disableNoclip()
 	
@@ -2760,8 +2772,6 @@ local script = G2L["1b"];
 				hrp.RotVelocity = Vector3.zero
 			end
 		end
-	
-		currentTarget = nil
 	end
 	
 	-- ====== КНОПКА ======
@@ -2776,6 +2786,7 @@ local script = G2L["1b"];
 	-- ====== РЕСПАВН ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
+		collectedCoins = {}
 		if isActive then
 			local char = player.Character
 			if char then
