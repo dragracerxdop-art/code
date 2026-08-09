@@ -2342,7 +2342,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (TWEEN + ПРОВЕРКА МЕШКА + NOCLIP)
+	-- MM2_AutoFarm (TWEEN + ПРОВЕРКА МЕШКА + NOCLIP + РАУНД)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2385,6 +2385,24 @@ local script = G2L["1b"];
 			indicator.Text = "🔴 ВЫКЛ"
 			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
 		end
+	end
+	
+	-- ====== ПРОВЕРКА РАУНДА ======
+	local function isRoundActive()
+		local mainGui = player.PlayerGui:FindFirstChild("MainGUI")
+		if not mainGui then return false end
+		local gameFrame = mainGui:FindFirstChild("Game")
+		if not gameFrame then return false end
+	
+		if gameFrame:FindFirstChild("Timer") and gameFrame.Timer.Visible then
+			return true
+		end
+	
+		if player:GetAttribute("Alive") == true then
+			return true
+		end
+	
+		return false
 	end
 	
 	-- ====== NOCLIP ФУНКЦИИ ======
@@ -2633,6 +2651,15 @@ local script = G2L["1b"];
 	
 	-- ====== ГЛАВНЫЙ ЦИКЛ ======
 	local function farmLoopFunction()
+		-- ПРОВЕРКА РАУНДА
+		if not isRoundActive() then
+			if isBagFull then
+				isBagFull = false
+				updateIndicator()
+			end
+			return
+		end
+	
 		if isBagFullFunction() then
 			if not isBagFull then
 				isBagFull = true
