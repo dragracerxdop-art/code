@@ -7,7 +7,7 @@
  Y888P  ~Y8888P' Y888888P      888888D      Y88888P ~Y8888P' YP   YP  CONVERTER 
 ]=]
 
--- Instances: 269 | Scripts: 53 | Modules: 0 | Tags: 0
+-- Instances: 261 | Scripts: 51 | Modules: 0 | Tags: 0
 local G2L = {};
 
 -- StarterGui.Folder.PurpHub
@@ -100,7 +100,6 @@ G2L["c"] = Instance.new("LocalScript", G2L["2"]);
 G2L["d"] = Instance.new("ScrollingFrame", G2L["2"]);
 G2L["d"]["Active"] = true;
 G2L["d"]["BorderSizePixel"] = 0;
-G2L["d"]["CanvasPosition"] = Vector2.new(0, 542);
 G2L["d"]["Name"] = [[RightFrame]];
 G2L["d"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["d"]["Size"] = UDim2.new(0, 352, 0, 420);
@@ -152,6 +151,7 @@ G2L["13"] = Instance.new("LocalScript", G2L["10"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_Rejoin
 G2L["14"] = Instance.new("ImageButton", G2L["d"]);
 G2L["14"]["BorderSizePixel"] = 0;
+G2L["14"]["Visible"] = false;
 G2L["14"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["14"]["Image"] = [[rbxassetid://84658496920287]];
 G2L["14"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -180,7 +180,6 @@ G2L["17"] = Instance.new("LocalScript", G2L["14"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_AutoFarm
 G2L["18"] = Instance.new("ImageButton", G2L["d"]);
 G2L["18"]["BorderSizePixel"] = 0;
-G2L["18"]["Visible"] = false;
 G2L["18"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["18"]["Image"] = [[rbxassetid://127936962150252]];
 G2L["18"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -319,6 +318,7 @@ G2L["2a"]["Color"] = Color3.fromRGB(180, 4, 255);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_CTRL_DEL
 G2L["2b"] = Instance.new("ImageButton", G2L["d"]);
 G2L["2b"]["BorderSizePixel"] = 0;
+G2L["2b"]["Visible"] = false;
 G2L["2b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["2b"]["Image"] = [[rbxassetid://134682894895611]];
 G2L["2b"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -352,6 +352,7 @@ G2L["2f"] = Instance.new("LocalScript", G2L["2b"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_CTRL_CLICK
 G2L["30"] = Instance.new("ImageButton", G2L["d"]);
 G2L["30"]["BorderSizePixel"] = 0;
+G2L["30"]["Visible"] = false;
 G2L["30"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["30"]["Image"] = [[rbxassetid://127985833910211]];
 G2L["30"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -436,6 +437,7 @@ G2L["3b"] = Instance.new("LocalScript", G2L["38"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_OpenPlayerList
 G2L["3c"] = Instance.new("ImageButton", G2L["d"]);
 G2L["3c"]["BorderSizePixel"] = 0;
+G2L["3c"]["Visible"] = false;
 G2L["3c"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["3c"]["Image"] = [[rbxassetid://113195840604536]];
 G2L["3c"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -463,6 +465,7 @@ G2L["3f"] = Instance.new("LocalScript", G2L["3c"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_Fling
 G2L["40"] = Instance.new("ImageButton", G2L["d"]);
 G2L["40"]["BorderSizePixel"] = 0;
+G2L["40"]["Visible"] = false;
 G2L["40"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["40"]["Image"] = [[rbxassetid://86617316299707]];
 G2L["40"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -489,9 +492,9 @@ G2L["43"] = Instance.new("LocalScript", G2L["40"]);
 
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_PlayerList
 G2L["44"] = Instance.new("ScrollingFrame", G2L["d"]);
+G2L["44"]["Visible"] = false;
 G2L["44"]["Active"] = true;
 G2L["44"]["BorderSizePixel"] = 0;
-G2L["44"]["CanvasPosition"] = Vector2.new(0, 600);
 G2L["44"]["Name"] = [[MISC_PlayerList]];
 G2L["44"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["44"]["Size"] = UDim2.new(0, 172, 0, 158);
@@ -544,6 +547,7 @@ G2L["4a"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_AntiFling
 G2L["4b"] = Instance.new("ImageButton", G2L["d"]);
 G2L["4b"]["BorderSizePixel"] = 0;
+G2L["4b"]["Visible"] = false;
 G2L["4b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["4b"]["Image"] = [[rbxassetid://97390425817878]];
 G2L["4b"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -682,6 +686,7 @@ G2L["5d"] = Instance.new("LocalScript", G2L["5a"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_Hitbox
 G2L["5e"] = Instance.new("ImageButton", G2L["d"]);
 G2L["5e"]["BorderSizePixel"] = 0;
+G2L["5e"]["Visible"] = false;
 G2L["5e"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["5e"]["Image"] = [[rbxassetid://105139943642120]];
 G2L["5e"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -708,6 +713,7 @@ G2L["61"] = Instance.new("LocalScript", G2L["5e"]);
 
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_HitboxValue
 G2L["62"] = Instance.new("TextBox", G2L["d"]);
+G2L["62"]["Visible"] = false;
 G2L["62"]["Name"] = [[MISC_HitboxValue]];
 G2L["62"]["BorderSizePixel"] = 0;
 G2L["62"]["TextSize"] = 14;
@@ -734,6 +740,7 @@ G2L["64"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_Fly
 G2L["65"] = Instance.new("ImageButton", G2L["d"]);
 G2L["65"]["BorderSizePixel"] = 0;
+G2L["65"]["Visible"] = false;
 G2L["65"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["65"]["Image"] = [[rbxassetid://101249471048048]];
 G2L["65"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -761,6 +768,7 @@ G2L["68"] = Instance.new("LocalScript", G2L["65"]);
 
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_WhiteList
 G2L["69"] = Instance.new("ScrollingFrame", G2L["d"]);
+G2L["69"]["Visible"] = false;
 G2L["69"]["Active"] = true;
 G2L["69"]["BorderSizePixel"] = 0;
 G2L["69"]["Name"] = [[MISC_WhiteList]];
@@ -845,6 +853,7 @@ G2L["73"] = Instance.new("LocalScript", G2L["70"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_Platform
 G2L["74"] = Instance.new("ImageButton", G2L["d"]);
 G2L["74"]["BorderSizePixel"] = 0;
+G2L["74"]["Visible"] = false;
 G2L["74"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["74"]["Image"] = [[rbxassetid://105830813298921]];
 G2L["74"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -902,7 +911,6 @@ G2L["7b"] = Instance.new("LocalScript", G2L["78"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_ESP
 G2L["7c"] = Instance.new("ImageButton", G2L["d"]);
 G2L["7c"]["BorderSizePixel"] = 0;
-G2L["7c"]["Visible"] = false;
 G2L["7c"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["7c"]["Image"] = [[rbxassetid://103019120424174]];
 G2L["7c"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -930,7 +938,6 @@ G2L["7f"] = Instance.new("LocalScript", G2L["7c"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_GunESP
 G2L["80"] = Instance.new("ImageButton", G2L["d"]);
 G2L["80"]["BorderSizePixel"] = 0;
-G2L["80"]["Visible"] = false;
 G2L["80"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["80"]["Image"] = [[rbxassetid://84784920557317]];
 G2L["80"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -958,7 +965,6 @@ G2L["83"] = Instance.new("LocalScript", G2L["80"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_PickUpGun
 G2L["84"] = Instance.new("ImageButton", G2L["d"]);
 G2L["84"]["BorderSizePixel"] = 0;
-G2L["84"]["Visible"] = false;
 G2L["84"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["84"]["Image"] = [[rbxassetid://96970545749565]];
 G2L["84"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -986,6 +992,7 @@ G2L["87"] = Instance.new("LocalScript", G2L["84"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_WhiteList_Open
 G2L["88"] = Instance.new("ImageButton", G2L["d"]);
 G2L["88"]["BorderSizePixel"] = 0;
+G2L["88"]["Visible"] = false;
 G2L["88"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["88"]["Image"] = [[rbxassetid://78292908557666]];
 G2L["88"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -1152,6 +1159,7 @@ G2L["9b"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_FullBright
 G2L["9c"] = Instance.new("ImageButton", G2L["d"]);
 G2L["9c"]["BorderSizePixel"] = 0;
+G2L["9c"]["Visible"] = false;
 G2L["9c"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["9c"]["Image"] = [[rbxassetid://139446261097202]];
 G2L["9c"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -1179,6 +1187,7 @@ G2L["9f"] = Instance.new("LocalScript", G2L["9c"]);
 
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_FlySpeed
 G2L["a0"] = Instance.new("TextBox", G2L["d"]);
+G2L["a0"]["Visible"] = false;
 G2L["a0"]["Name"] = [[MISC_FlySpeed]];
 G2L["a0"]["BorderSizePixel"] = 0;
 G2L["a0"]["TextSize"] = 14;
@@ -1589,7 +1598,6 @@ G2L["d6"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["d6"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["d6"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["d6"]["Size"] = UDim2.new(0, 290, 0, 29);
-G2L["d6"]["Visible"] = false;
 G2L["d6"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["d6"]["Name"] = [[MM2_Sheriff]];
 G2L["d6"]["Position"] = UDim2.new(0.05682, 0, 0.01247, 0);
@@ -1610,7 +1618,6 @@ G2L["d8"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["d8"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["d8"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["d8"]["Size"] = UDim2.new(0, 290, 0, 29);
-G2L["d8"]["Visible"] = false;
 G2L["d8"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["d8"]["Name"] = [[MM2_Murder]];
 G2L["d8"]["Position"] = UDim2.new(0.05682, 0, 0.04574, 0);
@@ -1631,7 +1638,6 @@ G2L["da"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["da"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
 G2L["da"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
 G2L["da"]["Size"] = UDim2.new(0, 290, 0, 29);
-G2L["da"]["Visible"] = false;
 G2L["da"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["da"]["Name"] = [[MM2_Hero]];
 G2L["da"]["Position"] = UDim2.new(0.05682, 0, 0.07588, 0);
@@ -1647,7 +1653,6 @@ G2L["db"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_KillMurderer
 G2L["dc"] = Instance.new("ImageButton", G2L["d"]);
 G2L["dc"]["BorderSizePixel"] = 0;
-G2L["dc"]["Visible"] = false;
 G2L["dc"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["dc"]["Image"] = [[rbxassetid://72858093409720]];
 G2L["dc"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -1675,7 +1680,6 @@ G2L["df"] = Instance.new("LocalScript", G2L["dc"]);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_KillAll
 G2L["e0"] = Instance.new("ImageButton", G2L["d"]);
 G2L["e0"]["BorderSizePixel"] = 0;
-G2L["e0"]["Visible"] = false;
 G2L["e0"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
 G2L["e0"]["Image"] = [[rbxassetid://97343320129949]];
 G2L["e0"]["Size"] = UDim2.new(0, 149, 0, 73);
@@ -1711,7 +1715,6 @@ G2L["e4"]["Size"] = UDim2.new(0, 20, 0, 24);
 G2L["e4"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["e4"]["Text"] = [[!!!!]];
 G2L["e4"]["Name"] = [[MM2_RolesToggle]];
-G2L["e4"]["Visible"] = false;
 G2L["e4"]["Position"] = UDim2.new(0.90057, 0, 0.04262, 0);
 
 
@@ -1727,281 +1730,225 @@ G2L["e6"] = Instance.new("LocalScript", G2L["e4"]);
 
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_Noclip
-G2L["e7"] = Instance.new("ImageButton", G2L["d"]);
+-- StarterGui.Folder.PurpHub.MainFrame.LeftFrame
+G2L["e7"] = Instance.new("ScrollingFrame", G2L["2"]);
+G2L["e7"]["Active"] = true;
 G2L["e7"]["BorderSizePixel"] = 0;
-G2L["e7"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["e7"]["Image"] = [[rbxassetid://108884368546144]];
-G2L["e7"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["e7"]["Name"] = [[LeftFrame]];
+G2L["e7"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["e7"]["Size"] = UDim2.new(0, 149, 0, 419);
+G2L["e7"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["e7"]["Position"] = UDim2.new(-0.00018, 0, 0.12682, 0);
 G2L["e7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["e7"]["Name"] = [[MISC_Noclip]];
-G2L["e7"]["Position"] = UDim2.new(0.51364, 0, 0.76543, 0);
+G2L["e7"]["ScrollBarThickness"] = 0;
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_Noclip.UICorner
+-- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.UICorner
 G2L["e8"] = Instance.new("UICorner", G2L["e7"]);
 G2L["e8"]["CornerRadius"] = UDim.new(0, 25);
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_Noclip.UIStroke
+-- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.UIStroke
 G2L["e9"] = Instance.new("UIStroke", G2L["e7"]);
 G2L["e9"]["Thickness"] = 3;
 G2L["e9"]["Color"] = Color3.fromRGB(180, 4, 255);
-G2L["e9"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
-
-
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_Noclip.LocalScript
-G2L["ea"] = Instance.new("LocalScript", G2L["e7"]);
-
-
-
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_AntiAFK
-G2L["eb"] = Instance.new("ImageButton", G2L["d"]);
-G2L["eb"]["BorderSizePixel"] = 0;
-G2L["eb"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["eb"]["Image"] = [[rbxassetid://76925704136925]];
-G2L["eb"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["eb"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["eb"]["Name"] = [[MISC_AntiAFK]];
-G2L["eb"]["Position"] = UDim2.new(0.025, 0, 0.861, 0);
-
-
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_AntiAFK.UICorner
-G2L["ec"] = Instance.new("UICorner", G2L["eb"]);
-G2L["ec"]["CornerRadius"] = UDim.new(0, 25);
-
-
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_AntiAFK.UIStroke
-G2L["ed"] = Instance.new("UIStroke", G2L["eb"]);
-G2L["ed"]["Thickness"] = 3;
-G2L["ed"]["Color"] = Color3.fromRGB(180, 4, 255);
-G2L["ed"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
-
-
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_AntiAFK.LocalScript
-G2L["ee"] = Instance.new("LocalScript", G2L["eb"]);
-
-
-
--- StarterGui.Folder.PurpHub.MainFrame.LeftFrame
-G2L["ef"] = Instance.new("ScrollingFrame", G2L["2"]);
-G2L["ef"]["Active"] = true;
-G2L["ef"]["BorderSizePixel"] = 0;
-G2L["ef"]["Name"] = [[LeftFrame]];
-G2L["ef"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["ef"]["Size"] = UDim2.new(0, 149, 0, 419);
-G2L["ef"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["ef"]["Position"] = UDim2.new(-0.00018, 0, 0.12682, 0);
-G2L["ef"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["ef"]["ScrollBarThickness"] = 0;
-
-
--- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.UICorner
-G2L["f0"] = Instance.new("UICorner", G2L["ef"]);
-G2L["f0"]["CornerRadius"] = UDim.new(0, 25);
-
-
--- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.UIStroke
-G2L["f1"] = Instance.new("UIStroke", G2L["ef"]);
-G2L["f1"]["Thickness"] = 3;
-G2L["f1"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.ESP
-G2L["f2"] = Instance.new("ImageButton", G2L["ef"]);
-G2L["f2"]["BorderSizePixel"] = 0;
-G2L["f2"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["f2"]["Image"] = [[rbxassetid://115832341179452]];
-G2L["f2"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["f2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["f2"]["Name"] = [[ESP]];
+G2L["ea"] = Instance.new("ImageButton", G2L["e7"]);
+G2L["ea"]["BorderSizePixel"] = 0;
+G2L["ea"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["ea"]["Image"] = [[rbxassetid://115832341179452]];
+G2L["ea"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["ea"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["ea"]["Name"] = [[ESP]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.ESP.UICorner
-G2L["f3"] = Instance.new("UICorner", G2L["f2"]);
-G2L["f3"]["CornerRadius"] = UDim.new(0, 25);
+G2L["eb"] = Instance.new("UICorner", G2L["ea"]);
+G2L["eb"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.ESP.UIStroke
-G2L["f4"] = Instance.new("UIStroke", G2L["f2"]);
-G2L["f4"]["Thickness"] = 3;
-G2L["f4"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["ec"] = Instance.new("UIStroke", G2L["ea"]);
+G2L["ec"]["Thickness"] = 3;
+G2L["ec"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Troll
-G2L["f5"] = Instance.new("ImageButton", G2L["ef"]);
-G2L["f5"]["BorderSizePixel"] = 0;
-G2L["f5"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["f5"]["Image"] = [[rbxassetid://86069927634963]];
-G2L["f5"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["f5"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["f5"]["Name"] = [[Troll]];
-G2L["f5"]["Position"] = UDim2.new(0, 0, 0.34304, 0);
+G2L["ed"] = Instance.new("ImageButton", G2L["e7"]);
+G2L["ed"]["BorderSizePixel"] = 0;
+G2L["ed"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["ed"]["Image"] = [[rbxassetid://86069927634963]];
+G2L["ed"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["ed"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["ed"]["Name"] = [[Troll]];
+G2L["ed"]["Position"] = UDim2.new(0, 0, 0.34304, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Troll.UICorner
-G2L["f6"] = Instance.new("UICorner", G2L["f5"]);
-G2L["f6"]["CornerRadius"] = UDim.new(0, 25);
+G2L["ee"] = Instance.new("UICorner", G2L["ed"]);
+G2L["ee"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Troll.UIStroke
-G2L["f7"] = Instance.new("UIStroke", G2L["f5"]);
-G2L["f7"]["Thickness"] = 3;
-G2L["f7"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["ef"] = Instance.new("UIStroke", G2L["ed"]);
+G2L["ef"]["Thickness"] = 3;
+G2L["ef"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MISC
-G2L["f8"] = Instance.new("ImageButton", G2L["ef"]);
-G2L["f8"]["BorderSizePixel"] = 0;
-G2L["f8"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["f8"]["Image"] = [[rbxassetid://113127774037849]];
-G2L["f8"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["f8"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["f8"]["Name"] = [[MISC]];
-G2L["f8"]["Position"] = UDim2.new(0, 0, 0.25676, 0);
+G2L["f0"] = Instance.new("ImageButton", G2L["e7"]);
+G2L["f0"]["BorderSizePixel"] = 0;
+G2L["f0"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["f0"]["Image"] = [[rbxassetid://113127774037849]];
+G2L["f0"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["f0"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["f0"]["Name"] = [[MISC]];
+G2L["f0"]["Position"] = UDim2.new(0, 0, 0.25676, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MISC.UICorner
-G2L["f9"] = Instance.new("UICorner", G2L["f8"]);
-G2L["f9"]["CornerRadius"] = UDim.new(0, 25);
+G2L["f1"] = Instance.new("UICorner", G2L["f0"]);
+G2L["f1"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MISC.UIStroke
-G2L["fa"] = Instance.new("UIStroke", G2L["f8"]);
-G2L["fa"]["Thickness"] = 3;
-G2L["fa"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["f2"] = Instance.new("UIStroke", G2L["f0"]);
+G2L["f2"]["Thickness"] = 3;
+G2L["f2"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SPECTATE
-G2L["fb"] = Instance.new("ImageButton", G2L["ef"]);
-G2L["fb"]["BorderSizePixel"] = 0;
-G2L["fb"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["fb"]["Image"] = [[rbxassetid://88668758714272]];
-G2L["fb"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["fb"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["fb"]["Name"] = [[SPECTATE]];
-G2L["fb"]["Position"] = UDim2.new(0, 0, 0.17152, 0);
+G2L["f3"] = Instance.new("ImageButton", G2L["e7"]);
+G2L["f3"]["BorderSizePixel"] = 0;
+G2L["f3"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["f3"]["Image"] = [[rbxassetid://88668758714272]];
+G2L["f3"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["f3"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["f3"]["Name"] = [[SPECTATE]];
+G2L["f3"]["Position"] = UDim2.new(0, 0, 0.17152, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SPECTATE.UICorner
-G2L["fc"] = Instance.new("UICorner", G2L["fb"]);
-G2L["fc"]["CornerRadius"] = UDim.new(0, 25);
+G2L["f4"] = Instance.new("UICorner", G2L["f3"]);
+G2L["f4"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SPECTATE.UIStroke
-G2L["fd"] = Instance.new("UIStroke", G2L["fb"]);
-G2L["fd"]["Thickness"] = 3;
-G2L["fd"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["f5"] = Instance.new("UIStroke", G2L["f3"]);
+G2L["f5"]["Thickness"] = 3;
+G2L["f5"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.TELEPORT
-G2L["fe"] = Instance.new("ImageButton", G2L["ef"]);
-G2L["fe"]["BorderSizePixel"] = 0;
-G2L["fe"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["fe"]["Image"] = [[rbxassetid://111184600011102]];
-G2L["fe"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["fe"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["fe"]["Name"] = [[TELEPORT]];
-G2L["fe"]["Position"] = UDim2.new(0, 0, 0.08628, 0);
+G2L["f6"] = Instance.new("ImageButton", G2L["e7"]);
+G2L["f6"]["BorderSizePixel"] = 0;
+G2L["f6"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["f6"]["Image"] = [[rbxassetid://111184600011102]];
+G2L["f6"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["f6"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["f6"]["Name"] = [[TELEPORT]];
+G2L["f6"]["Position"] = UDim2.new(0, 0, 0.08628, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.TELEPORT.UICorner
-G2L["ff"] = Instance.new("UICorner", G2L["fe"]);
-G2L["ff"]["CornerRadius"] = UDim.new(0, 25);
+G2L["f7"] = Instance.new("UICorner", G2L["f6"]);
+G2L["f7"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.TELEPORT.UIStroke
-G2L["100"] = Instance.new("UIStroke", G2L["fe"]);
-G2L["100"]["Thickness"] = 3;
-G2L["100"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["f8"] = Instance.new("UIStroke", G2L["f6"]);
+G2L["f8"]["Thickness"] = 3;
+G2L["f8"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
-G2L["101"] = Instance.new("LocalScript", G2L["ef"]);
-G2L["101"]["Name"] = [[SwitchTabs]];
+G2L["f9"] = Instance.new("LocalScript", G2L["e7"]);
+G2L["f9"]["Name"] = [[SwitchTabs]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MM2
-G2L["102"] = Instance.new("ImageButton", G2L["ef"]);
-G2L["102"]["BorderSizePixel"] = 0;
-G2L["102"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["102"]["Image"] = [[rbxassetid://88896945785744]];
-G2L["102"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["102"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["102"]["Name"] = [[MM2]];
-G2L["102"]["Position"] = UDim2.new(0, 0, 0.429, 0);
+G2L["fa"] = Instance.new("ImageButton", G2L["e7"]);
+G2L["fa"]["BorderSizePixel"] = 0;
+G2L["fa"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["fa"]["Image"] = [[rbxassetid://88896945785744]];
+G2L["fa"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["fa"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["fa"]["Name"] = [[MM2]];
+G2L["fa"]["Position"] = UDim2.new(0, 0, 0.429, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MM2.UICorner
-G2L["103"] = Instance.new("UICorner", G2L["102"]);
-G2L["103"]["CornerRadius"] = UDim.new(0, 25);
+G2L["fb"] = Instance.new("UICorner", G2L["fa"]);
+G2L["fb"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MM2.UIStroke
-G2L["104"] = Instance.new("UIStroke", G2L["102"]);
-G2L["104"]["Thickness"] = 3;
-G2L["104"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["fc"] = Instance.new("UIStroke", G2L["fa"]);
+G2L["fc"]["Thickness"] = 3;
+G2L["fc"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Zo Wip
-G2L["105"] = Instance.new("ImageButton", G2L["ef"]);
-G2L["105"]["BorderSizePixel"] = 0;
-G2L["105"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["105"]["Image"] = [[rbxassetid://94848246522699]];
-G2L["105"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["105"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["105"]["Name"] = [[Zo Wip]];
-G2L["105"]["Position"] = UDim2.new(0, 0, 0.515, 0);
+G2L["fd"] = Instance.new("ImageButton", G2L["e7"]);
+G2L["fd"]["BorderSizePixel"] = 0;
+G2L["fd"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["fd"]["Image"] = [[rbxassetid://94848246522699]];
+G2L["fd"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["fd"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["fd"]["Name"] = [[Zo Wip]];
+G2L["fd"]["Position"] = UDim2.new(0, 0, 0.515, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Zo Wip.UICorner
-G2L["106"] = Instance.new("UICorner", G2L["105"]);
-G2L["106"]["CornerRadius"] = UDim.new(0, 25);
+G2L["fe"] = Instance.new("UICorner", G2L["fd"]);
+G2L["fe"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Zo Wip.UIStroke
-G2L["107"] = Instance.new("UIStroke", G2L["105"]);
-G2L["107"]["Thickness"] = 3;
-G2L["107"]["Color"] = Color3.fromRGB(180, 4, 255);
-G2L["107"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
+G2L["ff"] = Instance.new("UIStroke", G2L["fd"]);
+G2L["ff"]["Thickness"] = 3;
+G2L["ff"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["ff"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SHOW
-G2L["108"] = Instance.new("ImageButton", G2L["ef"]);
-G2L["108"]["BorderSizePixel"] = 0;
-G2L["108"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["108"]["Image"] = [[rbxassetid://118102955667667]];
-G2L["108"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["108"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["108"]["Name"] = [[SHOW]];
-G2L["108"]["Position"] = UDim2.new(0, 0, 0.601, 0);
+G2L["100"] = Instance.new("ImageButton", G2L["e7"]);
+G2L["100"]["BorderSizePixel"] = 0;
+G2L["100"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["100"]["Image"] = [[rbxassetid://118102955667667]];
+G2L["100"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["100"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["100"]["Name"] = [[SHOW]];
+G2L["100"]["Position"] = UDim2.new(0, 0, 0.601, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SHOW.UICorner
-G2L["109"] = Instance.new("UICorner", G2L["108"]);
-G2L["109"]["CornerRadius"] = UDim.new(0, 25);
+G2L["101"] = Instance.new("UICorner", G2L["100"]);
+G2L["101"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SHOW.UIStroke
-G2L["10a"] = Instance.new("UIStroke", G2L["108"]);
-G2L["10a"]["Thickness"] = 3;
-G2L["10a"]["Color"] = Color3.fromRGB(180, 4, 255);
-G2L["10a"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
+G2L["102"] = Instance.new("UIStroke", G2L["100"]);
+G2L["102"]["Thickness"] = 3;
+G2L["102"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["102"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.HotKeys
-G2L["10b"] = Instance.new("LocalScript", G2L["2"]);
-G2L["10b"]["Name"] = [[HotKeys]];
+G2L["103"] = Instance.new("LocalScript", G2L["2"]);
+G2L["103"]["Name"] = [[HotKeys]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.ESP
-G2L["10c"] = Instance.new("LocalScript", G2L["2"]);
-G2L["10c"]["Name"] = [[ESP]];
+G2L["104"] = Instance.new("LocalScript", G2L["2"]);
+G2L["104"]["Name"] = [[ESP]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.AntiFling
-G2L["10d"] = Instance.new("LocalScript", G2L["2"]);
-G2L["10d"]["Name"] = [[AntiFling]];
+G2L["105"] = Instance.new("LocalScript", G2L["2"]);
+G2L["105"]["Name"] = [[AntiFling]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.CLose\Open.LocalScript
@@ -2348,20 +2295,18 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (РАБОЧАЯ ВЕРСИЯ)
+	-- MM2_AutoFarm (TWEEN + МГНОВЕННЫЙ ПЕРЕХОД)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
-	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
 	local TweenService = game:GetService("TweenService")
 	
 	local isActive = false
-	local farmConnection = nil
-	local safePoint = nil
-	local currentTarget = nil
+	local farmLoop = nil
 	local currentTween = nil
 	local isMoving = false
+	local coinCooldown = {} -- ЗАЩИТА ОТ ПОВТОРНОГО СБОРА
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2375,9 +2320,14 @@ local script = G2L["1b"];
 	indicator.Font = Enum.Font.SourceSansBold
 	indicator.Parent = button
 	
-	local function updateIndicator(text, color)
-		indicator.Text = text
-		indicator.TextColor3 = color or Color3.fromRGB(255, 0, 0)
+	local function updateIndicator()
+		if isActive then
+			indicator.Text = "🟢 ФАРМ"
+			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+		else
+			indicator.Text = "🔴 ВЫКЛ"
+			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+		end
 	end
 	
 	-- ====== ОСТАНОВКА ТВИНА ======
@@ -2389,119 +2339,86 @@ local script = G2L["1b"];
 		isMoving = false
 	end
 	
-	-- ====== ПРОВЕРКА РАУНДА ======
-	local function isRoundActive()
-		local mainGui = player.PlayerGui:FindFirstChild("MainGUI")
-		if not mainGui then return false end
-		local gameFrame = mainGui:FindFirstChild("Game")
-		if not gameFrame then return false end
-		if gameFrame:FindFirstChild("Timer") and gameFrame.Timer.Visible then
-			return true
-		end
-		if player:GetAttribute("Alive") == true then
-			return true
-		end
-		return false
-	end
-	
-	-- ====== ПОИСК КАРТЫ ======
-	local function findMap()
-		for _, v in workspace:GetDescendants() do
-			if v.Name == "Spawns" and v.Parent and v.Parent.Name ~= "Lobby" then
-				return v.Parent
-			end
-		end
-		return nil
-	end
-	
 	-- ====== ПОИСК КОНТЕЙНЕРА ======
 	local function findCoinContainer()
-		local map = findMap()
-		if map then
-			return map:FindFirstChild("CoinContainer")
-		end
-		return nil
-	end
-	
-	-- ====== ПОИСК УБИЙЦЫ ======
-	local function findMurderer()
-		for _, plr in pairs(Players:GetPlayers()) do
-			if plr ~= player then
-				if plr.Backpack:FindFirstChild("Knife") then
-					return plr
-				end
-				if plr.Character and plr.Character:FindFirstChild("Knife") then
-					return plr
-				end
+		for _, obj in pairs(workspace:GetChildren()) do
+			if obj:IsA("Model") and obj:FindFirstChild("CoinContainer") then
+				return obj:FindFirstChild("CoinContainer")
 			end
 		end
 		return nil
 	end
 	
-	-- ====== ПРОВЕРКА МОНЕТЫ ======
-	local function isCoinValid(coin)
+	-- ====== ПРОВЕРКА: МОНЕТА ДОСТУПНА ======
+	local function isCoinAvailable(coin)
 		if not coin then return false end
 		if not coin.Parent then return false end
-		if coin:FindFirstChild("TouchInterest") then
-			return true
-		end
-		return false
-	end
-	
-	-- ====== ПОЛУЧИТЬ ВСЕ МОНЕТЫ ======
-	local function getCoins(container)
-		local coins = {}
-		if not container then return coins end
-		for _, coin in pairs(container:GetChildren()) do
-			if isCoinValid(coin) then
-				table.insert(coins, coin)
-			end
-		end
-		return coins
+		if coin.Transparency ~= 1 then return false end
+		if not coin:FindFirstChild("TouchInterest") then return false end
+		if coinCooldown[coin] then return false end -- ПРОПУСКАЕМ НЕДАВНО СОБРАННЫЕ
+		return true
 	end
 	
 	-- ====== ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ ======
-	local function findNearestCoin(coins, position, murdererPos)
+	local function findNearestCoin(container, currentPos)
+		if not container then return nil end
+	
 		local nearest = nil
-		local nearestDist = math.huge
-		for _, coin in pairs(coins) do
-			local coinPos = coin.Position
-			if murdererPos then
-				local distToMurderer = (coinPos - murdererPos).Magnitude
-				if distToMurderer < 30 then
-					continue
+		local minDist = math.huge
+	
+		for _, coin in pairs(container:GetChildren()) do
+			if isCoinAvailable(coin) then
+				local dist = (currentPos - coin.Position).Magnitude
+				if dist < minDist then
+					nearest = coin
+					minDist = dist
 				end
 			end
-			local dist = (position - coinPos).Magnitude
-			if dist < nearestDist then
-				nearestDist = dist
-				nearest = coin
-			end
 		end
-		return nearest, nearestDist
+	
+		return nearest, minDist
 	end
 	
-	-- ====== ПОЛЕТ ======
-	local function flyTo(targetPos)
+	-- ====== ПОЛЕТ К МОНЕТЕ ======
+	local function flyToCoin(coin, callback)
 		local char = player.Character
-		if not char then return false end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return false end
-	
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid or humanoid.Health <= 0 then return false end
-	
-		local distance = (hrp.Position - targetPos).Magnitude
-	
-		if distance < 5 then
-			return true
+		if not char then 
+			if callback then callback(false) end
+			return 
 		end
 	
-		local speed = 22
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then 
+			if callback then callback(false) end
+			return 
+		end
+	
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid or humanoid.Health <= 0 then 
+			if callback then callback(false) end
+			return 
+		end
+	
+		-- НОКЛИП
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
+		end
+	
+		local targetPos = coin.Position + Vector3.new(0, 2, 0)
+		local distance = (hrp.Position - targetPos).Magnitude
+	
+		if distance < 3 then
+			if callback then callback(true) end
+			return
+		end
+	
+		-- СКОРОСТЬ 25 (БЫСТРО)
+		local speed = 25
 		local duration = distance / speed
-		duration = math.max(duration, 0.2)
-		duration = math.min(duration, 2.5)
+		duration = math.max(duration, 0.15)
+		duration = math.min(duration, 1.5)
 	
 		stopTween()
 		isMoving = true
@@ -2520,6 +2437,7 @@ local script = G2L["1b"];
 		currentTween.Completed:Connect(function()
 			completed = true
 			isMoving = false
+			if callback then callback(true) end
 		end)
 	
 		currentTween:Play()
@@ -2530,59 +2448,58 @@ local script = G2L["1b"];
 	
 			if humanoid.Health <= 0 then
 				stopTween()
-				return false
+				if callback then callback(false) end
+				return
 			end
 	
-			if currentTarget and not isCoinValid(currentTarget) then
+			if not coin.Parent or not coin:FindFirstChild("TouchInterest") then
 				stopTween()
-				return false
+				if callback then callback(false) end
+				return
 			end
 	
 			if tick() > timeout then
 				stopTween()
-				return false
+				if callback then callback(false) end
+				return
 			end
 	
 		until completed == true
 	
 		currentTween = nil
 		isMoving = false
-		return true
+		if callback then callback(true) end
 	end
 	
 	-- ====== ПОДОБРАТЬ МОНЕТУ ======
 	local function pickCoin(coin)
-		if not coin or not isCoinValid(coin) then return false end
+		if not coin or not coin.Parent then return false end
+	
 		local char = player.Character
 		if not char then return false end
+	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
+	
 		pcall(function()
 			firetouchinterest(hrp, coin, 0)
 			firetouchinterest(hrp, coin, 1)
+			task.wait(0.05)
+			firetouchinterest(hrp, coin, 0)
+			firetouchinterest(hrp, coin, 1)
 		end)
+	
+		-- ДОБАВЛЯЕМ В КУЛДАУН ЧТОБЫ НЕ ТРОГАТЬ СНОВА
+		coinCooldown[coin] = true
+		task.delay(0.5, function()
+			coinCooldown[coin] = nil
+		end)
+	
 		return true
 	end
 	
-	-- ====== ВЕРНУТЬСЯ В СЕЙВ ======
-	local function goToSafe()
-		if not safePoint then return end
-		local char = player.Character
-		if not char then return end
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return end
-		local dist = (hrp.Position - safePoint).Magnitude
-		if dist < 5 then return end
-		flyTo(safePoint)
-	end
-	
-	-- ====== ОСНОВНОЙ ЦИКЛ ======
-	local function farmTick()
-		if not isRoundActive() then
-			updateIndicator("⏳ ОЖИДАНИЕ", Color3.fromRGB(255, 165, 0))
-			return
-		end
-	
+	-- ====== ГЛАВНЫЙ ЦИКЛ ======
+	local function farmLoopFunction()
 		local char = player.Character
 		if not char then return end
 	
@@ -2590,28 +2507,12 @@ local script = G2L["1b"];
 		if not hrp then return end
 	
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid or humanoid.Health <= 0 then return end
-	
-		local murderer = findMurderer()
-		local murdererPos = nil
-		if murderer and murderer.Character then
-			local mhrp = murderer.Character:FindFirstChild("HumanoidRootPart")
-			if mhrp then
-				murdererPos = mhrp.Position
-			end
+		if not humanoid or humanoid.Health <= 0 then
+			stopFarming()
+			return
 		end
 	
-		if murdererPos and safePoint then
-			local dist = (hrp.Position - murdererPos).Magnitude
-			if dist < 30 then
-				updateIndicator("⚠️ УБИЙЦА", Color3.fromRGB(255, 0, 0))
-				if not isMoving then
-					goToSafe()
-				end
-				return
-			end
-		end
-	
+		-- ЕСЛИ ЛЕТИМ - НЕ ТРОГАЕМ
 		if isMoving then
 			return
 		end
@@ -2619,28 +2520,16 @@ local script = G2L["1b"];
 		local container = findCoinContainer()
 		if not container then return end
 	
-		local coins = getCoins(container)
-		if #coins == 0 then
-			updateIndicator("⏳ НЕТ МОНЕТ", Color3.fromRGB(255, 165, 0))
-			return
-		end
+		local coin, dist = findNearestCoin(container, hrp.Position)
+		if not coin then return end
 	
-		local nearest, dist = findNearestCoin(coins, hrp.Position, murdererPos)
-	
-		if not nearest then
-			updateIndicator("⏳ НЕТ БЕЗОП", Color3.fromRGB(255, 165, 0))
-			return
-		end
-	
-		updateIndicator("🪙 " .. math.floor(dist) .. "ст", Color3.fromRGB(0, 255, 0))
-		currentTarget = nearest
-	
-		local success = flyTo(nearest.Position)
-	
-		if success then
-			pickCoin(nearest)
-			currentTarget = nil
-		end
+		-- ЛЕТИМ К МОНЕТЕ
+		flyToCoin(coin, function(success)
+			if success then
+				pickCoin(coin)
+				-- МГНОВЕННО ПЕРЕХОДИМ К СЛЕДУЮЩЕЙ МОНЕТЕ
+			end
+		end)
 	end
 	
 	-- ====== ЗАПУСК ======
@@ -2648,44 +2537,50 @@ local script = G2L["1b"];
 		if isActive then return end
 	
 		local char = player.Character
-		if not char then return end
+		if not char then
+			print("❌ Нет персонажа!")
+			return
+		end
 	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if hrp then
-			safePoint = hrp.Position
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid or humanoid.Health <= 0 then
+			print("❌ Персонаж мёртв!")
+			return
 		end
 	
 		isActive = true
-		updateIndicator("🟢 ФАРМ", Color3.fromRGB(0, 255, 0))
+		updateIndicator()
+		print("🪙 Автофарм ВКЛЮЧЕН!")
 	
-		if farmConnection then
-			farmConnection:Disconnect()
-			farmConnection = nil
+		if farmLoop then
+			farmLoop:Disconnect()
+			farmLoop = nil
 		end
 	
-		farmConnection = RunService.Heartbeat:Connect(function()
+		farmLoop = RunService.Heartbeat:Connect(function()
 			if not isActive then
-				if farmConnection then
-					farmConnection:Disconnect()
-					farmConnection = nil
+				if farmLoop then
+					farmLoop:Disconnect()
+					farmLoop = nil
 				end
 				return
 			end
-			farmTick()
+			farmLoopFunction()
 		end)
 	end
 	
 	-- ====== ОСТАНОВКА ======
 	local function stopFarming()
 		isActive = false
-		updateIndicator("ВЫКЛ", Color3.fromRGB(255, 0, 0))
+		updateIndicator()
 	
-		if farmConnection then
-			farmConnection:Disconnect()
-			farmConnection = nil
+		if farmLoop then
+			farmLoop:Disconnect()
+			farmLoop = nil
 		end
 	
 		stopTween()
+		coinCooldown = {}
 	
 		local char = player.Character
 		if char then
@@ -2696,10 +2591,10 @@ local script = G2L["1b"];
 			end
 		end
 	
-		currentTarget = nil
+		print("🪙 Автофарм ВЫКЛЮЧЕН!")
 	end
 	
-	-- ====== КНОПКА ======
+	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	button.MouseButton1Click:Connect(function()
 		if isActive then
 			stopFarming()
@@ -2708,21 +2603,16 @@ local script = G2L["1b"];
 		end
 	end)
 	
-	-- ====== РЕСПАВН ======
+	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
 		if isActive then
-			local char = player.Character
-			if char then
-				local hrp = char:FindFirstChild("HumanoidRootPart")
-				if hrp then
-					safePoint = hrp.Position
-				end
-			end
+			startFarming()
 		end
 	end)
 	
-	updateIndicator("ВЫКЛ", Color3.fromRGB(255, 0, 0))
+	updateIndicator()
+	print("✅ MM2_AutoFarm загружена!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
@@ -4741,7 +4631,7 @@ task.spawn(C_7b);
 local function C_7f()
 local script = G2L["7f"];
 	-- ==========================================
-	-- MM2_ESP (РАБОЧАЯ ВЕРСИЯ)
+	-- MM2_ESP (ПОДСВЕТКА ИГРОКОВ ПО РОЛЯМ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -4755,7 +4645,7 @@ local script = G2L["7f"];
 	local Sheriff = ""
 	local Hero = ""
 	
-	-- ====== ИНДИКАТОР ======
+	-- Индикатор
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
 	indicator.Size = UDim2.new(1, 0, 0.3, 0)
@@ -4813,22 +4703,18 @@ local script = G2L["7f"];
 		return false
 	end
 	
-	-- ===== УДАЛЕНИЕ ВСЕХ ПОДСВЕТОК =====
-	local function removeAllHighlights()
-		for _, plr in pairs(game.Players:GetPlayers()) do
-			if plr.Character then
-				local highlight = plr.Character:FindFirstChild("MM2Highlight")
-				if highlight then
-					highlight:Destroy()
-				end
-			end
-		end
-	end
-	
-	-- ===== ОБНОВЛЕНИЕ ESP =====
+	-- ===== СОЗДАНИЕ/ОБНОВЛЕНИЕ ПОДСВЕТКИ =====
 	local function updateESP()
 		if not isEnabled then
-			removeAllHighlights()
+			-- Удаляем все подсветки
+			for _, plr in pairs(game.Players:GetPlayers()) do
+				if plr.Character then
+					local highlight = plr.Character:FindFirstChild("MM2Highlight")
+					if highlight then
+						highlight:Destroy()
+					end
+				end
+			end
 			return
 		end
 	
@@ -4851,28 +4737,16 @@ local script = G2L["7f"];
 	
 			if plr.Name == Murder and alive then
 				highlight.FillColor = Color3.fromRGB(255, 0, 0)  -- Красный (маньяк)
-				highlight.FillTransparency = 0.5
 			elseif plr.Name == Sheriff and alive then
 				highlight.FillColor = Color3.fromRGB(0, 0, 255)  -- Синий (шериф)
-				highlight.FillTransparency = 0.5
 			elseif plr.Name == Hero and alive and not isAlive(Sheriff) then
 				highlight.FillColor = Color3.fromRGB(255, 255, 0)  -- Жёлтый (герой)
-				highlight.FillTransparency = 0.5
 			elseif alive then
 				highlight.FillColor = Color3.fromRGB(0, 255, 0)  -- Зелёный (невинный)
-				highlight.FillTransparency = 0.5
 			else
 				highlight.FillColor = Color3.fromRGB(100, 100, 100)  -- Серый (мёртвый)
 				highlight.FillTransparency = 0.7
 			end
-		end
-	end
-	
-	-- ===== СОБЫТИЕ ПРИ ДОБАВЛЕНИИ ПЕРСОНАЖА =====
-	local function onCharacterAdded(plr)
-		if isEnabled and plr.Character then
-			task.wait(0.1)
-			updateESP()
 		end
 	end
 	
@@ -4888,38 +4762,21 @@ local script = G2L["7f"];
 			end
 			espLoop = runService.RenderStepped:Connect(updateESP)
 			updateESP()
-			print("🟣 MM2 ESP ВКЛЮЧЁН!")
+			print("🟣 MM2 ESP включён!")
 		else
 			if espLoop then
 				espLoop:Disconnect()
 				espLoop = nil
 			end
-			removeAllHighlights()
-			print("🟣 MM2 ESP ВЫКЛЮЧЕН!")
+			updateESP()
+			print("🟣 MM2 ESP выключен!")
 		end
 	end
 	
-	-- ===== КЛИК ПО КНОПКЕ =====
 	button.MouseButton1Click:Connect(toggleESP)
 	
-	-- ===== ПРИ ДОБАВЛЕНИИ НОВОГО ИГРОКА =====
-	game.Players.PlayerAdded:Connect(function(plr)
-		plr.CharacterAdded:Connect(function()
-			onCharacterAdded(plr)
-		end)
-	end)
-	
-	-- ===== ПРИ ДОБАВЛЕНИИ ПЕРСОНАЖА У СУЩЕСТВУЮЩИХ =====
-	for _, plr in pairs(game.Players:GetPlayers()) do
-		if plr ~= player then
-			plr.CharacterAdded:Connect(function()
-				onCharacterAdded(plr)
-			end)
-		end
-	end
-	
 	updateState()
-	print("✅ MM2_ESP ЗАГРУЖЕНА!")
+	print("✅ MM2_ESP загружена!")
 end;
 task.spawn(C_7f);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MM2_GunESP.LocalScript
@@ -7506,204 +7363,11 @@ local script = G2L["e6"];
 	print("✅ MM2_ShowRoles загружена!")
 end;
 task.spawn(C_e6);
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_Noclip.LocalScript
-local function C_ea()
-local script = G2L["ea"];
-	-- ==========================================
-	-- NOCLIP TOGGLE (ТОЛЬКО ВКЛ/ВЫКЛ)
-	-- ==========================================
-	local button = script.Parent
-	local player = game.Players.LocalPlayer
-	local RunService = game:GetService("RunService")
-	
-	local noclipActive = false
-	local noclipConnection = nil
-	
-	-- ====== УДАЛЯЕМ ВСЕ ЛИШНИЕ ДЕТИ ======
-	for _, child in pairs(button:GetChildren()) do
-		child:Destroy()
-	end
-	
-	-- ====== ИНДИКАТОР (ПО ВСЕЙ КНОПКЕ) ======
-	local indicator = Instance.new("TextLabel")
-	indicator.Name = "Indicator"
-	indicator.Size = UDim2.new(1, 0, 1, 0)
-	indicator.Position = UDim2.new(0, 0, 0, 0)
-	indicator.BackgroundTransparency = 1
-	indicator.Text = "ВЫКЛ"
-	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-	indicator.TextSize = 14
-	indicator.Font = Enum.Font.GothamBold
-	indicator.ZIndex = 2
-	indicator.Parent = button
-	
-	-- ====== ОБНОВЛЕНИЕ ======
-	local function updateUI()
-		if noclipActive then
-			indicator.Text = "ВКЛ"
-			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-			button.ImageColor3 = Color3.fromRGB(50, 200, 50)
-		else
-			indicator.Text = "ВЫКЛ"
-			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-			button.ImageColor3 = Color3.fromRGB(200, 50, 50)
-		end
-	end
-	
-	-- ====== ТОГГЛ ======
-	local function toggleNoclip()
-		noclipActive = not noclipActive
-		updateUI()
-	
-		if noclipActive then
-			if noclipConnection then noclipConnection:Disconnect() end
-			noclipConnection = RunService.Stepped:Connect(function()
-				if noclipActive then
-					local char = player.Character
-					if char then
-						for _, part in pairs(char:GetDescendants()) do
-							if part:IsA("BasePart") then
-								part.CanCollide = false
-							end
-						end
-					end
-				end
-			end)
-		else
-			if noclipConnection then
-				noclipConnection:Disconnect()
-				noclipConnection = nil
-			end
-			local char = player.Character
-			if char then
-				for _, part in pairs(char:GetDescendants()) do
-					if part:IsA("BasePart") then
-						part.CanCollide = true
-					end
-				end
-			end
-		end
-	end
-	
-	button.MouseButton1Down:Connect(toggleNoclip)
-	
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		if noclipActive then
-			local char = player.Character
-			if char then
-				for _, part in pairs(char:GetDescendants()) do
-					if part:IsA("BasePart") then
-						part.CanCollide = false
-					end
-				end
-			end
-		end
-	end)
-	
-	updateUI()
-end;
-task.spawn(C_ea);
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.MISC_AntiAFK.LocalScript
-local function C_ee()
-local script = G2L["ee"];
-	-- ==========================================
-	-- MISC_AntiAFK (АНТИ-АФК)
-	-- ==========================================
-	local button = script.Parent
-	local player = game.Players.LocalPlayer
-	local VirtualUser = game:GetService("VirtualUser")
-	
-	local isActive = false
-	local antiAfkConnection = nil
-	
-	-- ====== УДАЛЯЕМ СТАРЫЕ ИНДИКАТОРЫ ======
-	for _, child in pairs(button:GetChildren()) do
-		child:Destroy()
-	end
-	
-	-- ====== ИНДИКАТОР (ПО ВСЕЙ КНОПКЕ) ======
-	local indicator = Instance.new("TextLabel")
-	indicator.Name = "Indicator"
-	indicator.Size = UDim2.new(1, 0, 1, 0)
-	indicator.Position = UDim2.new(0, 0, 0, 0)
-	indicator.BackgroundTransparency = 1
-	indicator.Text = "АНТИ-АФК: ВЫКЛ"
-	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-	indicator.TextSize = 14
-	indicator.Font = Enum.Font.GothamBold
-	indicator.ZIndex = 2
-	indicator.Parent = button
-	
-	-- ====== ОБНОВЛЕНИЕ UI ======
-	local function updateUI()
-		if isActive then
-			indicator.Text = "АНТИ-АФК: ВКЛ ✅"
-			indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-			button.ImageColor3 = Color3.fromRGB(50, 200, 50)
-		else
-			indicator.Text = "АНТИ-АФК: ВЫКЛ ❌"
-			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-			button.ImageColor3 = Color3.fromRGB(200, 50, 50)
-		end
-	end
-	
-	-- ====== ВКЛ ======
-	local function enableAntiAFK()
-		if isActive then return end
-		isActive = true
-		updateUI()
-		print("🟢 АНТИ-АФК ВКЛЮЧЕН!")
-	
-		if antiAfkConnection then
-			antiAfkConnection:Disconnect()
-			antiAfkConnection = nil
-		end
-	
-		-- КАК В ТВОЕМ СКРИПТЕ
-		antiAfkConnection = player.Idled:Connect(function()
-			pcall(function()
-				VirtualUser:CaptureController()
-				VirtualUser:ClickButton2(Vector2.new())
-				print("🔄 АНТИ-АФК СРАБОТАЛ!")
-			end)
-		end)
-	end
-	
-	-- ====== ВЫКЛ ======
-	local function disableAntiAFK()
-		isActive = false
-		updateUI()
-		print("🔴 АНТИ-АФК ВЫКЛЮЧЕН!")
-	
-		if antiAfkConnection then
-			antiAfkConnection:Disconnect()
-			antiAfkConnection = nil
-		end
-	end
-	
-	-- ====== ТОГГЛ ======
-	local function toggleAntiAFK()
-		if isActive then
-			disableAntiAFK()
-		else
-			enableAntiAFK()
-		end
-	end
-	
-	-- ====== КНОПКА ======
-	button.MouseButton1Down:Connect(toggleAntiAFK)
-	
-	-- ====== СТАРТ ======
-	updateUI()
-	print("✅ MISC_AntiAFK ЗАГРУЖЕНА!")
-end;
-task.spawn(C_ee);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
-local function C_101()
-local script = G2L["101"];
+local function C_f9()
+local script = G2L["f9"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (С AntiAFK)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -7816,7 +7480,7 @@ local script = G2L["101"];
 			end
 			print("✅ SPECTATE")
 	
-			-- ===== MISC (С AntiAFK) =====
+			-- ===== MISC =====
 		elseif tabName == "MISC" then
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("ImageButton") and (
@@ -7830,9 +7494,7 @@ local script = G2L["101"];
 						child.Name == "MISC_Fly" or
 						child.Name == "MISC_Rejoin" or
 						child.Name == "MISC_FullBright" or
-						child.Name == "MISC_Platform" or
-						child.Name == "MISC_Noclip" or
-						child.Name == "MISC_AntiAFK"
+						child.Name == "MISC_Platform"
 					) then
 					child.Visible = true
 				end
@@ -7844,7 +7506,7 @@ local script = G2L["101"];
 			end
 			print("✅ MISC")
 	
-			-- ===== MM2 =====
+			-- ===== MM2 (С ПОДДЕРЖКОЙ TextButton) =====
 		elseif tabName == "MM2" then
 			for _, child in pairs(rightFrame:GetChildren()) do
 				if (child:IsA("ImageButton") or child:IsA("TextButton")) and (
@@ -7962,10 +7624,10 @@ local script = G2L["101"];
 	switchTab("TELEPORT")
 	print("✅ Переключение вкладок загружено!")
 end;
-task.spawn(C_101);
+task.spawn(C_f9);
 -- StarterGui.Folder.PurpHub.MainFrame.HotKeys
-local function C_10b()
-local script = G2L["10b"];
+local function C_103()
+local script = G2L["103"];
 	-- ==========================================
 	-- ГОРЯЧИЕ КЛАВИШИ (Ctrl + ЛКМ)
 	-- ==========================================
@@ -8059,10 +7721,10 @@ local script = G2L["10b"];
 	print("   Ctrl + ЛКМ → удаление (CTRL+DEL)")
 	print("   Ctrl + ЛКМ → телепорт в точку клика (CTRL+CLICK)")
 end;
-task.spawn(C_10b);
+task.spawn(C_103);
 -- StarterGui.Folder.PurpHub.MainFrame.ESP
-local function C_10c()
-local script = G2L["10c"];
+local function C_104()
+local script = G2L["104"];
 	-- ==========================================
 	-- ОПТИМИЗИРОВАННЫЙ ESP (БЕЗ ЛАГОВ)
 	-- ==========================================
@@ -8186,10 +7848,10 @@ local script = G2L["10c"];
 	
 	print("✅ Оптимизированный ESP загружен!")
 end;
-task.spawn(C_10c);
+task.spawn(C_104);
 -- StarterGui.Folder.PurpHub.MainFrame.AntiFling
-local function C_10d()
-local script = G2L["10d"];
+local function C_105()
+local script = G2L["105"];
 	-- ==========================================
 	-- АНТИ-ФЛИНГ (ОТКЛЮЧЕНИЕ СТОЛКНОВЕНИЙ)
 	-- ==========================================
@@ -8260,6 +7922,6 @@ local script = G2L["10d"];
 	
 	print("✅ Анти-флинг загружен! Используй toggleAntiFling()")
 end;
-task.spawn(C_10d);
+task.spawn(C_105);
 
 return G2L["1"], require;
