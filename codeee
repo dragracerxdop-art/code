@@ -2348,7 +2348,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (TWEEN + ПРОВЕРКА МЕШКА + NOCLIP + РАУНД)
+	-- MM2_AutoFarm (БЕЗ 267 + NOCLIP)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2366,60 +2366,6 @@ local script = G2L["1b"];
 	local noclipActive = false
 	local noclipConnection = nil
 	
-	-- ====== ИНДИКАТОР ======
-	local indicator = Instance.new("TextLabel")
-	indicator.Name = "Indicator"
-	indicator.Size = UDim2.new(1, 0, 0.3, 0)
-	indicator.Position = UDim2.new(0, 0, 0.7, 0)
-	indicator.BackgroundTransparency = 1
-	indicator.Text = "ВЫКЛ"
-	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-	indicator.TextSize = 14
-	indicator.Font = Enum.Font.SourceSansBold
-	indicator.Parent = button
-	
-	local function updateIndicator()
-		if isActive then
-			if isBagFull then
-				indicator.Text = "🟡 МЕШОК ПОЛОН"
-				indicator.TextColor3 = Color3.fromRGB(255, 255, 0)
-			else
-				indicator.Text = "🟢 ФАРМ + NOCLIP"
-				indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-			end
-		else
-			indicator.Text = "🔴 ВЫКЛ"
-			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-		end
-	end
-	
-	-- ====== ПРОВЕРКА РАУНДА ======
-	local function isRoundActive()
-		local mainGui = player.PlayerGui:FindFirstChild("MainGUI")
-		if not mainGui then return false end
-	
-		local gameFrame = mainGui:FindFirstChild("Game")
-		if not gameFrame then return false end
-	
-		-- ПРОВЕРЯЕМ ТАЙМЕР
-		if gameFrame:FindFirstChild("Timer") and gameFrame.Timer.Visible then
-			return true
-		end
-	
-		-- ПРОВЕРЯЕМ XP (ЕСЛИ ВИДНО - ЗНАЧИТ В РАУНДЕ)
-		if gameFrame:FindFirstChild("EarnedXP") and gameFrame.EarnedXP.Visible then
-			return true
-		end
-	
-		-- ПРОВЕРЯЕМ АТРИБУТ
-		if player:GetAttribute("Alive") == true then
-			return true
-		end
-	
-		return false
-	end
-	
-	-- ====== NOCLIP ФУНКЦИИ ======
 	local function enableNoclip()
 		if noclipActive then return end
 		noclipActive = true
@@ -2463,6 +2409,48 @@ local script = G2L["1b"];
 		print("🔒 NOCLIP ВЫКЛЮЧЕН!")
 	end
 	
+	-- ====== ИНДИКАТОР ======
+	local indicator = Instance.new("TextLabel")
+	indicator.Name = "Indicator"
+	indicator.Size = UDim2.new(1, 0, 0.3, 0)
+	indicator.Position = UDim2.new(0, 0, 0.7, 0)
+	indicator.BackgroundTransparency = 1
+	indicator.Text = "ВЫКЛ"
+	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+	indicator.TextSize = 14
+	indicator.Font = Enum.Font.SourceSansBold
+	indicator.Parent = button
+	
+	local function updateIndicator()
+		if isActive then
+			if isBagFull then
+				indicator.Text = "🟡 МЕШОК ПОЛОН"
+				indicator.TextColor3 = Color3.fromRGB(255, 255, 0)
+			else
+				indicator.Text = "🟢 ФАРМ + NOCLIP"
+				indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+			end
+		else
+			indicator.Text = "🔴 ВЫКЛ"
+			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+		end
+	end
+	
+	-- ====== ПРОВЕРКА РАУНДА ======
+	local function isRoundActive()
+		local mainGui = player.PlayerGui:FindFirstChild("MainGUI")
+		if not mainGui then return false end
+		local gameFrame = mainGui:FindFirstChild("Game")
+		if not gameFrame then return false end
+		if gameFrame:FindFirstChild("Timer") and gameFrame.Timer.Visible then
+			return true
+		end
+		if player:GetAttribute("Alive") == true then
+			return true
+		end
+		return false
+	end
+	
 	-- ====== ОСТАНОВКА ТВИНА ======
 	local function stopTween()
 		if currentTween then
@@ -2476,33 +2464,23 @@ local script = G2L["1b"];
 	local function isBagFullFunction()
 		local mainGui = player.PlayerGui:FindFirstChild("MainGUI")
 		if not mainGui then return false end
-	
 		local gameFrame = mainGui:FindFirstChild("Game")
 		if not gameFrame then return false end
-	
 		local coinBags = gameFrame:FindFirstChild("CoinBags")
 		if not coinBags then return false end
-	
 		local container = coinBags:FindFirstChild("Container")
 		if not container then return false end
-	
 		local snowToken = container:FindFirstChild("SnowToken")
 		if not snowToken then return false end
-	
 		local currencyFrame = snowToken:FindFirstChild("CurrencyFrame")
 		if not currencyFrame then return false end
-	
 		local icon = currencyFrame:FindFirstChild("Icon")
 		if not icon then return false end
-	
 		local coins = icon:FindFirstChild("Coins")
 		if not coins then return false end
-	
 		local currentCoins = tonumber(coins.Text) or 0
-	
 		local isElite = player:GetAttribute("Elite") or false
 		local maxCoins = isElite and 50 or 40
-	
 		return currentCoins >= maxCoins
 	end
 	
@@ -2516,7 +2494,7 @@ local script = G2L["1b"];
 		return nil
 	end
 	
-	-- ====== ПРОВЕРКА: МОНЕТА ДОСТУПНА ======
+	-- ====== ПРОВЕРКА МОНЕТЫ ======
 	local function isCoinAvailable(coin)
 		if not coin then return false end
 		if not coin.Parent then return false end
@@ -2529,10 +2507,8 @@ local script = G2L["1b"];
 	-- ====== ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ ======
 	local function findNearestCoin(container, currentPos)
 		if not container then return nil end
-	
 		local nearest = nil
 		local minDist = math.huge
-	
 		for _, coin in pairs(container:GetChildren()) do
 			if isCoinAvailable(coin) then
 				local dist = (currentPos - coin.Position).Magnitude
@@ -2542,11 +2518,10 @@ local script = G2L["1b"];
 				end
 			end
 		end
-	
 		return nearest, minDist
 	end
 	
-	-- ====== ПОЛЕТ К МОНЕТЕ ======
+	-- ====== ПЛАВНЫЙ ПОЛЕТ ======
 	local function flyToCoin(coin, callback)
 		local char = player.Character
 		if not char then 
@@ -2566,24 +2541,25 @@ local script = G2L["1b"];
 			return 
 		end
 	
+		-- НОКЛИП ВКЛЮЧЕН, НО НА ВСЯКИЙ
 		for _, part in pairs(char:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.CanCollide = false
 			end
 		end
 	
-		local targetPos = coin.Position + Vector3.new(0, 2, 0)
+		local targetPos = coin.Position + Vector3.new(0, 3, 0)
 		local distance = (hrp.Position - targetPos).Magnitude
 	
-		if distance < 3 then
+		if distance < 5 then
 			if callback then callback(true) end
 			return
 		end
 	
-		local speed = 25
+		local speed = 30
 		local duration = distance / speed
-		duration = math.max(duration, 0.15)
-		duration = math.min(duration, 1.5)
+		duration = math.max(duration, 0.2)
+		duration = math.min(duration, 2.0)
 	
 		stopTween()
 		isMoving = true
@@ -2607,9 +2583,16 @@ local script = G2L["1b"];
 	
 		currentTween:Play()
 	
-		local timeout = tick() + duration + 1
+		local timeout = tick() + duration + 0.5
 		repeat
 			task.wait()
+	
+			if hrp.Position.Y < -5 then
+				stopTween()
+				hrp.Position = Vector3.new(hrp.Position.X, 10, hrp.Position.Z)
+				if callback then callback(false) end
+				return
+			end
 	
 			if humanoid.Health <= 0 then
 				stopTween()
@@ -2639,10 +2622,8 @@ local script = G2L["1b"];
 	-- ====== ПОДОБРАТЬ МОНЕТУ ======
 	local function pickCoin(coin)
 		if not coin or not coin.Parent then return false end
-	
 		local char = player.Character
 		if not char then return false end
-	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
 	
@@ -2664,20 +2645,16 @@ local script = G2L["1b"];
 	
 	-- ====== ГЛАВНЫЙ ЦИКЛ ======
 	local function farmLoopFunction()
-		-- ====== ПРОВЕРКА РАУНДА ======
 		if not isRoundActive() then
-			if isMoving then
-				stopTween()
-			end
+			if isMoving then stopTween() end
 			return
 		end
 	
-		-- ====== ПРОВЕРКА МЕШКА ======
 		if isBagFullFunction() then
 			if not isBagFull then
 				isBagFull = true
 				updateIndicator()
-				print("🟡 МЕШОК ПОЛОН! ОСТАНОВКА...")
+				print("🟡 МЕШОК ПОЛОН!")
 				stopTween()
 			end
 			return
@@ -2685,7 +2662,6 @@ local script = G2L["1b"];
 			if isBagFull then
 				isBagFull = false
 				updateIndicator()
-				print("🟢 МЕШОК НЕ ПОЛОН! ПРОДОЛЖАЕМ...")
 			end
 		end
 	
@@ -2701,6 +2677,11 @@ local script = G2L["1b"];
 			return
 		end
 	
+		if hrp.Position.Y < -5 then
+			hrp.Position = Vector3.new(hrp.Position.X, 10, hrp.Position.Z)
+			return
+		end
+	
 		if isMoving then
 			return
 		end
@@ -2709,9 +2690,7 @@ local script = G2L["1b"];
 		if not container then return end
 	
 		local coin, dist = findNearestCoin(container, hrp.Position)
-		if not coin then
-			return
-		end
+		if not coin then return end
 	
 		flyToCoin(coin, function(success)
 			if success then
@@ -2790,7 +2769,7 @@ local script = G2L["1b"];
 		print("🪙 Автофарм + NOCLIP ВЫКЛЮЧЕНЫ!")
 	end
 	
-	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
+	-- ====== КНОПКА ======
 	button.MouseButton1Click:Connect(function()
 		if isActive then
 			stopFarming()
@@ -2799,7 +2778,7 @@ local script = G2L["1b"];
 		end
 	end)
 	
-	-- ====== ПРИ РЕСПАВНЕ ======
+	-- ====== РЕСПАВН ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
 		if isActive then
@@ -2808,7 +2787,7 @@ local script = G2L["1b"];
 	end)
 	
 	updateIndicator()
-	print("✅ MM2_AutoFarm + NOCLIP + РАУНД загружена!")
+	print("✅ MM2_AutoFarm + NOCLIP загружена!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
