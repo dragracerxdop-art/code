@@ -7664,7 +7664,7 @@ task.spawn(C_e5);
 local function C_e9()
 local script = G2L["e9"];
 	-- ==========================================
-	-- MISC_AntiAFK (ПРОСТОЙ ИНДИКАТОР)
+	-- MISC_AntiAFK (ИНДИКАТОР ПОВЕРХ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -7673,12 +7673,12 @@ local script = G2L["e9"];
 	local isEnabled = false
 	local antiAfkConnection = nil
 	
-	-- ====== УДАЛЯЕМ СТАРЫЕ ИНДИКАТОРЫ ======
+	-- УДАЛЯЕМ СТАРЫЕ ИНДИКАТОРЫ
 	for _, child in pairs(button:GetChildren()) do
 		child:Destroy()
 	end
 	
-	-- ====== ИНДИКАТОР ======
+	-- ИНДИКАТОР (ТОЛЬКО ТЕКСТ, БЕЗ ФОНА)
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
 	indicator.Size = UDim2.new(1, 0, 1, 0)
@@ -7703,46 +7703,30 @@ local script = G2L["e9"];
 		end
 	end
 	
-	-- ====== ВКЛ ======
-	local function enableAntiAFK()
-		if isEnabled then return end
-		isEnabled = true
-		updateState()
-		print("🟢 АНТИ-АФК ВКЛЮЧЕН!")
-	
-		if antiAfkConnection then
-			antiAfkConnection:Disconnect()
-			antiAfkConnection = nil
-		end
-	
-		antiAfkConnection = player.Idled:Connect(function()
-			pcall(function()
-				VirtualUser:CaptureController()
-				VirtualUser:ClickButton2(Vector2.new())
-				print("🔄 АНТИ-АФК СРАБОТАЛ!")
-			end)
-		end)
-	end
-	
-	-- ====== ВЫКЛ ======
-	local function disableAntiAFK()
-		if not isEnabled then return end
-		isEnabled = false
-		updateState()
-		print("🔴 АНТИ-АФК ВЫКЛЮЧЕН!")
-	
-		if antiAfkConnection then
-			antiAfkConnection:Disconnect()
-			antiAfkConnection = nil
-		end
-	end
-	
-	-- ====== ТОГГЛ ======
+	-- ТОГГЛ
 	button.MouseButton1Click:Connect(function()
+		isEnabled = not isEnabled
+		updateState()
+	
 		if isEnabled then
-			disableAntiAFK()
+			print("🟢 АНТИ-АФК ВКЛЮЧЕН!")
+			if antiAfkConnection then
+				antiAfkConnection:Disconnect()
+				antiAfkConnection = nil
+			end
+			antiAfkConnection = player.Idled:Connect(function()
+				pcall(function()
+					VirtualUser:CaptureController()
+					VirtualUser:ClickButton2(Vector2.new())
+					print("🔄 АНТИ-АФК СРАБОТАЛ!")
+				end)
+			end)
 		else
-			enableAntiAFK()
+			print("🔴 АНТИ-АФК ВЫКЛЮЧЕН!")
+			if antiAfkConnection then
+				antiAfkConnection:Disconnect()
+				antiAfkConnection = nil
+			end
 		end
 	end)
 	
@@ -7754,7 +7738,7 @@ task.spawn(C_e9);
 local function C_ed()
 local script = G2L["ed"];
 	-- ==========================================
-	-- NOCLIP TOGGLE (ПРОСТОЙ ИНДИКАТОР)
+	-- NOCLIP TOGGLE (ИНДИКАТОР ПОВЕРХ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -7763,12 +7747,12 @@ local script = G2L["ed"];
 	local isEnabled = false
 	local noclipConnection = nil
 	
-	-- ====== УДАЛЯЕМ СТАРЫЕ ИНДИКАТОРЫ ======
+	-- УДАЛЯЕМ СТАРЫЕ ИНДИКАТОРЫ
 	for _, child in pairs(button:GetChildren()) do
 		child:Destroy()
 	end
 	
-	-- ====== ИНДИКАТОР ======
+	-- ИНДИКАТОР (ТОЛЬКО ТЕКСТ, БЕЗ ФОНА)
 	local indicator = Instance.new("TextLabel")
 	indicator.Name = "Indicator"
 	indicator.Size = UDim2.new(1, 0, 1, 0)
@@ -7793,64 +7777,47 @@ local script = G2L["ed"];
 		end
 	end
 	
-	-- ====== ВКЛ ======
-	local function enableNoclip()
-		if isEnabled then return end
-		isEnabled = true
+	-- ТОГГЛ
+	button.MouseButton1Click:Connect(function()
+		isEnabled = not isEnabled
 		updateState()
-		print("🔓 NOCLIP ВКЛЮЧЕН!")
 	
-		if noclipConnection then
-			noclipConnection:Disconnect()
-			noclipConnection = nil
-		end
-	
-		noclipConnection = RunService.Stepped:Connect(function()
-			if isEnabled then
-				local char = player.Character
-				if char then
-					for _, part in pairs(char:GetDescendants()) do
-						if part:IsA("BasePart") then
-							part.CanCollide = false
+		if isEnabled then
+			print("🔓 NOCLIP ВКЛЮЧЕН!")
+			if noclipConnection then
+				noclipConnection:Disconnect()
+				noclipConnection = nil
+			end
+			noclipConnection = RunService.Stepped:Connect(function()
+				if isEnabled then
+					local char = player.Character
+					if char then
+						for _, part in pairs(char:GetDescendants()) do
+							if part:IsA("BasePart") then
+								part.CanCollide = false
+							end
 						end
 					end
 				end
+			end)
+		else
+			print("🔒 NOCLIP ВЫКЛЮЧЕН!")
+			if noclipConnection then
+				noclipConnection:Disconnect()
+				noclipConnection = nil
 			end
-		end)
-	end
-	
-	-- ====== ВЫКЛ ======
-	local function disableNoclip()
-		if not isEnabled then return end
-		isEnabled = false
-		updateState()
-		print("🔒 NOCLIP ВЫКЛЮЧЕН!")
-	
-		if noclipConnection then
-			noclipConnection:Disconnect()
-			noclipConnection = nil
-		end
-	
-		local char = player.Character
-		if char then
-			for _, part in pairs(char:GetDescendants()) do
-				if part:IsA("BasePart") then
-					part.CanCollide = true
+			local char = player.Character
+			if char then
+				for _, part in pairs(char:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.CanCollide = true
+					end
 				end
 			end
 		end
-	end
-	
-	-- ====== ТОГГЛ ======
-	button.MouseButton1Click:Connect(function()
-		if isEnabled then
-			disableNoclip()
-		else
-			enableNoclip()
-		end
 	end)
 	
-	-- ====== ПРИ РЕСПАВНЕ ======
+	-- ПРИ РЕСПАВНЕ
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
 		if isEnabled then
