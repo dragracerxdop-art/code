@@ -2348,436 +2348,113 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (TWEEN + ПРОВЕРКА МЕШКА + NOCLIP)
+	-- ANTI-KICK 267 + АВТО-РЕКОННЕКТ
 	-- ==========================================
-	local button = script.Parent
 	local player = game.Players.LocalPlayer
+	local TeleportService = game:GetService("TeleportService")
 	local RunService = game:GetService("RunService")
-	local TweenService = game:GetService("TweenService")
+	local Players = game:GetService("Players")
+	local GuiService = game:GetService("GuiService")
 	
-	local isActive = false
-	local farmLoop = nil
-	local currentTween = nil
-	local isMoving = false
-	local coinCooldown = {}
-	local isBagFull = false
+	local isReconnecting = false
 	
-	-- ====== NOCLIP ======
-	local noclipActive = false
-	local noclipConnection = nil
-	
-	-- ====== ИНДИКАТОР ======
-	local indicator = Instance.new("TextLabel")
-	indicator.Name = "Indicator"
-	indicator.Size = UDim2.new(1, 0, 0.3, 0)
-	indicator.Position = UDim2.new(0, 0, 0.7, 0)
-	indicator.BackgroundTransparency = 1
-	indicator.Text = "ВЫКЛ"
-	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-	indicator.TextSize = 14
-	indicator.Font = Enum.Font.SourceSansBold
-	indicator.Parent = button
-	
-	local function updateIndicator()
-		if isActive then
-			if isBagFull then
-				indicator.Text = "🟡 МЕШОК ПОЛОН"
-				indicator.TextColor3 = Color3.fromRGB(255, 255, 0)
-			else
-				indicator.Text = "🟢 ФАРМ + NOCLIP"
-				indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
-			end
-		else
-			indicator.Text = "🔴 ВЫКЛ"
-			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-		end
-	end
-	
-	-- ====== NOCLIP ФУНКЦИИ ======
-	local function enableNoclip()
-		if noclipActive then return end
-		noclipActive = true
-	
-		if noclipConnection then
-			noclipConnection:Disconnect()
-			noclipConnection = nil
-		end
-	
-		noclipConnection = RunService.Stepped:Connect(function()
-			if noclipActive then
-				local char = player.Character
-				if char then
-					for _, part in pairs(char:GetDescendants()) do
-						if part:IsA("BasePart") then
-							part.CanCollide = false
-						end
-					end
-				end
-			end
-		end)
-		print("🔓 NOCLIP ВКЛЮЧЕН!")
-	end
-	
-	local function disableNoclip()
-		noclipActive = false
-	
-		if noclipConnection then
-			noclipConnection:Disconnect()
-			noclipConnection = nil
-		end
-	
-		local char = player.Character
-		if char then
-			for _, part in pairs(char:GetDescendants()) do
-				if part:IsA("BasePart") then
-					part.CanCollide = true
-				end
-			end
-		end
-		print("🔒 NOCLIP ВЫКЛЮЧЕН!")
-	end
-	
-	-- ====== ОСТАНОВКА ТВИНА ======
-	local function stopTween()
-		if currentTween then
-			pcall(function() currentTween:Cancel() end)
-			currentTween = nil
-		end
-		isMoving = false
-	end
-	
-	-- ====== ПРОВЕРКА МЕШКА ======
-	local function isBagFullFunction()
-		local mainGui = player.PlayerGui:FindFirstChild("MainGUI")
-		if not mainGui then return false end
-	
-		local gameFrame = mainGui:FindFirstChild("Game")
-		if not gameFrame then return false end
-	
-		local coinBags = gameFrame:FindFirstChild("CoinBags")
-		if not coinBags then return false end
-	
-		local container = coinBags:FindFirstChild("Container")
-		if not container then return false end
-	
-		local snowToken = container:FindFirstChild("SnowToken")
-		if not snowToken then return false end
-	
-		local currencyFrame = snowToken:FindFirstChild("CurrencyFrame")
-		if not currencyFrame then return false end
-	
-		local icon = currencyFrame:FindFirstChild("Icon")
-		if not icon then return false end
-	
-		local coins = icon:FindFirstChild("Coins")
-		if not coins then return false end
-	
-		local currentCoins = tonumber(coins.Text) or 0
-	
-		local isElite = player:GetAttribute("Elite") or false
-		local maxCoins = isElite and 50 or 40
-	
-		return currentCoins >= maxCoins
-	end
-	
-	-- ====== ПОИСК КОНТЕЙНЕРА ======
-	local function findCoinContainer()
-		for _, obj in pairs(workspace:GetChildren()) do
-			if obj:IsA("Model") and obj:FindFirstChild("CoinContainer") then
-				return obj:FindFirstChild("CoinContainer")
-			end
-		end
-		return nil
-	end
-	
-	-- ====== ПРОВЕРКА: МОНЕТА ДОСТУПНА ======
-	local function isCoinAvailable(coin)
-		if not coin then return false end
-		if not coin.Parent then return false end
-		if coin.Transparency ~= 1 then return false end
-		if not coin:FindFirstChild("TouchInterest") then return false end
-		if coinCooldown[coin] then return false end
-		return true
-	end
-	
-	-- ====== ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ ======
-	local function findNearestCoin(container, currentPos)
-		if not container then return nil end
-	
-		local nearest = nil
-		local minDist = math.huge
-	
-		for _, coin in pairs(container:GetChildren()) do
-			if isCoinAvailable(coin) then
-				local dist = (currentPos - coin.Position).Magnitude
-				if dist < minDist then
-					nearest = coin
-					minDist = dist
-				end
-			end
-		end
-	
-		return nearest, minDist
-	end
-	
-	-- ====== ПОЛЕТ К МОНЕТЕ ======
-	local function flyToCoin(coin, callback)
-		local char = player.Character
-		if not char then 
-			if callback then callback(false) end
-			return 
-		end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then 
-			if callback then callback(false) end
-			return 
-		end
-	
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid or humanoid.Health <= 0 then 
-			if callback then callback(false) end
-			return 
-		end
-	
-		-- НОКЛИП УЖЕ ВКЛЮЧЕН, НО НА ВСЯКИЙ СЛУЧАЙ
-		for _, part in pairs(char:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = false
-			end
-		end
-	
-		local targetPos = coin.Position + Vector3.new(0, 2, 0)
-		local distance = (hrp.Position - targetPos).Magnitude
-	
-		if distance < 3 then
-			if callback then callback(true) end
-			return
-		end
-	
-		local speed = 25
-		local duration = distance / speed
-		duration = math.max(duration, 0.15)
-		duration = math.min(duration, 1.5)
-	
-		stopTween()
-		isMoving = true
-	
-		local tweenInfo = TweenInfo.new(
-			duration,
-			Enum.EasingStyle.Linear,
-			Enum.EasingDirection.Out
-		)
-	
-		currentTween = TweenService:Create(hrp, tweenInfo, {
-			Position = targetPos
-		})
-	
-		local completed = false
-		currentTween.Completed:Connect(function()
-			completed = true
-			isMoving = false
-			if callback then callback(true) end
-		end)
-	
-		currentTween:Play()
-	
-		local timeout = tick() + duration + 1
-		repeat
-			task.wait()
-	
-			if humanoid.Health <= 0 then
-				stopTween()
-				if callback then callback(false) end
-				return
-			end
-	
-			if not coin.Parent or not coin:FindFirstChild("TouchInterest") then
-				stopTween()
-				if callback then callback(false) end
-				return
-			end
-	
-			if tick() > timeout then
-				stopTween()
-				if callback then callback(false) end
-				return
-			end
-	
-		until completed == true
-	
-		currentTween = nil
-		isMoving = false
-		if callback then callback(true) end
-	end
-	
-	-- ====== ПОДОБРАТЬ МОНЕТУ ======
-	local function pickCoin(coin)
-		if not coin or not coin.Parent then return false end
-	
-		local char = player.Character
-		if not char then return false end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return false end
-	
+	-- ====== ПЕРЕХВАТ КИКА ======
+	local function antiKick()
 		pcall(function()
-			firetouchinterest(hrp, coin, 0)
-			firetouchinterest(hrp, coin, 1)
-			task.wait(0.05)
-			firetouchinterest(hrp, coin, 0)
-			firetouchinterest(hrp, coin, 1)
-		end)
+			-- ОТКЛЮЧАЕМ ОШИБКИ GUI (ЧТОБЫ НЕ ВЫЛЕТАЛО)
+			GuiService.ErrorMessageChanged:Connect(function(msg)
+				if msg and string.find(msg, "Error Code: 267") then
+					print("🛡️ ПЕРЕХВАТ 267!")
+					return -- НЕ ПОКАЗЫВАЕМ ОШИБКУ
+				end
+			end)
 	
-		coinCooldown[coin] = true
-		task.delay(0.5, function()
-			coinCooldown[coin] = nil
+			-- БЛОКИРУЕМ ВЫЛЕТ ЧЕРЕЗ ТЕЛЕПОРТ
+			local oldTeleport = TeleportService.Teleport
+			TeleportService.Teleport = function(self, placeId, player)
+				if placeId == game.PlaceId then
+					print("🔄 БЛОКИРУЕМ ТЕЛЕПОРТ!")
+					return
+				end
+				return oldTeleport(self, placeId, player)
+			end
 		end)
-	
-		return true
 	end
 	
-	-- ====== ГЛАВНЫЙ ЦИКЛ ======
-	local function farmLoopFunction()
-		if isBagFullFunction() then
-			if not isBagFull then
-				isBagFull = true
-				updateIndicator()
-				print("🟡 МЕШОК ПОЛОН! ОСТАНОВКА...")
-				stopTween()
-			end
-			return
-		else
-			if isBagFull then
-				isBagFull = false
-				updateIndicator()
-				print("🟢 МЕШОК НЕ ПОЛОН! ПРОДОЛЖАЕМ...")
-			end
-		end
+	-- ====== АВТО-РЕКОННЕКТ ======
+	local function autoReconnect()
+		if isReconnecting then return end
+		isReconnecting = true
 	
+		print("🔄 ПЕРЕЗАХОДИМ В ИГРУ...")
+		task.wait(2)
+	
+		-- ПЫТАЕМСЯ ПЕРЕЗАЙТИ
+		pcall(function()
+			TeleportService:Teleport(game.PlaceId, player)
+		end)
+	
+		-- ЕСЛИ НЕ ПОЛУЧИЛОСЬ - ЧЕРЕЗ 5 СЕКУНД ЕЩЁ РАЗ
+		task.wait(5)
+		pcall(function()
+			TeleportService:Teleport(game.PlaceId, player)
+		end)
+	
+		isReconnecting = false
+	end
+	
+	-- ====== МОНИТОРИМ ВЫЛЕТ ======
+	pcall(function()
+		-- ПРИ ПОПЫТКЕ КИКА
+		GuiService.ErrorMessageChanged:Connect(function(msg)
+			if msg and (string.find(msg, "267") or string.find(msg, "Invalid position")) then
+				print("🛡️ ОБНАРУЖЕН ВЫЛЕТ 267!")
+				task.wait(1)
+				autoReconnect()
+			end
+		end)
+	
+		-- ПРИ ОТКЛЮЧЕНИИ ОТ СЕРВЕРА
+		Players.PlayerRemoving:Connect(function(plr)
+			if plr == player and not isReconnecting then
+				print("🔄 ИГРОК ВЫЛЕТЕЛ!")
+				task.wait(1)
+				autoReconnect()
+			end
+		end)
+	end)
+	
+	-- ====== ЗАЩИТА ОТ ТЕЛЕПОРТА ПОД КАРТУ ======
+	local function safePosition()
 		local char = player.Character
 		if not char then return end
 	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return end
 	
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid or humanoid.Health <= 0 then
-			stopFarming()
-			return
+		-- ЕСЛИ ПОД КАРТОЙ - ТЕЛЕПОРТ НА ПОВЕРХНОСТЬ
+		if hrp.Position.Y < -10 then
+			print("🔄 ТЕЛЕПОРТ НА ПОВЕРХНОСТЬ!")
+			hrp.CFrame = CFrame.new(hrp.Position.X, 50, hrp.Position.Z)
 		end
-	
-		if isMoving then
-			return
-		end
-	
-		local container = findCoinContainer()
-		if not container then return end
-	
-		local coin, dist = findNearestCoin(container, hrp.Position)
-		if not coin then
-			return
-		end
-	
-		flyToCoin(coin, function(success)
-			if success then
-				pickCoin(coin)
-			end
-		end)
 	end
+	
+	-- МОНИТОРИМ ПОЗИЦИЮ
+	RunService.Heartbeat:Connect(function()
+		pcall(safePosition)
+	end)
 	
 	-- ====== ЗАПУСК ======
-	local function startFarming()
-		if isActive then return end
+	antiKick()
+	print("🛡️ ANTI-KICK 267 ЗАГРУЖЕН!")
+	print("🔄 ПРИ ВЫЛЕТЕ БУДЕТ АВТО-РЕКОННЕКТ!")
 	
-		local char = player.Character
-		if not char then
-			print("❌ Нет персонажа!")
-			return
-		end
-	
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid or humanoid.Health <= 0 then
-			print("❌ Персонаж мёртв!")
-			return
-		end
-	
-		isActive = true
-		isBagFull = false
-	
-		-- ВКЛЮЧАЕМ НОКЛИП
-		enableNoclip()
-	
-		updateIndicator()
-		print("🪙 Автофарм + NOCLIP ВКЛЮЧЕНЫ!")
-	
-		if farmLoop then
-			farmLoop:Disconnect()
-			farmLoop = nil
-		end
-	
-		farmLoop = RunService.Heartbeat:Connect(function()
-			if not isActive then
-				if farmLoop then
-					farmLoop:Disconnect()
-					farmLoop = nil
-				end
-				return
-			end
-			farmLoopFunction()
-		end)
+	-- ====== КОМАНДА ДЛЯ РУЧНОГО РЕКОННЕКТА ======
+	_G.reconnect = function()
+		autoReconnect()
 	end
 	
-	-- ====== ОСТАНОВКА ======
-	local function stopFarming()
-		isActive = false
-		isBagFull = false
-	
-		-- ВЫКЛЮЧАЕМ НОКЛИП
-		disableNoclip()
-	
-		updateIndicator()
-	
-		if farmLoop then
-			farmLoop:Disconnect()
-			farmLoop = nil
-		end
-	
-		stopTween()
-		coinCooldown = {}
-	
-		local char = player.Character
-		if char then
-			local hrp = char:FindFirstChild("HumanoidRootPart")
-			if hrp then
-				hrp.Velocity = Vector3.zero
-				hrp.RotVelocity = Vector3.zero
-			end
-		end
-	
-		print("🪙 Автофарм + NOCLIP ВЫКЛЮЧЕНЫ!")
-	end
-	
-	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
-	button.MouseButton1Click:Connect(function()
-		if isActive then
-			stopFarming()
-		else
-			startFarming()
-		end
-	end)
-	
-	-- ====== ПРИ РЕСПАВНЕ ======
-	player.CharacterAdded:Connect(function()
-		task.wait(0.5)
-		if isActive then
-			enableNoclip()
-			startFarming()
-		end
-	end)
-	
-	updateIndicator()
-	print("✅ MM2_AutoFarm + NOCLIP загружена!")
+	print("📌 ЕСЛИ НУЖНО РУЧНО ПЕРЕЗАЙТИ - ВВЕДИ _G.reconnect()")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
