@@ -2342,26 +2342,52 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (РАБОЧАЯ + NOCLIP + МЕШОК)
+	-- MM2_AutoFarm (TWEEN + ПРОВЕРКА МЕШКА + NOCLIP)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
-	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
 	local TweenService = game:GetService("TweenService")
 	
 	local isActive = false
-	local farmConnection = nil
-	local safePoint = nil
-	local currentTarget = nil
+	local farmLoop = nil
 	local currentTween = nil
 	local isMoving = false
+	local coinCooldown = {}
 	local isBagFull = false
 	
 	-- ====== NOCLIP ======
 	local noclipActive = false
 	local noclipConnection = nil
 	
+	-- ====== ИНДИКАТОР ======
+	local indicator = Instance.new("TextLabel")
+	indicator.Name = "Indicator"
+	indicator.Size = UDim2.new(1, 0, 0.3, 0)
+	indicator.Position = UDim2.new(0, 0, 0.7, 0)
+	indicator.BackgroundTransparency = 1
+	indicator.Text = "ВЫКЛ"
+	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+	indicator.TextSize = 14
+	indicator.Font = Enum.Font.SourceSansBold
+	indicator.Parent = button
+	
+	local function updateIndicator()
+		if isActive then
+			if isBagFull then
+				indicator.Text = "🟡 МЕШОК ПОЛОН"
+				indicator.TextColor3 = Color3.fromRGB(255, 255, 0)
+			else
+				indicator.Text = "🟢 ФАРМ + NOCLIP"
+				indicator.TextColor3 = Color3.fromRGB(0, 255, 0)
+			end
+		else
+			indicator.Text = "🔴 ВЫКЛ"
+			indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+		end
+	end
+	
+	-- ====== NOCLIP ФУНКЦИИ ======
 	local function enableNoclip()
 		if noclipActive then return end
 		noclipActive = true
@@ -2383,6 +2409,7 @@ local script = G2L["1b"];
 				end
 			end
 		end)
+		print("🔓 NOCLIP ВКЛЮЧЕН!")
 	end
 	
 	local function disableNoclip()
@@ -2401,23 +2428,7 @@ local script = G2L["1b"];
 				end
 			end
 		end
-	end
-	
-	-- ====== ИНДИКАТОР ======
-	local indicator = Instance.new("TextLabel")
-	indicator.Name = "Indicator"
-	indicator.Size = UDim2.new(1, 0, 0.3, 0)
-	indicator.Position = UDim2.new(0, 0, 0.7, 0)
-	indicator.BackgroundTransparency = 1
-	indicator.Text = "ВЫКЛ"
-	indicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-	indicator.TextSize = 14
-	indicator.Font = Enum.Font.SourceSansBold
-	indicator.Parent = button
-	
-	local function updateIndicator(text, color)
-		indicator.Text = text
-		indicator.TextColor3 = color or Color3.fromRGB(255, 0, 0)
+		print("🔒 NOCLIP ВЫКЛЮЧЕН!")
 	end
 	
 	-- ====== ОСТАНОВКА ТВИНА ======
@@ -2456,132 +2467,92 @@ local script = G2L["1b"];
 		if not coins then return false end
 	
 		local currentCoins = tonumber(coins.Text) or 0
+	
 		local isElite = player:GetAttribute("Elite") or false
 		local maxCoins = isElite and 50 or 40
 	
 		return currentCoins >= maxCoins
 	end
 	
-	-- ====== ПРОВЕРКА РАУНДА ======
-	local function isRoundActive()
-		local mainGui = player.PlayerGui:FindFirstChild("MainGUI")
-		if not mainGui then return false end
-		local gameFrame = mainGui:FindFirstChild("Game")
-		if not gameFrame then return false end
-		if gameFrame:FindFirstChild("Timer") and gameFrame.Timer.Visible then
-			return true
-		end
-		if player:GetAttribute("Alive") == true then
-			return true
-		end
-		return false
-	end
-	
-	-- ====== ПОИСК КАРТЫ ======
-	local function findMap()
-		for _, v in workspace:GetDescendants() do
-			if v.Name == "Spawns" and v.Parent and v.Parent.Name ~= "Lobby" then
-				return v.Parent
-			end
-		end
-		return nil
-	end
-	
 	-- ====== ПОИСК КОНТЕЙНЕРА ======
 	local function findCoinContainer()
-		local map = findMap()
-		if map then
-			return map:FindFirstChild("CoinContainer")
-		end
-		return nil
-	end
-	
-	-- ====== ПОИСК УБИЙЦЫ ======
-	local function findMurderer()
-		for _, plr in pairs(Players:GetPlayers()) do
-			if plr ~= player then
-				if plr.Backpack:FindFirstChild("Knife") then
-					return plr
-				end
-				if plr.Character and plr.Character:FindFirstChild("Knife") then
-					return plr
-				end
+		for _, obj in pairs(workspace:GetChildren()) do
+			if obj:IsA("Model") and obj:FindFirstChild("CoinContainer") then
+				return obj:FindFirstChild("CoinContainer")
 			end
 		end
 		return nil
 	end
 	
-	-- ====== ПРОВЕРКА МОНЕТЫ ======
-	local function isCoinValid(coin)
+	-- ====== ПРОВЕРКА: МОНЕТА ДОСТУПНА ======
+	local function isCoinAvailable(coin)
 		if not coin then return false end
 		if not coin.Parent then return false end
-		if coin:FindFirstChild("TouchInterest") then
-			return true
-		end
-		return false
-	end
-	
-	-- ====== ПОЛУЧИТЬ ВСЕ МОНЕТЫ ======
-	local function getCoins(container)
-		local coins = {}
-		if not container then return coins end
-		for _, coin in pairs(container:GetChildren()) do
-			if isCoinValid(coin) then
-				table.insert(coins, coin)
-			end
-		end
-		return coins
+		if coin.Transparency ~= 1 then return false end
+		if not coin:FindFirstChild("TouchInterest") then return false end
+		if coinCooldown[coin] then return false end
+		return true
 	end
 	
 	-- ====== ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ ======
-	local function findNearestCoin(coins, position, murdererPos)
+	local function findNearestCoin(container, currentPos)
+		if not container then return nil end
+	
 		local nearest = nil
-		local nearestDist = math.huge
-		for _, coin in pairs(coins) do
-			local coinPos = coin.Position
-			if murdererPos then
-				local distToMurderer = (coinPos - murdererPos).Magnitude
-				if distToMurderer < 30 then
-					continue
+		local minDist = math.huge
+	
+		for _, coin in pairs(container:GetChildren()) do
+			if isCoinAvailable(coin) then
+				local dist = (currentPos - coin.Position).Magnitude
+				if dist < minDist then
+					nearest = coin
+					minDist = dist
 				end
 			end
-			local dist = (position - coinPos).Magnitude
-			if dist < nearestDist then
-				nearestDist = dist
-				nearest = coin
-			end
 		end
-		return nearest, nearestDist
+	
+		return nearest, minDist
 	end
 	
-	-- ====== ПОЛЕТ ======
-	local function flyTo(targetPos)
+	-- ====== ПОЛЕТ К МОНЕТЕ ======
+	local function flyToCoin(coin, callback)
 		local char = player.Character
-		if not char then return false end
+		if not char then 
+			if callback then callback(false) end
+			return 
+		end
 	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return false end
+		if not hrp then 
+			if callback then callback(false) end
+			return 
+		end
 	
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid or humanoid.Health <= 0 then return false end
+		if not humanoid or humanoid.Health <= 0 then 
+			if callback then callback(false) end
+			return 
+		end
 	
-		-- НОКЛИП
+		-- НОКЛИП УЖЕ ВКЛЮЧЕН, НО НА ВСЯКИЙ СЛУЧАЙ
 		for _, part in pairs(char:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.CanCollide = false
 			end
 		end
 	
+		local targetPos = coin.Position + Vector3.new(0, 2, 0)
 		local distance = (hrp.Position - targetPos).Magnitude
 	
-		if distance < 5 then
-			return true
+		if distance < 3 then
+			if callback then callback(true) end
+			return
 		end
 	
-		local speed = 20
+		local speed = 25
 		local duration = distance / speed
-		duration = math.max(duration, 0.3)
-		duration = math.min(duration, 2.5)
+		duration = math.max(duration, 0.15)
+		duration = math.min(duration, 1.5)
 	
 		stopTween()
 		isMoving = true
@@ -2600,6 +2571,7 @@ local script = G2L["1b"];
 		currentTween.Completed:Connect(function()
 			completed = true
 			isMoving = false
+			if callback then callback(true) end
 		end)
 	
 		currentTween:Play()
@@ -2610,33 +2582,39 @@ local script = G2L["1b"];
 	
 			if humanoid.Health <= 0 then
 				stopTween()
-				return false
+				if callback then callback(false) end
+				return
 			end
 	
-			if currentTarget and not isCoinValid(currentTarget) then
+			if not coin.Parent or not coin:FindFirstChild("TouchInterest") then
 				stopTween()
-				return false
+				if callback then callback(false) end
+				return
 			end
 	
 			if tick() > timeout then
 				stopTween()
-				return false
+				if callback then callback(false) end
+				return
 			end
 	
 		until completed == true
 	
 		currentTween = nil
 		isMoving = false
-		return true
+		if callback then callback(true) end
 	end
 	
 	-- ====== ПОДОБРАТЬ МОНЕТУ ======
 	local function pickCoin(coin)
-		if not coin or not isCoinValid(coin) then return false end
+		if not coin or not coin.Parent then return false end
+	
 		local char = player.Character
 		if not char then return false end
+	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
+	
 		pcall(function()
 			firetouchinterest(hrp, coin, 0)
 			firetouchinterest(hrp, coin, 1)
@@ -2644,40 +2622,30 @@ local script = G2L["1b"];
 			firetouchinterest(hrp, coin, 0)
 			firetouchinterest(hrp, coin, 1)
 		end)
+	
+		coinCooldown[coin] = true
+		task.delay(0.5, function()
+			coinCooldown[coin] = nil
+		end)
+	
 		return true
 	end
 	
-	-- ====== ВЕРНУТЬСЯ В СЕЙВ ======
-	local function goToSafe()
-		if not safePoint then return end
-		local char = player.Character
-		if not char then return end
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return end
-		local dist = (hrp.Position - safePoint).Magnitude
-		if dist < 5 then return end
-		flyTo(safePoint)
-	end
-	
-	-- ====== ОСНОВНОЙ ЦИКЛ ======
-	local function farmTick()
-		if not isRoundActive() then
-			updateIndicator("⏳ ОЖИДАНИЕ", Color3.fromRGB(255, 165, 0))
-			return
-		end
-	
-		-- ПРОВЕРКА МЕШКА
+	-- ====== ГЛАВНЫЙ ЦИКЛ ======
+	local function farmLoopFunction()
 		if isBagFullFunction() then
 			if not isBagFull then
 				isBagFull = true
-				updateIndicator("🟡 МЕШОК ПОЛОН", Color3.fromRGB(255, 255, 0))
+				updateIndicator()
+				print("🟡 МЕШОК ПОЛОН! ОСТАНОВКА...")
 				stopTween()
 			end
 			return
 		else
 			if isBagFull then
 				isBagFull = false
-				updateIndicator("🟢 ФАРМ + NOCLIP", Color3.fromRGB(0, 255, 0))
+				updateIndicator()
+				print("🟢 МЕШОК НЕ ПОЛОН! ПРОДОЛЖАЕМ...")
 			end
 		end
 	
@@ -2693,27 +2661,6 @@ local script = G2L["1b"];
 			return
 		end
 	
-		local murderer = findMurderer()
-		local murdererPos = nil
-		if murderer and murderer.Character then
-			local mhrp = murderer.Character:FindFirstChild("HumanoidRootPart")
-			if mhrp then
-				murdererPos = mhrp.Position
-			end
-		end
-	
-		-- ЕСЛИ УБИЙЦА БЛИЗКО - УЛЕТАЕМ В СЕЙВ
-		if murdererPos and safePoint then
-			local dist = (hrp.Position - murdererPos).Magnitude
-			if dist < 30 then
-				updateIndicator("⚠️ УБИЙЦА", Color3.fromRGB(255, 0, 0))
-				if not isMoving then
-					goToSafe()
-				end
-				return
-			end
-		end
-	
 		if isMoving then
 			return
 		end
@@ -2721,28 +2668,16 @@ local script = G2L["1b"];
 		local container = findCoinContainer()
 		if not container then return end
 	
-		local coins = getCoins(container)
-		if #coins == 0 then
-			updateIndicator("⏳ НЕТ МОНЕТ", Color3.fromRGB(255, 165, 0))
+		local coin, dist = findNearestCoin(container, hrp.Position)
+		if not coin then
 			return
 		end
 	
-		local nearest, dist = findNearestCoin(coins, hrp.Position, murdererPos)
-	
-		if not nearest then
-			updateIndicator("⏳ НЕТ БЕЗОП", Color3.fromRGB(255, 165, 0))
-			return
-		end
-	
-		updateIndicator("🪙 " .. math.floor(dist) .. "ст", Color3.fromRGB(0, 255, 0))
-		currentTarget = nearest
-	
-		local success = flyTo(nearest.Position)
-	
-		if success then
-			pickCoin(nearest)
-			currentTarget = nil
-		end
+		flyToCoin(coin, function(success)
+			if success then
+				pickCoin(coin)
+			end
+		end)
 	end
 	
 	-- ====== ЗАПУСК ======
@@ -2750,34 +2685,40 @@ local script = G2L["1b"];
 		if isActive then return end
 	
 		local char = player.Character
-		if not char then return end
+		if not char then
+			print("❌ Нет персонажа!")
+			return
+		end
 	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if hrp then
-			safePoint = hrp.Position
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid or humanoid.Health <= 0 then
+			print("❌ Персонаж мёртв!")
+			return
 		end
 	
 		isActive = true
 		isBagFull = false
 	
+		-- ВКЛЮЧАЕМ НОКЛИП
 		enableNoclip()
 	
-		updateIndicator("🟢 ФАРМ + NOCLIP", Color3.fromRGB(0, 255, 0))
+		updateIndicator()
+		print("🪙 Автофарм + NOCLIP ВКЛЮЧЕНЫ!")
 	
-		if farmConnection then
-			farmConnection:Disconnect()
-			farmConnection = nil
+		if farmLoop then
+			farmLoop:Disconnect()
+			farmLoop = nil
 		end
 	
-		farmConnection = RunService.Heartbeat:Connect(function()
+		farmLoop = RunService.Heartbeat:Connect(function()
 			if not isActive then
-				if farmConnection then
-					farmConnection:Disconnect()
-					farmConnection = nil
+				if farmLoop then
+					farmLoop:Disconnect()
+					farmLoop = nil
 				end
 				return
 			end
-			farmTick()
+			farmLoopFunction()
 		end)
 	end
 	
@@ -2786,16 +2727,18 @@ local script = G2L["1b"];
 		isActive = false
 		isBagFull = false
 	
+		-- ВЫКЛЮЧАЕМ НОКЛИП
 		disableNoclip()
 	
-		updateIndicator("ВЫКЛ", Color3.fromRGB(255, 0, 0))
+		updateIndicator()
 	
-		if farmConnection then
-			farmConnection:Disconnect()
-			farmConnection = nil
+		if farmLoop then
+			farmLoop:Disconnect()
+			farmLoop = nil
 		end
 	
 		stopTween()
+		coinCooldown = {}
 	
 		local char = player.Character
 		if char then
@@ -2806,10 +2749,10 @@ local script = G2L["1b"];
 			end
 		end
 	
-		currentTarget = nil
+		print("🪙 Автофарм + NOCLIP ВЫКЛЮЧЕНЫ!")
 	end
 	
-	-- ====== КНОПКА ======
+	-- ====== ПЕРЕКЛЮЧЕНИЕ ======
 	button.MouseButton1Click:Connect(function()
 		if isActive then
 			stopFarming()
@@ -2818,22 +2761,17 @@ local script = G2L["1b"];
 		end
 	end)
 	
-	-- ====== РЕСПАВН ======
+	-- ====== ПРИ РЕСПАВНЕ ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
 		if isActive then
-			local char = player.Character
-			if char then
-				local hrp = char:FindFirstChild("HumanoidRootPart")
-				if hrp then
-					safePoint = hrp.Position
-				end
-			end
 			enableNoclip()
+			startFarming()
 		end
 	end)
 	
-	updateIndicator("ВЫКЛ", Color3.fromRGB(255, 0, 0))
+	updateIndicator()
+	print("✅ MM2_AutoFarm + NOCLIP загружена!")
 end;
 task.spawn(C_1b);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.TROLL_Push.LocalScript
