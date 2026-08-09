@@ -2342,7 +2342,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ФИКС ДЕРГАНИЯ + СКОРОСТЬ 20 + МЕШОК + ТЕЛЕПОРТ)
+	-- MM2_AutoFarm (ФИКС ДЕРГАНИЯ + СКОРОСТЬ 20)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2357,8 +2357,6 @@ local script = G2L["1b"];
 	local currentTween = nil
 	local isMoving = false
 	local gyro = nil
-	local isBagFull = false
-	local teleportCooldown = 0
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2375,39 +2373,6 @@ local script = G2L["1b"];
 	local function updateIndicator(text, color)
 		indicator.Text = text
 		indicator.TextColor3 = color or Color3.fromRGB(255, 0, 0)
-	end
-	
-	-- ====== ПРОВЕРКА МЕШКА ======
-	local function isBagFullFunction()
-		local mainGui = player.PlayerGui:FindFirstChild("MainGUI")
-		if not mainGui then return false end
-	
-		local gameFrame = mainGui:FindFirstChild("Game")
-		if not gameFrame then return false end
-	
-		local coinBags = gameFrame:FindFirstChild("CoinBags")
-		if not coinBags then return false end
-	
-		local container = coinBags:FindFirstChild("Container")
-		if not container then return false end
-	
-		local snowToken = container:FindFirstChild("SnowToken")
-		if not snowToken then return false end
-	
-		local currencyFrame = snowToken:FindFirstChild("CurrencyFrame")
-		if not currencyFrame then return false end
-	
-		local icon = currencyFrame:FindFirstChild("Icon")
-		if not icon then return false end
-	
-		local coins = icon:FindFirstChild("Coins")
-		if not coins then return false end
-	
-		local currentCoins = tonumber(coins.Text) or 0
-		local isElite = player:GetAttribute("Elite") or false
-		local maxCoins = isElite and 50 or 40
-	
-		return currentCoins >= maxCoins
 	end
 	
 	-- ====== ФИКС РОТАЦИИ ======
@@ -2456,21 +2421,6 @@ local script = G2L["1b"];
 			currentTween = nil
 		end
 		isMoving = false
-	end
-	
-	-- ====== ТЕЛЕПОРТ ======
-	local function teleportTo(targetPos)
-		local char = player.Character
-		if not char then return false end
-	
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return false end
-	
-		hrp.Velocity = Vector3.zero
-		hrp.RotVelocity = Vector3.zero
-		hrp.CFrame = CFrame.new(targetPos + Vector3.new(0, 2, 0))
-	
-		return true
 	end
 	
 	-- ====== ПРОВЕРКА РАУНДА ======
@@ -2549,53 +2499,29 @@ local script = G2L["1b"];
 		return coins
 	end
 	
-	-- ====== ПОИСК БЕЗОПАСНОЙ МОНЕТЫ ======
-	local function findSafeCoin(coins, position, murdererPos)
-		local safeCoins = {}
+	-- ====== ПОИСК БЛИЖАЙШЕЙ МОНЕТЫ ======
+	local function findNearestCoin(coins, position, murdererPos)
+		local nearest = nil
+		local nearestDist = math.huge
 	
 		for _, coin in pairs(coins) do
 			local coinPos = coin.Position
-			local isSafe = true
 	
 			if murdererPos then
 				local distToMurderer = (coinPos - murdererPos).Magnitude
-				if distToMurderer < 40 then
-					isSafe = false
+				if distToMurderer < 30 then
+					continue
 				end
 			end
 	
-			if isSafe then
-				table.insert(safeCoins, coin)
+			local dist = (position - coinPos).Magnitude
+			if dist < nearestDist then
+				nearestDist = dist
+				nearest = coin
 			end
 		end
 	
-		if #safeCoins > 0 then
-			local nearest = nil
-			local nearestDist = math.huge
-			for _, coin in pairs(safeCoins) do
-				local dist = (position - coin.Position).Magnitude
-				if dist < nearestDist then
-					nearestDist = dist
-					nearest = coin
-				end
-			end
-			return nearest, "safe"
-		end
-	
-		if murdererPos then
-			local farthest = nil
-			local farthestDist = -math.huge
-			for _, coin in pairs(coins) do
-				local distToMurderer = (coin.Position - murdererPos).Magnitude
-				if distToMurderer > farthestDist then
-					farthestDist = distToMurderer
-					farthest = coin
-				end
-			end
-			return farthest, "farthest"
-		end
-	
-		return nil, "none"
+		return nearest, nearestDist
 	end
 	
 	-- ====== ПОЛЕТ (БЕЗ ДЕРГАНИЯ) ======
@@ -2614,10 +2540,12 @@ local script = G2L["1b"];
 	
 		local distance = (hrp.Position - targetPos).Magnitude
 	
+		-- ЕСЛИ УЖЕ БЛИЗКО - НЕ ДВИГАЕМ
 		if distance < 5 then
 			return true
 		end
 	
+		-- СКОРОСТЬ 20
 		local speed = 20
 		local duration = distance / speed
 		duration = math.max(duration, 0.3)
@@ -2632,6 +2560,7 @@ local script = G2L["1b"];
 			Enum.EasingDirection.Out
 		)
 	
+		-- ДВИГАЕМ POSITION, А НЕ CFrame (ЧТОБЫ НЕ ДЕРГАЛО)
 		currentTween = TweenService:Create(hrp, tweenInfo, {
 			Position = targetPos
 		})
@@ -2652,6 +2581,7 @@ local script = G2L["1b"];
 				gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
 			end
 	
+			-- ПРОВЕРЯЕМ ДИСТАНЦИЮ В ЦИКЛЕ
 			local currentDist = (hrp.Position - targetPos).Magnitude
 			if currentDist < 5 then
 				stopTween()
@@ -2729,25 +2659,6 @@ local script = G2L["1b"];
 			return
 		end
 	
-		-- ПРОВЕРКА МЕШКА
-		if isBagFullFunction() then
-			if not isBagFull then
-				isBagFull = true
-				updateIndicator("🟡 МЕШОК ПОЛОН", Color3.fromRGB(255, 255, 0))
-				stopTween()
-			end
-			return
-		else
-			if isBagFull then
-				isBagFull = false
-				updateIndicator("🟢 ФАРМ", Color3.fromRGB(0, 255, 0))
-			end
-		end
-	
-		if teleportCooldown > 0 then
-			teleportCooldown = teleportCooldown - 0.1
-		end
-	
 		local char = player.Character
 		if not char then return end
 	
@@ -2770,25 +2681,14 @@ local script = G2L["1b"];
 			end
 		end
 	
-		-- ЕСЛИ УБИЙЦА РЯДОМ - ТЕЛЕПОРТ
-		if murdererPos then
-			local distToMurderer = (hrp.Position - murdererPos).Magnitude
-			if distToMurderer < 40 and teleportCooldown <= 0 then
-				local container = findCoinContainer()
-				if container then
-					local coins = getCoins(container)
-					if #coins > 0 then
-						local safeCoin, mode = findSafeCoin(coins, hrp.Position, murdererPos)
-						if safeCoin then
-							teleportTo(safeCoin.Position)
-							teleportCooldown = 0.5
-							updateIndicator("⚡ ТЕЛЕПОРТ", Color3.fromRGB(0, 255, 255))
-							task.wait(0.1)
-							pickCoin(safeCoin)
-							return
-						end
-					end
+		if murdererPos and safePoint then
+			local dist = (hrp.Position - murdererPos).Magnitude
+			if dist < 30 then
+				updateIndicator("⚠️ УБИЙЦА", Color3.fromRGB(255, 0, 0))
+				if not isMoving then
+					goToSafe()
 				end
+				return
 			end
 		end
 	
@@ -2836,8 +2736,6 @@ local script = G2L["1b"];
 		end
 	
 		isActive = true
-		isBagFull = false
-		teleportCooldown = 0
 		updateIndicator("🟢 ФАРМ", Color3.fromRGB(0, 255, 0))
 	
 		if farmConnection then
@@ -2860,8 +2758,6 @@ local script = G2L["1b"];
 	-- ====== ОСТАНОВКА ======
 	local function stopFarming()
 		isActive = false
-		isBagFull = false
-		teleportCooldown = 0
 		updateIndicator("ВЫКЛ", Color3.fromRGB(255, 0, 0))
 	
 		if farmConnection then
