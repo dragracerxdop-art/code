@@ -2979,6 +2979,7 @@ local script = G2L["1b"];
 	end)
 	
 	updateIndicator("ВЫКЛ", Color3.fromRGB(255, 0, 0))
+	local noclipActive = false
 	print("✅ MM2_AutoFarm ЗАГРУЖЕНА!")
 end;
 task.spawn(C_1b);
