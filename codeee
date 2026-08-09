@@ -2348,7 +2348,7 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (СКОРОСТЬ 20 + МЕШОК)
+	-- MM2_AutoFarm (СКОРОСТЬ 25 + NOCLIP)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -2592,7 +2592,7 @@ local script = G2L["1b"];
 		return nearest, nearestDist
 	end
 	
-	-- ====== ПОЛЕТ (СКОРОСТЬ 20) ======
+	-- ====== ПОЛЕТ (СКОРОСТЬ 25) ======
 	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
@@ -2618,11 +2618,11 @@ local script = G2L["1b"];
 			return true
 		end
 	
-		-- СКОРОСТЬ 20
-		local speed = 20
+		-- СКОРОСТЬ 25 (ЗОЛОТАЯ СЕРЕДИНА)
+		local speed = 25
 		local duration = distance / speed
-		duration = math.max(duration, 0.3)
-		duration = math.min(duration, 3.0)
+		duration = math.max(duration, 0.2)
+		duration = math.min(duration, 2.5)
 	
 		stopTween()
 		isMoving = true
@@ -2645,7 +2645,7 @@ local script = G2L["1b"];
 	
 		currentTween:Play()
 	
-		local timeout = tick() + duration + 1
+		local timeout = tick() + duration + 0.5
 		repeat
 			task.wait()
 	
