@@ -2342,66 +2342,23 @@ task.spawn(C_17);
 local function C_1b()
 local script = G2L["1b"];
 	-- ==========================================
-	-- MM2_AutoFarm (ТЕЛЕПОРТ + ЗАДЕРЖКА + ПАДЕНИЕ)
+	-- MM2_AutoFarm (ФИКС ДЕРГАНИЯ + СКОРОСТЬ 20 + МЕШОК + ТЕЛЕПОРТ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
+	local TweenService = game:GetService("TweenService")
 	
 	local isActive = false
 	local farmConnection = nil
+	local safePoint = nil
+	local currentTarget = nil
+	local currentTween = nil
+	local isMoving = false
+	local gyro = nil
 	local isBagFull = false
 	local teleportCooldown = 0
-	
-	-- ====== ЗАПОМИНАНИЕ СОБРАННЫХ МОНЕТ ======
-	local collectedCoins = {}
-	local collectedCoinsTimer = {}
-	
-	-- ====== NOCLIP ======
-	local noclipActive = false
-	local noclipConnection = nil
-	
-	local function enableNoclip()
-		if noclipActive then return end
-		noclipActive = true
-	
-		if noclipConnection then
-			noclipConnection:Disconnect()
-			noclipConnection = nil
-		end
-	
-		noclipConnection = RunService.Stepped:Connect(function()
-			if noclipActive then
-				local char = player.Character
-				if char then
-					for _, part in pairs(char:GetDescendants()) do
-						if part:IsA("BasePart") then
-							part.CanCollide = false
-						end
-					end
-				end
-			end
-		end)
-	end
-	
-	local function disableNoclip()
-		noclipActive = false
-	
-		if noclipConnection then
-			noclipConnection:Disconnect()
-			noclipConnection = nil
-		end
-	
-		local char = player.Character
-		if char then
-			for _, part in pairs(char:GetDescendants()) do
-				if part:IsA("BasePart") then
-					part.CanCollide = true
-				end
-			end
-		end
-	end
 	
 	-- ====== ИНДИКАТОР ======
 	local indicator = Instance.new("TextLabel")
@@ -2451,6 +2408,69 @@ local script = G2L["1b"];
 		local maxCoins = isElite and 50 or 40
 	
 		return currentCoins >= maxCoins
+	end
+	
+	-- ====== ФИКС РОТАЦИИ ======
+	local function createGyro(hrp)
+		if not hrp then return end
+		if gyro then return end
+	
+		gyro = Instance.new("BodyGyro")
+		gyro.Parent = hrp
+		gyro.D = 500
+		gyro.P = 5000
+		gyro.MaxTorque = Vector3.new(4000, 4000, 4000)
+		gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
+	end
+	
+	local function removeGyro()
+		if gyro then
+			pcall(function() gyro:Destroy() end)
+			gyro = nil
+		end
+	end
+	
+	-- ====== НОКЛИП ======
+	local function enableNoclip(char)
+		if not char then return end
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
+		end
+	end
+	
+	local function disableNoclip(char)
+		if not char then return end
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = true
+			end
+		end
+	end
+	
+	-- ====== ОСТАНОВКА ТВИНА ======
+	local function stopTween()
+		if currentTween then
+			pcall(function() currentTween:Cancel() end)
+			currentTween = nil
+		end
+		isMoving = false
+	end
+	
+	-- ====== ТЕЛЕПОРТ ======
+	local function teleportTo(targetPos)
+		local char = player.Character
+		if not char then return false end
+	
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return false end
+	
+		hrp.Velocity = Vector3.zero
+		hrp.RotVelocity = Vector3.zero
+		hrp.CFrame = CFrame.new(targetPos + Vector3.new(0, 2, 0))
+	
+		return true
 	end
 	
 	-- ====== ПРОВЕРКА РАУНДА ======
@@ -2509,9 +2529,10 @@ local script = G2L["1b"];
 	local function isCoinValid(coin)
 		if not coin then return false end
 		if not coin.Parent then return false end
-		if not coin:FindFirstChild("TouchInterest") then return false end
-		if collectedCoins[coin] then return false end
-		return true
+		if coin:FindFirstChild("TouchInterest") then
+			return true
+		end
+		return false
 	end
 	
 	-- ====== ПОЛУЧИТЬ ВСЕ МОНЕТЫ ======
@@ -2577,19 +2598,93 @@ local script = G2L["1b"];
 		return nil, "none"
 	end
 	
-	-- ====== ТЕЛЕПОРТ НА МОНЕТУ (ПРЯМО НА НЕЁ) ======
-	local function teleportToCoin(coin)
+	-- ====== ПОЛЕТ (БЕЗ ДЕРГАНИЯ) ======
+	local function flyTo(targetPos)
 		local char = player.Character
 		if not char then return false end
 	
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
 	
-		hrp.Velocity = Vector3.zero
-		hrp.RotVelocity = Vector3.zero
-		-- ТЕЛЕПОРТ ПРЯМО НА МОНЕТУ (Y = 0)
-		hrp.CFrame = CFrame.new(coin.Position)
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid or humanoid.Health <= 0 then return false end
 	
+		enableNoclip(char)
+		createGyro(hrp)
+	
+		local distance = (hrp.Position - targetPos).Magnitude
+	
+		if distance < 5 then
+			return true
+		end
+	
+		local speed = 20
+		local duration = distance / speed
+		duration = math.max(duration, 0.3)
+		duration = math.min(duration, 3.0)
+	
+		stopTween()
+		isMoving = true
+	
+		local tweenInfo = TweenInfo.new(
+			duration,
+			Enum.EasingStyle.Linear,
+			Enum.EasingDirection.Out
+		)
+	
+		currentTween = TweenService:Create(hrp, tweenInfo, {
+			Position = targetPos
+		})
+	
+		local completed = false
+		currentTween.Completed:Connect(function()
+			completed = true
+			isMoving = false
+		end)
+	
+		currentTween:Play()
+	
+		local timeout = tick() + duration + 1
+		repeat
+			task.wait()
+	
+			if gyro then
+				gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
+			end
+	
+			local currentDist = (hrp.Position - targetPos).Magnitude
+			if currentDist < 5 then
+				stopTween()
+				return true
+			end
+	
+			if humanoid.Health <= 0 then
+				stopTween()
+				return false
+			end
+	
+			if currentTarget and not isCoinValid(currentTarget) then
+				stopTween()
+				return false
+			end
+	
+			if hrp.Position.Y < -30 then
+				stopTween()
+				if safePoint then
+					hrp.CFrame = CFrame.new(safePoint)
+				end
+				return false
+			end
+	
+			if tick() > timeout then
+				stopTween()
+				return false
+			end
+	
+		until completed == true
+	
+		currentTween = nil
+		isMoving = false
 		return true
 	end
 	
@@ -2606,22 +2701,25 @@ local script = G2L["1b"];
 		pcall(function()
 			firetouchinterest(hrp, coin, 0)
 			firetouchinterest(hrp, coin, 1)
-			task.wait(0.05)
-			firetouchinterest(hrp, coin, 0)
-			firetouchinterest(hrp, coin, 1)
-		end)
-	
-		collectedCoins[coin] = true
-	
-		if collectedCoinsTimer[coin] then
-			collectedCoinsTimer[coin]:Disconnect()
-		end
-		collectedCoinsTimer[coin] = task.delay(3, function()
-			collectedCoins[coin] = nil
-			collectedCoinsTimer[coin] = nil
 		end)
 	
 		return true
+	end
+	
+	-- ====== ВЕРНУТЬСЯ В СЕЙВ ======
+	local function goToSafe()
+		if not safePoint then return end
+	
+		local char = player.Character
+		if not char then return end
+	
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+	
+		local dist = (hrp.Position - safePoint).Magnitude
+		if dist < 5 then return end
+	
+		flyTo(safePoint)
 	end
 	
 	-- ====== ОСНОВНОЙ ЦИКЛ ======
@@ -2631,23 +2729,23 @@ local script = G2L["1b"];
 			return
 		end
 	
+		-- ПРОВЕРКА МЕШКА
 		if isBagFullFunction() then
 			if not isBagFull then
 				isBagFull = true
 				updateIndicator("🟡 МЕШОК ПОЛОН", Color3.fromRGB(255, 255, 0))
+				stopTween()
 			end
 			return
 		else
 			if isBagFull then
 				isBagFull = false
-				updateIndicator("🟢 ФАРМ + NOCLIP", Color3.fromRGB(0, 255, 0))
+				updateIndicator("🟢 ФАРМ", Color3.fromRGB(0, 255, 0))
 			end
 		end
 	
-		-- КУЛДАУН МЕЖДУ ТЕЛЕПОРТАМИ
 		if teleportCooldown > 0 then
 			teleportCooldown = teleportCooldown - 0.1
-			return
 		end
 	
 		local char = player.Character
@@ -2657,16 +2755,10 @@ local script = G2L["1b"];
 		if not hrp then return end
 	
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid or humanoid.Health <= 0 then
-			stopFarming()
-			return
-		end
+		if not humanoid or humanoid.Health <= 0 then return end
 	
-		-- НОКЛИП
-		for _, part in pairs(char:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = false
-			end
+		if gyro then
+			gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(0, 1, 0))
 		end
 	
 		local murderer = findMurderer()
@@ -2678,6 +2770,32 @@ local script = G2L["1b"];
 			end
 		end
 	
+		-- ЕСЛИ УБИЙЦА РЯДОМ - ТЕЛЕПОРТ
+		if murdererPos then
+			local distToMurderer = (hrp.Position - murdererPos).Magnitude
+			if distToMurderer < 40 and teleportCooldown <= 0 then
+				local container = findCoinContainer()
+				if container then
+					local coins = getCoins(container)
+					if #coins > 0 then
+						local safeCoin, mode = findSafeCoin(coins, hrp.Position, murdererPos)
+						if safeCoin then
+							teleportTo(safeCoin.Position)
+							teleportCooldown = 0.5
+							updateIndicator("⚡ ТЕЛЕПОРТ", Color3.fromRGB(0, 255, 255))
+							task.wait(0.1)
+							pickCoin(safeCoin)
+							return
+						end
+					end
+				end
+			end
+		end
+	
+		if isMoving then
+			return
+		end
+	
 		local container = findCoinContainer()
 		if not container then return end
 	
@@ -2687,28 +2805,22 @@ local script = G2L["1b"];
 			return
 		end
 	
-		local targetCoin, mode = findSafeCoin(coins, hrp.Position, murdererPos)
+		local nearest, dist = findNearestCoin(coins, hrp.Position, murdererPos)
 	
-		if not targetCoin then
-			updateIndicator("⏳ НЕТ ДОСТУПНЫХ", Color3.fromRGB(255, 165, 0))
+		if not nearest then
+			updateIndicator("⏳ НЕТ БЕЗОП", Color3.fromRGB(255, 165, 0))
 			return
 		end
 	
-		if mode == "safe" then
-			updateIndicator("⚡ ТЕЛЕПОРТ ✅", Color3.fromRGB(0, 255, 255))
-		elseif mode == "farthest" then
-			updateIndicator("⚡ ТЕЛЕПОРТ ⚠️", Color3.fromRGB(255, 165, 0))
-		else
-			updateIndicator("⚡ ТЕЛЕПОРТ", Color3.fromRGB(0, 255, 0))
+		updateIndicator("🪙 " .. math.floor(dist) .. "ст", Color3.fromRGB(0, 255, 0))
+		currentTarget = nearest
+	
+		local success = flyTo(nearest.Position)
+	
+		if success then
+			pickCoin(nearest)
+			currentTarget = nil
 		end
-	
-		-- ТЕЛЕПОРТ НА МОНЕТУ
-		teleportToCoin(targetCoin)
-		task.wait(0.1)
-		pickCoin(targetCoin)
-	
-		-- ЗАДЕРЖКА МЕЖДУ ТЕЛЕПОРТАМИ (0.3-0.5 СЕК)
-		teleportCooldown = 0.3
 	end
 	
 	-- ====== ЗАПУСК ======
@@ -2716,25 +2828,17 @@ local script = G2L["1b"];
 		if isActive then return end
 	
 		local char = player.Character
-		if not char then
-			print("❌ Нет персонажа!")
-			return
-		end
+		if not char then return end
 	
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if not humanoid or humanoid.Health <= 0 then
-			print("❌ Персонаж мёртв!")
-			return
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			safePoint = hrp.Position
 		end
 	
 		isActive = true
 		isBagFull = false
-		collectedCoins = {}
 		teleportCooldown = 0
-	
-		enableNoclip()
-	
-		updateIndicator("🟢 ФАРМ + NOCLIP", Color3.fromRGB(0, 255, 0))
+		updateIndicator("🟢 ФАРМ", Color3.fromRGB(0, 255, 0))
 	
 		if farmConnection then
 			farmConnection:Disconnect()
@@ -2757,16 +2861,7 @@ local script = G2L["1b"];
 	local function stopFarming()
 		isActive = false
 		isBagFull = false
-		collectedCoins = {}
 		teleportCooldown = 0
-	
-		for _, timer in pairs(collectedCoinsTimer) do
-			pcall(function() timer:Disconnect() end)
-		end
-		collectedCoinsTimer = {}
-	
-		disableNoclip()
-	
 		updateIndicator("ВЫКЛ", Color3.fromRGB(255, 0, 0))
 	
 		if farmConnection then
@@ -2774,14 +2869,20 @@ local script = G2L["1b"];
 			farmConnection = nil
 		end
 	
+		stopTween()
+		removeGyro()
+	
 		local char = player.Character
 		if char then
+			disableNoclip(char)
 			local hrp = char:FindFirstChild("HumanoidRootPart")
 			if hrp then
 				hrp.Velocity = Vector3.zero
 				hrp.RotVelocity = Vector3.zero
 			end
 		end
+	
+		currentTarget = nil
 	end
 	
 	-- ====== КНОПКА ======
@@ -2796,9 +2897,14 @@ local script = G2L["1b"];
 	-- ====== РЕСПАВН ======
 	player.CharacterAdded:Connect(function()
 		task.wait(0.5)
-		collectedCoins = {}
 		if isActive then
-			enableNoclip()
+			local char = player.Character
+			if char then
+				local hrp = char:FindFirstChild("HumanoidRootPart")
+				if hrp then
+					safePoint = hrp.Position
+				end
+			end
 		end
 	end)
 	
