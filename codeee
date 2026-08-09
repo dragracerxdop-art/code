@@ -2549,7 +2549,7 @@ local script = G2L["1b"];
 			return
 		end
 	
-		local speed = 25
+		local speed = 20
 		local duration = distance / speed
 		duration = math.max(duration, 0.15)
 		duration = math.min(duration, 1.5)
