@@ -7750,12 +7750,11 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_AutoFarm (ФИНАЛЬНАЯ ВЕРСИЯ)
+	-- UYC_AutoFarm (ImageButton + СКРЫТЫЙ TextLabel)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
 	local UserInputService = game:GetService("UserInputService")
-	local TweenService = game:GetService("TweenService")
 	
 	-- ====== ПОИСК КНОПОК ======
 	local rightFrame = script.Parent
@@ -7766,6 +7765,36 @@ local script = G2L["fa"];
 	if not selectBtn then warn("❌ UYC_SelectCrate НЕ НАЙДЕН!") return end
 	if not startBtn then warn("❌ UYC_StartFarm НЕ НАЙДЕН!") return end
 	if not scrollFrame then warn("❌ UYC_CrateList НЕ НАЙДЕН!") return end
+	
+	-- ====== СОЗДАЁМ TextLabel ВНУТРИ КНОПОК (ЕСЛИ ИХ НЕТ) ======
+	local function ensureLabel(btn, defaultText, defaultColor)
+		local label = btn:FindFirstChild("ButtonText")
+		if not label then
+			label = Instance.new("TextLabel")
+			label.Name = "ButtonText"
+			label.Size = UDim2.new(1, 0, 1, 0)
+			label.BackgroundTransparency = 1
+			label.Text = defaultText or "---"
+			label.TextColor3 = defaultColor or Color3.fromRGB(255, 255, 255)
+			label.TextSize = 14
+			label.Font = Enum.Font.SourceSansBold
+			label.ZIndex = 2
+			label.Parent = btn
+		end
+		return label
+	end
+	
+	local selectLabel = ensureLabel(selectBtn, "ВЫБЕРИ КЕЙС", Color3.fromRGB(255, 200, 100))
+	local startLabel = ensureLabel(startBtn, "ВЫКЛ", Color3.fromRGB(255, 0, 0))
+	
+	-- ====== ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ ТЕКСТА ======
+	local function setLabelText(btn, text, color)
+		local label = btn:FindFirstChild("ButtonText")
+		if label then
+			label.Text = text
+			if color then label.TextColor3 = color end
+		end
+	end
 	
 	-- ====== ТАБЛИЦА КЕЙСОВ ======
 	local CRATE_TABLE = {
@@ -7791,7 +7820,7 @@ local script = G2L["fa"];
 	_G.SelectedCrate = nil
 	local listCreated = false
 	
-	-- ====== ПО УМОЛЧАНИЮ СПИСОК СКРЫТ ======
+	-- ====== СПИСОК СКРЫТ ======
 	scrollFrame.Visible = false
 	
 	-- ====== СОЗДАНИЕ СПИСКА ======
@@ -7804,7 +7833,6 @@ local script = G2L["fa"];
 			return
 		end
 	
-		-- ОЧИЩАЕМ (КРОМЕ ШАБЛОНА)
 		for _, child in pairs(scrollFrame:GetChildren()) do
 			if child ~= template then child:Destroy() end
 		end
@@ -7822,8 +7850,8 @@ local script = G2L["fa"];
 	
 			btn.MouseButton1Click:Connect(function()
 				_G.SelectedCrate = crate
-				print("📌 ВЫБРАН КЕЙС:", crate.name, crate.level)
-				selectBtn.Text = crate.name .. " (" .. crate.level .. ")"
+				print("📌 ВЫБРАН:", crate.name, crate.level)
+				setLabelText(selectBtn, crate.name .. " (" .. crate.level .. ")", Color3.fromRGB(0, 255, 200))
 				scrollFrame.Visible = false
 			end)
 		end
@@ -7833,7 +7861,7 @@ local script = G2L["fa"];
 		listCreated = true
 	end
 	
-	-- ====== КНОПКА ВЫБОРА КЕЙСА ======
+	-- ====== ОТКРЫТИЕ СПИСКА ======
 	selectBtn.MouseButton1Click:Connect(function()
 		if scrollFrame.Visible then
 			scrollFrame.Visible = false
@@ -7847,12 +7875,11 @@ local script = G2L["fa"];
 		scrollFrame.Visible = true
 	end)
 	
-	-- ====== КНОПКА СТАРТА ======
+	-- ====== ФАРМ ======
 	local isFarming = false
 	local farmLoop = nil
 	local isWorking = false
 	
-	-- ====== ОБЪЕКТЫ ======
 	local function getPlot()
 		return workspace.Plots:FindFirstChild(player.Name .. " Plot")
 	end
@@ -7875,7 +7902,6 @@ local script = G2L["fa"];
 		return grower:FindFirstChild("CratesFolder")
 	end
 	
-	-- ====== ТЕЛЕПОРТ К ОБЪЕКТУ ======
 	local function teleportToObject(obj)
 		local char = player.Character
 		if not char then return false end
@@ -7892,7 +7918,6 @@ local script = G2L["fa"];
 		return true
 	end
 	
-	-- ====== ТЕЛЕПОРТ ПРЯМО К КЛОНУ ======
 	local function teleportToClone()
 		local duplicator = getDuplicator()
 		if not duplicator then return false end
@@ -7910,7 +7935,6 @@ local script = G2L["fa"];
 		return false
 	end
 	
-	-- ====== ВЗЯТЬ КЛОН С ДУПЛИКАТОРА ======
 	local function takeCloneFromDuplicator()
 		local duplicator = getDuplicator()
 		if not duplicator then return nil end
@@ -7928,7 +7952,6 @@ local script = G2L["fa"];
 		return nil
 	end
 	
-	-- ====== НАЖАТИЯ E ======
 	local function pressE()
 		pcall(function()
 			UserInputService:SetKeyDown(Enum.KeyCode.E)
@@ -7945,7 +7968,6 @@ local script = G2L["fa"];
 		end)
 	end
 	
-	-- ====== ПОЛУЧИТЬ ТЕКУЩИЙ УРОВЕНЬ КЕЙСА ======
 	local function getCurrentCrateLevel()
 		local cratesFolder = getCratesFolder()
 		if not cratesFolder then return nil end
@@ -7958,7 +7980,6 @@ local script = G2L["fa"];
 		return nil
 	end
 	
-	-- ====== ПРОВЕРКА ДОСТИГ ЛИ УРОВЕНЬ ======
 	local CRATE_NAMES = {
 		"Summer", "Forest", "Bee", "Beach", "YinYang", "Rare", "Divine",
 		"Golden", "Starlight", "Aqua", "Ice", "Obsidian", "Galaxy",
@@ -7984,14 +8005,13 @@ local script = G2L["fa"];
 		return currentIndex >= selectedIndex
 	end
 	
-	-- ====== ОСНОВНОЙ ЦИКЛ ФАРМА ======
+	-- ====== ОСНОВНОЙ ЦИКЛ ======
 	local function farmLoopFunction()
 		if isWorking then return end
 		isWorking = true
 	
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
-		-- 1. ТЕЛЕПОРТ К КЛОНУ
 		if not teleportToClone() then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К КЛОНУ!")
 			isWorking = false
@@ -7999,10 +8019,9 @@ local script = G2L["fa"];
 		end
 		task.wait(0.2)
 	
-		-- 2. ВЗЯТЬ КЛОН
 		local clone = takeCloneFromDuplicator()
 		if not clone then
-			print("⏳ НЕТ КЛОНА НА ДУПЛИКАТОРЕ!")
+			print("⏳ НЕТ КЛОНА!")
 			isWorking = false
 			return
 		end
@@ -8011,7 +8030,6 @@ local script = G2L["fa"];
 		pressE()
 		task.wait(0.5)
 	
-		-- 3. ТЕЛЕПОРТ К ГРОВЕРУ
 		local grower = getGrower()
 		if not grower then
 			print("❌ НЕТ ГРОВЕРА!")
@@ -8022,15 +8040,12 @@ local script = G2L["fa"];
 		teleportToObject(grower)
 		task.wait(0.2)
 	
-		-- 4. ПОЛОЖИТЬ В ГРОВЕР
 		holdE()
 		task.wait(1)
-		print("📥 ЯЩИК ПОЛОЖЕН В ГРОВЕР")
+		print("📥 ЯЩИК ПОЛОЖЕН")
 	
-		-- 5. ЖДАТЬ РОСТА
 		local waitTime = 0
-		local maxWait = 3600 -- 1 ЧАС МАКСИМУМ
-	
+		local maxWait = 3600
 		print("⏳ ОЖИДАНИЕ РОСТА ДО " .. (_G.SelectedCrate and _G.SelectedCrate.level or "???") .. "...")
 	
 		while waitTime < maxWait do
@@ -8038,20 +8053,14 @@ local script = G2L["fa"];
 			waitTime = waitTime + 5
 	
 			local current = getCurrentCrateLevel()
-			if current then
-				print("📊 ТЕКУЩИЙ УРОВЕНЬ:", current)
-			end
+			if current then print("📊 ТЕКУЩИЙ УРОВЕНЬ:", current) end
 	
-			if hasReachedSelectedLevel() then
-				print("✅ ДОСТИГНУТ УРОВЕНЬ:", _G.SelectedCrate and _G.SelectedCrate.level or "???")
-				break
-			end
+			if hasReachedSelectedLevel() then break end
 		end
 	
-		-- 6. ЗАБРАТЬ ЯЩИК
 		pressE()
 		task.wait(0.5)
-		print("✅ ЯЩИК ЗАБРАН ИЗ ГРОВЕРА")
+		print("✅ ЯЩИК ЗАБРАН")
 	
 		isWorking = false
 		print("🔄 ЦИКЛ ЗАВЕРШЕН!")
@@ -8060,33 +8069,22 @@ local script = G2L["fa"];
 	-- ====== ЗАПУСК ======
 	local function startFarming()
 		if isFarming then return end
-	
 		if not _G.SelectedCrate then
 			print("❌ ВЫБЕРИ УРОВЕНЬ КЕЙСА!")
 			return
 		end
 	
 		isFarming = true
-		startBtn.Text = "ВКЛ"
-		startBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+		setLabelText(startBtn, "ВКЛ", Color3.fromRGB(0, 255, 0))
 		print("🚀 ФАРМ ЗАПУЩЕН! УРОВЕНЬ:", _G.SelectedCrate.level)
 	
-		if farmLoop then
-			farmLoop:Disconnect()
-			farmLoop = nil
-		end
-	
+		if farmLoop then farmLoop:Disconnect() farmLoop = nil end
 		farmLoop = RunService.Heartbeat:Connect(function()
 			if not isFarming then
-				if farmLoop then
-					farmLoop:Disconnect()
-					farmLoop = nil
-				end
+				if farmLoop then farmLoop:Disconnect() farmLoop = nil end
 				return
 			end
-			if not isWorking then
-				task.spawn(farmLoopFunction)
-			end
+			if not isWorking then task.spawn(farmLoopFunction) end
 		end)
 	end
 	
@@ -8094,14 +8092,10 @@ local script = G2L["fa"];
 	local function stopFarming()
 		isFarming = false
 		isWorking = false
-		startBtn.Text = "ВЫКЛ"
-		startBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
+		setLabelText(startBtn, "ВЫКЛ", Color3.fromRGB(255, 0, 0))
 		print("⏹️ ФАРМ ОСТАНОВЛЕН!")
 	
-		if farmLoop then
-			farmLoop:Disconnect()
-			farmLoop = nil
-		end
+		if farmLoop then farmLoop:Disconnect() farmLoop = nil end
 	end
 	
 	-- ====== КНОПКА СТАРТА ======
@@ -8112,10 +8106,6 @@ local script = G2L["fa"];
 			startFarming()
 		end
 	end)
-	
-	-- ====== СТАРТОВЫЙ СТАТУС ======
-	startBtn.Text = "ВЫКЛ"
-	startBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
 	
 	print("✅ UYC_AutoFarm ЗАГРУЖЕНА!")
 end;
