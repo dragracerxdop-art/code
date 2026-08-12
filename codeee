@@ -7,7 +7,7 @@
  Y888P  ~Y8888P' Y888888P      888888D      Y88888P ~Y8888P' YP   YP  CONVERTER 
 ]=]
 
--- Instances: 285 | Scripts: 54 | Modules: 0 | Tags: 0
+-- Instances: 284 | Scripts: 53 | Modules: 0 | Tags: 0
 local G2L = {};
 
 -- StarterGui.Folder.PurpHub
@@ -1816,333 +1816,327 @@ G2L["f0"]["Color"] = Color3.fromRGB(180, 4, 255);
 G2L["f0"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC_SelectCrate.LocalScript
-G2L["f1"] = Instance.new("LocalScript", G2L["ee"]);
-
-
-
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC_CrateList
-G2L["f2"] = Instance.new("ScrollingFrame", G2L["d"]);
-G2L["f2"]["Visible"] = false;
-G2L["f2"]["Active"] = true;
-G2L["f2"]["BorderSizePixel"] = 0;
-G2L["f2"]["Name"] = [[UYC_CrateList]];
-G2L["f2"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["f2"]["Size"] = UDim2.new(0, 169, 0, 193);
-G2L["f2"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["f2"]["Position"] = UDim2.new(0.48011, 0, 0.01871, 0);
-G2L["f2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["f2"]["ScrollBarThickness"] = 1;
+G2L["f1"] = Instance.new("ScrollingFrame", G2L["d"]);
+G2L["f1"]["Active"] = true;
+G2L["f1"]["BorderSizePixel"] = 0;
+G2L["f1"]["Name"] = [[UYC_CrateList]];
+G2L["f1"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["f1"]["Size"] = UDim2.new(0, 169, 0, 193);
+G2L["f1"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["f1"]["Position"] = UDim2.new(0.48011, 0, 0.01871, 0);
+G2L["f1"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["f1"]["ScrollBarThickness"] = 1;
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC_CrateList.UIStroke
-G2L["f3"] = Instance.new("UIStroke", G2L["f2"]);
-G2L["f3"]["Thickness"] = 3;
-G2L["f3"]["Color"] = Color3.fromRGB(180, 4, 255);
-G2L["f3"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
+G2L["f2"] = Instance.new("UIStroke", G2L["f1"]);
+G2L["f2"]["Thickness"] = 3;
+G2L["f2"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["f2"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC_CrateList.UICorner
-G2L["f4"] = Instance.new("UICorner", G2L["f2"]);
-G2L["f4"]["CornerRadius"] = UDim.new(0, 25);
+G2L["f3"] = Instance.new("UICorner", G2L["f1"]);
+G2L["f3"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC_CrateList.Template
-G2L["f5"] = Instance.new("TextButton", G2L["f2"]);
-G2L["f5"]["BorderSizePixel"] = 0;
-G2L["f5"]["TextSize"] = 14;
-G2L["f5"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
-G2L["f5"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["f5"]["FontFace"] = Font.new([[rbxasset://fonts/families/GothamSSm.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
-G2L["f5"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["f5"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["f5"]["Name"] = [[Template]];
-G2L["f5"]["Position"] = UDim2.new(0.06395, 0, 0.00591, 0);
+G2L["f4"] = Instance.new("TextButton", G2L["f1"]);
+G2L["f4"]["BorderSizePixel"] = 0;
+G2L["f4"]["TextSize"] = 14;
+G2L["f4"]["TextColor3"] = Color3.fromRGB(180, 4, 255);
+G2L["f4"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["f4"]["FontFace"] = Font.new([[rbxasset://fonts/families/GothamSSm.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+G2L["f4"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["f4"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["f4"]["Name"] = [[Template]];
+G2L["f4"]["Position"] = UDim2.new(0.06395, 0, 0.00591, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC_CrateList.Template.UICorner
-G2L["f6"] = Instance.new("UICorner", G2L["f5"]);
-G2L["f6"]["CornerRadius"] = UDim.new(0, 25);
+G2L["f5"] = Instance.new("UICorner", G2L["f4"]);
+G2L["f5"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC_CrateList.Template.UIStroke
-G2L["f7"] = Instance.new("UIStroke", G2L["f5"]);
-G2L["f7"]["Thickness"] = 3;
-G2L["f7"]["Color"] = Color3.fromRGB(180, 4, 255);
-G2L["f7"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
+G2L["f6"] = Instance.new("UIStroke", G2L["f4"]);
+G2L["f6"]["Thickness"] = 3;
+G2L["f6"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["f6"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC_StartFarm
-G2L["f8"] = Instance.new("ImageButton", G2L["d"]);
-G2L["f8"]["BorderSizePixel"] = 0;
-G2L["f8"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["f8"]["Image"] = [[rbxassetid://98284131756068]];
-G2L["f8"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["f8"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["f8"]["Name"] = [[UYC_StartFarm]];
-G2L["f8"]["Position"] = UDim2.new(0.02557, 0, 0.10915, 0);
+G2L["f7"] = Instance.new("ImageButton", G2L["d"]);
+G2L["f7"]["BorderSizePixel"] = 0;
+G2L["f7"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["f7"]["Image"] = [[rbxassetid://98284131756068]];
+G2L["f7"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["f7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["f7"]["Name"] = [[UYC_StartFarm]];
+G2L["f7"]["Position"] = UDim2.new(0.02557, 0, 0.10915, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC_StartFarm.UICorner
-G2L["f9"] = Instance.new("UICorner", G2L["f8"]);
-G2L["f9"]["CornerRadius"] = UDim.new(0, 25);
+G2L["f8"] = Instance.new("UICorner", G2L["f7"]);
+G2L["f8"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC_StartFarm.UIStroke
-G2L["fa"] = Instance.new("UIStroke", G2L["f8"]);
-G2L["fa"]["Thickness"] = 3;
-G2L["fa"]["Color"] = Color3.fromRGB(180, 4, 255);
-G2L["fa"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
+G2L["f9"] = Instance.new("UIStroke", G2L["f7"]);
+G2L["f9"]["Thickness"] = 3;
+G2L["f9"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["f9"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC_StartFarm.LocalScript
-G2L["fb"] = Instance.new("LocalScript", G2L["f8"]);
-
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC
+G2L["fa"] = Instance.new("LocalScript", G2L["d"]);
+G2L["fa"]["Name"] = [[UYC]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame
-G2L["fc"] = Instance.new("ScrollingFrame", G2L["2"]);
-G2L["fc"]["Active"] = true;
-G2L["fc"]["BorderSizePixel"] = 0;
-G2L["fc"]["CanvasPosition"] = Vector2.new(0, 400);
-G2L["fc"]["Name"] = [[LeftFrame]];
-G2L["fc"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["fc"]["Size"] = UDim2.new(0, 149, 0, 419);
-G2L["fc"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["fc"]["Position"] = UDim2.new(-0.00018, 0, 0.12682, 0);
-G2L["fc"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["fc"]["ScrollBarThickness"] = 0;
+G2L["fb"] = Instance.new("ScrollingFrame", G2L["2"]);
+G2L["fb"]["Active"] = true;
+G2L["fb"]["BorderSizePixel"] = 0;
+G2L["fb"]["CanvasPosition"] = Vector2.new(0, 400);
+G2L["fb"]["Name"] = [[LeftFrame]];
+G2L["fb"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["fb"]["Size"] = UDim2.new(0, 149, 0, 419);
+G2L["fb"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["fb"]["Position"] = UDim2.new(-0.00018, 0, 0.12682, 0);
+G2L["fb"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["fb"]["ScrollBarThickness"] = 0;
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.UICorner
-G2L["fd"] = Instance.new("UICorner", G2L["fc"]);
-G2L["fd"]["CornerRadius"] = UDim.new(0, 25);
+G2L["fc"] = Instance.new("UICorner", G2L["fb"]);
+G2L["fc"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.UIStroke
-G2L["fe"] = Instance.new("UIStroke", G2L["fc"]);
-G2L["fe"]["Thickness"] = 3;
-G2L["fe"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["fd"] = Instance.new("UIStroke", G2L["fb"]);
+G2L["fd"]["Thickness"] = 3;
+G2L["fd"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.ESP
-G2L["ff"] = Instance.new("ImageButton", G2L["fc"]);
-G2L["ff"]["BorderSizePixel"] = 0;
-G2L["ff"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["ff"]["Image"] = [[rbxassetid://115832341179452]];
-G2L["ff"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["ff"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["ff"]["Name"] = [[ESP]];
+G2L["fe"] = Instance.new("ImageButton", G2L["fb"]);
+G2L["fe"]["BorderSizePixel"] = 0;
+G2L["fe"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["fe"]["Image"] = [[rbxassetid://115832341179452]];
+G2L["fe"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["fe"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["fe"]["Name"] = [[ESP]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.ESP.UICorner
-G2L["100"] = Instance.new("UICorner", G2L["ff"]);
-G2L["100"]["CornerRadius"] = UDim.new(0, 25);
+G2L["ff"] = Instance.new("UICorner", G2L["fe"]);
+G2L["ff"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.ESP.UIStroke
-G2L["101"] = Instance.new("UIStroke", G2L["ff"]);
-G2L["101"]["Thickness"] = 3;
-G2L["101"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["100"] = Instance.new("UIStroke", G2L["fe"]);
+G2L["100"]["Thickness"] = 3;
+G2L["100"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Troll
-G2L["102"] = Instance.new("ImageButton", G2L["fc"]);
-G2L["102"]["BorderSizePixel"] = 0;
-G2L["102"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["102"]["Image"] = [[rbxassetid://86069927634963]];
-G2L["102"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["102"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["102"]["Name"] = [[Troll]];
-G2L["102"]["Position"] = UDim2.new(0, 0, 0.34304, 0);
+G2L["101"] = Instance.new("ImageButton", G2L["fb"]);
+G2L["101"]["BorderSizePixel"] = 0;
+G2L["101"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["101"]["Image"] = [[rbxassetid://86069927634963]];
+G2L["101"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["101"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["101"]["Name"] = [[Troll]];
+G2L["101"]["Position"] = UDim2.new(0, 0, 0.34304, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Troll.UICorner
-G2L["103"] = Instance.new("UICorner", G2L["102"]);
-G2L["103"]["CornerRadius"] = UDim.new(0, 25);
+G2L["102"] = Instance.new("UICorner", G2L["101"]);
+G2L["102"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Troll.UIStroke
-G2L["104"] = Instance.new("UIStroke", G2L["102"]);
-G2L["104"]["Thickness"] = 3;
-G2L["104"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["103"] = Instance.new("UIStroke", G2L["101"]);
+G2L["103"]["Thickness"] = 3;
+G2L["103"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MISC
-G2L["105"] = Instance.new("ImageButton", G2L["fc"]);
-G2L["105"]["BorderSizePixel"] = 0;
-G2L["105"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["105"]["Image"] = [[rbxassetid://113127774037849]];
-G2L["105"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["105"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["105"]["Name"] = [[MISC]];
-G2L["105"]["Position"] = UDim2.new(0, 0, 0.25676, 0);
+G2L["104"] = Instance.new("ImageButton", G2L["fb"]);
+G2L["104"]["BorderSizePixel"] = 0;
+G2L["104"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["104"]["Image"] = [[rbxassetid://113127774037849]];
+G2L["104"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["104"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["104"]["Name"] = [[MISC]];
+G2L["104"]["Position"] = UDim2.new(0, 0, 0.25676, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MISC.UICorner
-G2L["106"] = Instance.new("UICorner", G2L["105"]);
-G2L["106"]["CornerRadius"] = UDim.new(0, 25);
+G2L["105"] = Instance.new("UICorner", G2L["104"]);
+G2L["105"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MISC.UIStroke
-G2L["107"] = Instance.new("UIStroke", G2L["105"]);
-G2L["107"]["Thickness"] = 3;
-G2L["107"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["106"] = Instance.new("UIStroke", G2L["104"]);
+G2L["106"]["Thickness"] = 3;
+G2L["106"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SPECTATE
-G2L["108"] = Instance.new("ImageButton", G2L["fc"]);
-G2L["108"]["BorderSizePixel"] = 0;
-G2L["108"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["108"]["Image"] = [[rbxassetid://88668758714272]];
-G2L["108"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["108"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["108"]["Name"] = [[SPECTATE]];
-G2L["108"]["Position"] = UDim2.new(0, 0, 0.17152, 0);
+G2L["107"] = Instance.new("ImageButton", G2L["fb"]);
+G2L["107"]["BorderSizePixel"] = 0;
+G2L["107"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["107"]["Image"] = [[rbxassetid://88668758714272]];
+G2L["107"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["107"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["107"]["Name"] = [[SPECTATE]];
+G2L["107"]["Position"] = UDim2.new(0, 0, 0.17152, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SPECTATE.UICorner
-G2L["109"] = Instance.new("UICorner", G2L["108"]);
-G2L["109"]["CornerRadius"] = UDim.new(0, 25);
+G2L["108"] = Instance.new("UICorner", G2L["107"]);
+G2L["108"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SPECTATE.UIStroke
-G2L["10a"] = Instance.new("UIStroke", G2L["108"]);
-G2L["10a"]["Thickness"] = 3;
-G2L["10a"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["109"] = Instance.new("UIStroke", G2L["107"]);
+G2L["109"]["Thickness"] = 3;
+G2L["109"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.TELEPORT
-G2L["10b"] = Instance.new("ImageButton", G2L["fc"]);
-G2L["10b"]["BorderSizePixel"] = 0;
-G2L["10b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["10b"]["Image"] = [[rbxassetid://111184600011102]];
-G2L["10b"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["10b"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["10b"]["Name"] = [[TELEPORT]];
-G2L["10b"]["Position"] = UDim2.new(0, 0, 0.08628, 0);
+G2L["10a"] = Instance.new("ImageButton", G2L["fb"]);
+G2L["10a"]["BorderSizePixel"] = 0;
+G2L["10a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["10a"]["Image"] = [[rbxassetid://111184600011102]];
+G2L["10a"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["10a"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["10a"]["Name"] = [[TELEPORT]];
+G2L["10a"]["Position"] = UDim2.new(0, 0, 0.08628, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.TELEPORT.UICorner
-G2L["10c"] = Instance.new("UICorner", G2L["10b"]);
-G2L["10c"]["CornerRadius"] = UDim.new(0, 25);
+G2L["10b"] = Instance.new("UICorner", G2L["10a"]);
+G2L["10b"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.TELEPORT.UIStroke
-G2L["10d"] = Instance.new("UIStroke", G2L["10b"]);
-G2L["10d"]["Thickness"] = 3;
-G2L["10d"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["10c"] = Instance.new("UIStroke", G2L["10a"]);
+G2L["10c"]["Thickness"] = 3;
+G2L["10c"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
-G2L["10e"] = Instance.new("LocalScript", G2L["fc"]);
-G2L["10e"]["Name"] = [[SwitchTabs]];
+G2L["10d"] = Instance.new("LocalScript", G2L["fb"]);
+G2L["10d"]["Name"] = [[SwitchTabs]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MM2
-G2L["10f"] = Instance.new("ImageButton", G2L["fc"]);
-G2L["10f"]["BorderSizePixel"] = 0;
-G2L["10f"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["10f"]["Image"] = [[rbxassetid://88896945785744]];
-G2L["10f"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["10f"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["10f"]["Name"] = [[MM2]];
-G2L["10f"]["Position"] = UDim2.new(0, 0, 0.429, 0);
+G2L["10e"] = Instance.new("ImageButton", G2L["fb"]);
+G2L["10e"]["BorderSizePixel"] = 0;
+G2L["10e"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["10e"]["Image"] = [[rbxassetid://88896945785744]];
+G2L["10e"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["10e"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["10e"]["Name"] = [[MM2]];
+G2L["10e"]["Position"] = UDim2.new(0, 0, 0.429, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MM2.UICorner
-G2L["110"] = Instance.new("UICorner", G2L["10f"]);
-G2L["110"]["CornerRadius"] = UDim.new(0, 25);
+G2L["10f"] = Instance.new("UICorner", G2L["10e"]);
+G2L["10f"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.MM2.UIStroke
-G2L["111"] = Instance.new("UIStroke", G2L["10f"]);
-G2L["111"]["Thickness"] = 3;
-G2L["111"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["110"] = Instance.new("UIStroke", G2L["10e"]);
+G2L["110"]["Thickness"] = 3;
+G2L["110"]["Color"] = Color3.fromRGB(180, 4, 255);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Zo Wip
-G2L["112"] = Instance.new("ImageButton", G2L["fc"]);
-G2L["112"]["BorderSizePixel"] = 0;
-G2L["112"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["112"]["Image"] = [[rbxassetid://94848246522699]];
-G2L["112"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["112"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["112"]["Name"] = [[Zo Wip]];
-G2L["112"]["Position"] = UDim2.new(0, 0, 0.515, 0);
+G2L["111"] = Instance.new("ImageButton", G2L["fb"]);
+G2L["111"]["BorderSizePixel"] = 0;
+G2L["111"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["111"]["Image"] = [[rbxassetid://94848246522699]];
+G2L["111"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["111"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["111"]["Name"] = [[Zo Wip]];
+G2L["111"]["Position"] = UDim2.new(0, 0, 0.515, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Zo Wip.UICorner
-G2L["113"] = Instance.new("UICorner", G2L["112"]);
-G2L["113"]["CornerRadius"] = UDim.new(0, 25);
+G2L["112"] = Instance.new("UICorner", G2L["111"]);
+G2L["112"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.Zo Wip.UIStroke
-G2L["114"] = Instance.new("UIStroke", G2L["112"]);
-G2L["114"]["Thickness"] = 3;
-G2L["114"]["Color"] = Color3.fromRGB(180, 4, 255);
-G2L["114"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
+G2L["113"] = Instance.new("UIStroke", G2L["111"]);
+G2L["113"]["Thickness"] = 3;
+G2L["113"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["113"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SHOW
-G2L["115"] = Instance.new("ImageButton", G2L["fc"]);
-G2L["115"]["BorderSizePixel"] = 0;
-G2L["115"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["115"]["Image"] = [[rbxassetid://118102955667667]];
-G2L["115"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["115"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["115"]["Name"] = [[SHOW]];
-G2L["115"]["Position"] = UDim2.new(0, 0, 0.601, 0);
+G2L["114"] = Instance.new("ImageButton", G2L["fb"]);
+G2L["114"]["BorderSizePixel"] = 0;
+G2L["114"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["114"]["Image"] = [[rbxassetid://118102955667667]];
+G2L["114"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["114"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["114"]["Name"] = [[SHOW]];
+G2L["114"]["Position"] = UDim2.new(0, 0, 0.601, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SHOW.UICorner
-G2L["116"] = Instance.new("UICorner", G2L["115"]);
-G2L["116"]["CornerRadius"] = UDim.new(0, 25);
+G2L["115"] = Instance.new("UICorner", G2L["114"]);
+G2L["115"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SHOW.UIStroke
-G2L["117"] = Instance.new("UIStroke", G2L["115"]);
-G2L["117"]["Thickness"] = 3;
-G2L["117"]["Color"] = Color3.fromRGB(180, 4, 255);
-G2L["117"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
+G2L["116"] = Instance.new("UIStroke", G2L["114"]);
+G2L["116"]["Thickness"] = 3;
+G2L["116"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["116"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.UYC
-G2L["118"] = Instance.new("ImageButton", G2L["fc"]);
-G2L["118"]["BorderSizePixel"] = 0;
-G2L["118"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-G2L["118"]["Image"] = [[rbxassetid://82379383960234]];
-G2L["118"]["Size"] = UDim2.new(0, 149, 0, 73);
-G2L["118"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["118"]["Name"] = [[UYC]];
-G2L["118"]["Position"] = UDim2.new(0, 0, 0.689, 0);
+G2L["117"] = Instance.new("ImageButton", G2L["fb"]);
+G2L["117"]["BorderSizePixel"] = 0;
+G2L["117"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["117"]["Image"] = [[rbxassetid://82379383960234]];
+G2L["117"]["Size"] = UDim2.new(0, 149, 0, 73);
+G2L["117"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+G2L["117"]["Name"] = [[UYC]];
+G2L["117"]["Position"] = UDim2.new(0, 0, 0.689, 0);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.UYC.UICorner
-G2L["119"] = Instance.new("UICorner", G2L["118"]);
-G2L["119"]["CornerRadius"] = UDim.new(0, 25);
+G2L["118"] = Instance.new("UICorner", G2L["117"]);
+G2L["118"]["CornerRadius"] = UDim.new(0, 25);
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.UYC.UIStroke
-G2L["11a"] = Instance.new("UIStroke", G2L["118"]);
-G2L["11a"]["Thickness"] = 3;
-G2L["11a"]["Color"] = Color3.fromRGB(180, 4, 255);
-G2L["11a"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
+G2L["119"] = Instance.new("UIStroke", G2L["117"]);
+G2L["119"]["Thickness"] = 3;
+G2L["119"]["Color"] = Color3.fromRGB(180, 4, 255);
+G2L["119"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.HotKeys
-G2L["11b"] = Instance.new("LocalScript", G2L["2"]);
-G2L["11b"]["Name"] = [[HotKeys]];
+G2L["11a"] = Instance.new("LocalScript", G2L["2"]);
+G2L["11a"]["Name"] = [[HotKeys]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.ESP
-G2L["11c"] = Instance.new("LocalScript", G2L["2"]);
-G2L["11c"]["Name"] = [[ESP]];
+G2L["11b"] = Instance.new("LocalScript", G2L["2"]);
+G2L["11b"]["Name"] = [[ESP]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.AntiFling
-G2L["11d"] = Instance.new("LocalScript", G2L["2"]);
-G2L["11d"]["Name"] = [[AntiFling]];
+G2L["11c"] = Instance.new("LocalScript", G2L["2"]);
+G2L["11c"]["Name"] = [[AntiFling]];
 
 
 -- StarterGui.Folder.PurpHub.MainFrame.CLose\Open.LocalScript
@@ -7752,23 +7746,28 @@ local script = G2L["ed"];
 	print("✅ NOCLIP ЗАГРУЖЕНА!")
 end;
 task.spawn(C_ed);
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC_SelectCrate.LocalScript
-local function C_f1()
-local script = G2L["f1"];
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC
+local function C_fa()
+local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_SelectCrate (ВЫБОР КЕЙСА)
+	-- UYC_AutoFarm (ФИНАЛЬНАЯ ВЕРСИЯ)
 	-- ==========================================
-	local button = script.Parent
 	local player = game.Players.LocalPlayer
+	local RunService = game:GetService("RunService")
+	local UserInputService = game:GetService("UserInputService")
+	local TweenService = game:GetService("TweenService")
 	
-	-- НАХОДИМ LABEL ВНУТРИ КНОПКИ
-	local textLabel = button:FindFirstChild("ButtonText")
-	if not textLabel then
-		warn("❌ ButtonText НЕ НАЙДЕН! СОЗДАЙ TextLabel ВНУТРИ КНОПКИ")
-		return
-	end
+	-- ====== ПОИСК КНОПОК ======
+	local rightFrame = script.Parent
+	local selectBtn = rightFrame:FindFirstChild("UYC_SelectCrate")
+	local startBtn = rightFrame:FindFirstChild("UYC_StartFarm")
+	local scrollFrame = rightFrame:FindFirstChild("UYC_CrateList")
 	
-	-- ТАБЛИЦА КЕЙСОВ
+	if not selectBtn then warn("❌ UYC_SelectCrate НЕ НАЙДЕН!") return end
+	if not startBtn then warn("❌ UYC_StartFarm НЕ НАЙДЕН!") return end
+	if not scrollFrame then warn("❌ UYC_CrateList НЕ НАЙДЕН!") return end
+	
+	-- ====== ТАБЛИЦА КЕЙСОВ ======
 	local CRATE_TABLE = {
 		{name = "Summer", level = "1x"}, {name = "Forest", level = "1.5x"},
 		{name = "Bee", level = "2x"}, {name = "Beach", level = "3x"},
@@ -7790,60 +7789,41 @@ local script = G2L["f1"];
 	}
 	
 	_G.SelectedCrate = nil
-	
-	-- НАХОДИМ SCROLLINGFRAME И ШАБЛОН
-	local scrollFrame = button.Parent:FindFirstChild("UYC_CrateList")
-	if not scrollFrame then
-		warn("❌ UYC_CrateList НЕ НАЙДЕН!")
-		return
-	end
-	
-	local template = scrollFrame:FindFirstChild("Template")
-	if not template then
-		warn("❌ Template НЕ НАЙДЕН!")
-		return
-	end
-	
-	-- ПО УМОЛЧАНИЮ СКРЫВАЕМ СПИСОК
-	scrollFrame.Visible = false
-	
-	-- ПЕРЕМЕННАЯ ДЛЯ ОТСЛЕЖИВАНИЯ СОЗДАН ЛИ СПИСОК
 	local listCreated = false
 	
-	-- СОЗДАНИЕ СПИСКА
+	-- ====== ПО УМОЛЧАНИЮ СПИСОК СКРЫТ ======
+	scrollFrame.Visible = false
+	
+	-- ====== СОЗДАНИЕ СПИСКА ======
 	local function createCrateList()
-		if listCreated then return end -- НЕ СОЗДАЁМ ПОВТОРНО
+		if listCreated then return end
+	
+		local template = scrollFrame:FindFirstChild("Template")
+		if not template then
+			warn("❌ Template НЕ НАЙДЕН!")
+			return
+		end
 	
 		-- ОЧИЩАЕМ (КРОМЕ ШАБЛОНА)
 		for _, child in pairs(scrollFrame:GetChildren()) do
-			if child ~= template then
-				child:Destroy()
-			end
+			if child ~= template then child:Destroy() end
 		end
 	
 		template.Visible = false
 	
-		-- СОЗДАЕМ КНОПКИ
 		for i, crate in pairs(CRATE_TABLE) do
 			local btn = template:Clone()
 			btn.Name = crate.name
 			btn.Visible = true
 			btn.Position = UDim2.new(0, 0, 0, (i - 1) * 32)
 			btn.Size = UDim2.new(1, 0, 0, 30)
-	
-			local lbl = btn:FindFirstChild("ButtonText")
-			if lbl then
-				lbl.Text = crate.name .. " (" .. crate.level .. ")"
-			end
-	
+			btn.Text = crate.name .. " (" .. crate.level .. ")"
 			btn.Parent = scrollFrame
 	
 			btn.MouseButton1Click:Connect(function()
 				_G.SelectedCrate = crate
-				print("📌 ВЫБРАН:", crate.name, crate.level)
-				if textLabel then
-					textLabel.Text = crate.name .. " (" .. crate.level .. ")"
-				end
+				print("📌 ВЫБРАН КЕЙС:", crate.name, crate.level)
+				selectBtn.Text = crate.name .. " (" .. crate.level .. ")"
 				scrollFrame.Visible = false
 			end)
 		end
@@ -7853,50 +7833,24 @@ local script = G2L["f1"];
 		listCreated = true
 	end
 	
-	-- ОТКРЫТИЕ/ЗАКРЫТИЕ СПИСКА
-	local function toggleList()
+	-- ====== КНОПКА ВЫБОРА КЕЙСА ======
+	selectBtn.MouseButton1Click:Connect(function()
 		if scrollFrame.Visible then
 			scrollFrame.Visible = false
 			return
 		end
 	
-		-- ЕСЛИ СПИСОК ЕЩЁ НЕ СОЗДАН — СОЗДАЁМ
 		if not listCreated then
 			createCrateList()
 		end
 	
 		scrollFrame.Visible = true
-	end
+	end)
 	
-	button.MouseButton1Click:Connect(toggleList)
-	
-	print("✅ UYC_SelectCrate ЗАГРУЖЕНА!")
-end;
-task.spawn(C_f1);
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC_StartFarm.LocalScript
-local function C_fb()
-local script = G2L["fb"];
-	-- ==========================================
-	-- UYC_StartFarm (ЗАПУСК ФАРМА)
-	-- ==========================================
-	local button = script.Parent
-	local player = game.Players.LocalPlayer
-	local RunService = game:GetService("RunService")
-	local UserInputService = game:GetService("UserInputService")
-	
+	-- ====== КНОПКА СТАРТА ======
 	local isFarming = false
 	local farmLoop = nil
 	local isWorking = false
-	
-	-- ТАБЛИЦА КЕЙСОВ (ДЛЯ ПРОВЕРКИ УРОВНЯ)
-	local CRATE_TABLE = {
-		"Summer", "Forest", "Bee", "Beach", "YinYang", "Rare", "Divine",
-		"Golden", "Starlight", "Aqua", "Ice", "Obsidian", "Galaxy",
-		"Neon", "Rainbow", "Hacker", "Midnight", "Sunburst", "Magical",
-		"Beehive", "Lucky Star", "Futuristic", "Nuclear", "Atlantis",
-		"Evil", "Pixel", "Lucky Clover", "Chocolate", "Honeycomb",
-		"Robot", "Treasure", "Purple Gem", "Alchemy"
-	}
 	
 	-- ====== ОБЪЕКТЫ ======
 	local function getPlot()
@@ -7921,35 +7875,39 @@ local script = G2L["fb"];
 		return grower:FindFirstChild("CratesFolder")
 	end
 	
-	-- ====== ТЕЛЕПОРТ ======
-	local function teleportTo(position)
+	-- ====== ТЕЛЕПОРТ К ОБЪЕКТУ ======
+	local function teleportToObject(obj)
 		local char = player.Character
 		if not char then return false end
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
 	
+		local pos = obj:FindFirstChild("Position") or obj
+		local targetPos = pos.Position + Vector3.new(0, 3, 0)
+	
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
-		hrp.CFrame = CFrame.new(position + Vector3.new(0, 3, 0))
+		hrp.CFrame = CFrame.new(targetPos)
 		task.wait(0.1)
 		return true
 	end
 	
-	-- ====== НАЖАТИЯ ======
-	local function pressE()
-		pcall(function()
-			UserInputService:SetKeyDown(Enum.KeyCode.E)
-			task.wait(0.05)
-			UserInputService:SetKeyUp(Enum.KeyCode.E)
-		end)
-	end
+	-- ====== ТЕЛЕПОРТ ПРЯМО К КЛОНУ ======
+	local function teleportToClone()
+		local duplicator = getDuplicator()
+		if not duplicator then return false end
 	
-	local function holdE()
-		pcall(function()
-			UserInputService:SetKeyDown(Enum.KeyCode.E)
-			task.wait(0.5)
-			UserInputService:SetKeyUp(Enum.KeyCode.E)
-		end)
+		local children = {}
+		for _, child in pairs(duplicator:GetChildren()) do
+			if child:IsA("Tool") or child:IsA("Model") or child:IsA("Part") then
+				table.insert(children, child)
+			end
+		end
+	
+		if #children >= 2 then
+			return teleportToObject(children[2])
+		end
+		return false
 	end
 	
 	-- ====== ВЗЯТЬ КЛОН С ДУПЛИКАТОРА ======
@@ -7970,7 +7928,24 @@ local script = G2L["fb"];
 		return nil
 	end
 	
-	-- ====== ПОЛУЧИТЬ ТЕКУЩИЙ УРОВЕНЬ ======
+	-- ====== НАЖАТИЯ E ======
+	local function pressE()
+		pcall(function()
+			UserInputService:SetKeyDown(Enum.KeyCode.E)
+			task.wait(0.05)
+			UserInputService:SetKeyUp(Enum.KeyCode.E)
+		end)
+	end
+	
+	local function holdE()
+		pcall(function()
+			UserInputService:SetKeyDown(Enum.KeyCode.E)
+			task.wait(0.5)
+			UserInputService:SetKeyUp(Enum.KeyCode.E)
+		end)
+	end
+	
+	-- ====== ПОЛУЧИТЬ ТЕКУЩИЙ УРОВЕНЬ КЕЙСА ======
 	local function getCurrentCrateLevel()
 		local cratesFolder = getCratesFolder()
 		if not cratesFolder then return nil end
@@ -7984,6 +7959,15 @@ local script = G2L["fb"];
 	end
 	
 	-- ====== ПРОВЕРКА ДОСТИГ ЛИ УРОВЕНЬ ======
+	local CRATE_NAMES = {
+		"Summer", "Forest", "Bee", "Beach", "YinYang", "Rare", "Divine",
+		"Golden", "Starlight", "Aqua", "Ice", "Obsidian", "Galaxy",
+		"Neon", "Rainbow", "Hacker", "Midnight", "Sunburst", "Magical",
+		"Beehive", "Lucky Star", "Futuristic", "Nuclear", "Atlantis",
+		"Evil", "Pixel", "Lucky Clover", "Chocolate", "Honeycomb",
+		"Robot", "Treasure", "Purple Gem", "Alchemy"
+	}
+	
 	local function hasReachedSelectedLevel()
 		local current = getCurrentCrateLevel()
 		if not current then return false end
@@ -7992,42 +7976,33 @@ local script = G2L["fb"];
 		local currentIndex = 0
 		local selectedIndex = 0
 	
-		for i, name in pairs(CRATE_TABLE) do
-			if name == current then
-				currentIndex = i
-			end
-			if name == _G.SelectedCrate.name then
-				selectedIndex = i
-			end
+		for i, name in pairs(CRATE_NAMES) do
+			if name == current then currentIndex = i end
+			if name == _G.SelectedCrate.name then selectedIndex = i end
 		end
 	
 		return currentIndex >= selectedIndex
 	end
 	
-	-- ====== ОСНОВНОЙ ЦИКЛ ======
+	-- ====== ОСНОВНОЙ ЦИКЛ ФАРМА ======
 	local function farmLoopFunction()
 		if isWorking then return end
 		isWorking = true
 	
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
-		-- 1. ТЕЛЕПОРТ К ДУПЛИКАТОРУ
-		local duplicator = getDuplicator()
-		if not duplicator then
-			print("❌ НЕТ ДУПЛИКАТОРА!")
+		-- 1. ТЕЛЕПОРТ К КЛОНУ
+		if not teleportToClone() then
+			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К КЛОНУ!")
 			isWorking = false
 			return
 		end
-	
-		local dupPos = duplicator:FindFirstChild("Position") or duplicator
-		if dupPos then
-			teleportTo(dupPos.Position)
-		end
+		task.wait(0.2)
 	
 		-- 2. ВЗЯТЬ КЛОН
 		local clone = takeCloneFromDuplicator()
 		if not clone then
-			print("⏳ НЕТ КЛОНА НА ДУПЛИКАТОРЕ")
+			print("⏳ НЕТ КЛОНА НА ДУПЛИКАТОРЕ!")
 			isWorking = false
 			return
 		end
@@ -8044,20 +8019,17 @@ local script = G2L["fb"];
 			return
 		end
 	
-		local growPos = grower:FindFirstChild("Position") or grower
-		if growPos then
-			teleportTo(growPos.Position)
-		end
+		teleportToObject(grower)
+		task.wait(0.2)
 	
 		-- 4. ПОЛОЖИТЬ В ГРОВЕР
 		holdE()
 		task.wait(1)
-	
 		print("📥 ЯЩИК ПОЛОЖЕН В ГРОВЕР")
 	
 		-- 5. ЖДАТЬ РОСТА
 		local waitTime = 0
-		local maxWait = 3600
+		local maxWait = 3600 -- 1 ЧАС МАКСИМУМ
 	
 		print("⏳ ОЖИДАНИЕ РОСТА ДО " .. (_G.SelectedCrate and _G.SelectedCrate.level or "???") .. "...")
 	
@@ -8079,7 +8051,6 @@ local script = G2L["fb"];
 		-- 6. ЗАБРАТЬ ЯЩИК
 		pressE()
 		task.wait(0.5)
-	
 		print("✅ ЯЩИК ЗАБРАН ИЗ ГРОВЕРА")
 	
 		isWorking = false
@@ -8096,7 +8067,8 @@ local script = G2L["fb"];
 		end
 	
 		isFarming = true
-		button.Text = "⏹️ СТОП"
+		startBtn.Text = "ВКЛ"
+		startBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
 		print("🚀 ФАРМ ЗАПУЩЕН! УРОВЕНЬ:", _G.SelectedCrate.level)
 	
 		if farmLoop then
@@ -8122,7 +8094,8 @@ local script = G2L["fb"];
 	local function stopFarming()
 		isFarming = false
 		isWorking = false
-		button.Text = "▶️ СТАРТ"
+		startBtn.Text = "ВЫКЛ"
+		startBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
 		print("⏹️ ФАРМ ОСТАНОВЛЕН!")
 	
 		if farmLoop then
@@ -8131,19 +8104,25 @@ local script = G2L["fb"];
 		end
 	end
 	
-	-- ====== КНОПКА ======
-	button.MouseButton1Click:Connect(function()
+	-- ====== КНОПКА СТАРТА ======
+	startBtn.MouseButton1Click:Connect(function()
 		if isFarming then
 			stopFarming()
 		else
 			startFarming()
 		end
 	end)
+	
+	-- ====== СТАРТОВЫЙ СТАТУС ======
+	startBtn.Text = "ВЫКЛ"
+	startBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
+	
+	print("✅ UYC_AutoFarm ЗАГРУЖЕНА!")
 end;
-task.spawn(C_fb);
+task.spawn(C_fa);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
-local function C_10e()
-local script = G2L["10e"];
+local function C_10d()
+local script = G2L["10d"];
 	-- ==========================================
 	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (С UYC)
 	-- ==========================================
@@ -8428,10 +8407,10 @@ local script = G2L["10e"];
 	switchTab("TELEPORT")
 	print("✅ Переключение вкладок загружено!")
 end;
-task.spawn(C_10e);
+task.spawn(C_10d);
 -- StarterGui.Folder.PurpHub.MainFrame.HotKeys
-local function C_11b()
-local script = G2L["11b"];
+local function C_11a()
+local script = G2L["11a"];
 	-- ==========================================
 	-- ГОРЯЧИЕ КЛАВИШИ (Ctrl + ЛКМ)
 	-- ==========================================
@@ -8525,10 +8504,10 @@ local script = G2L["11b"];
 	print("   Ctrl + ЛКМ → удаление (CTRL+DEL)")
 	print("   Ctrl + ЛКМ → телепорт в точку клика (CTRL+CLICK)")
 end;
-task.spawn(C_11b);
+task.spawn(C_11a);
 -- StarterGui.Folder.PurpHub.MainFrame.ESP
-local function C_11c()
-local script = G2L["11c"];
+local function C_11b()
+local script = G2L["11b"];
 	-- ==========================================
 	-- ОПТИМИЗИРОВАННЫЙ ESP (БЕЗ ЛАГОВ)
 	-- ==========================================
@@ -8652,10 +8631,10 @@ local script = G2L["11c"];
 	
 	print("✅ Оптимизированный ESP загружен!")
 end;
-task.spawn(C_11c);
+task.spawn(C_11b);
 -- StarterGui.Folder.PurpHub.MainFrame.AntiFling
-local function C_11d()
-local script = G2L["11d"];
+local function C_11c()
+local script = G2L["11c"];
 	-- ==========================================
 	-- АНТИ-ФЛИНГ (ОТКЛЮЧЕНИЕ СТОЛКНОВЕНИЙ)
 	-- ==========================================
@@ -8726,6 +8705,6 @@ local script = G2L["11d"];
 	
 	print("✅ Анти-флинг загружен! Используй toggleAntiFling()")
 end;
-task.spawn(C_11d);
+task.spawn(C_11c);
 
 return G2L["1"], require;
