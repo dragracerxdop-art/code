@@ -7751,7 +7751,7 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_AutoFarm (ФИНАЛ)
+	-- UYC_AutoFarm (РАБОЧИЙ ЦИКЛ 1 РАЗ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7877,7 +7877,6 @@ local script = G2L["fa"];
 	
 	-- ====== ФАРМ ======
 	local isFarming = false
-	local farmLoop = nil
 	local isWorking = false
 	
 	local function getPlot()
@@ -7902,7 +7901,7 @@ local script = G2L["fa"];
 		return grower:FindFirstChild("CratesFolder")
 	end
 	
-	-- ====== ТЕЛЕПОРТ ВПРАВО (К КЛОНУ) ======
+	-- ====== ТЕЛЕПОРТ ======
 	local function teleportToClone()
 		local char = player.Character
 		if not char then return false end
@@ -7921,9 +7920,7 @@ local script = G2L["fa"];
 			return false
 		end
 	
-		-- ТЕЛЕПОРТ ВПРАВО (+6 ПО X)
 		local targetPos = part.Position + Vector3.new(-6, 3, 0)
-	
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
 		hrp.CFrame = CFrame.new(targetPos)
@@ -7931,7 +7928,6 @@ local script = G2L["fa"];
 		return true
 	end
 	
-	-- ====== ТЕЛЕПОРТ К ГРОВЕРУ ======
 	local function teleportToGrower()
 		local char = player.Character
 		if not char then return false end
@@ -8028,14 +8024,13 @@ local script = G2L["fa"];
 		return currentIndex >= selectedIndex
 	end
 	
-	-- ====== ОСНОВНОЙ ЦИКЛ (ТОЛЬКО 1 РАЗ) ======
-	local function farmLoopFunction()
+	-- ====== ОДИН ЦИКЛ ФАРМА ======
+	local function doOneCycle()
 		if isWorking then return end
 		isWorking = true
 	
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
-		-- 1. ТЕЛЕПОРТ К КЛОНУ (ВПРАВО)
 		if not teleportToClone() then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К КЛОНУ!")
 			isWorking = false
@@ -8043,7 +8038,6 @@ local script = G2L["fa"];
 		end
 		task.wait(0.2)
 	
-		-- 2. ВЗЯТЬ КЛОН
 		local clone = findClone()
 		if not clone then
 			print("⏳ НЕТ КЛОНА!")
@@ -8055,7 +8049,6 @@ local script = G2L["fa"];
 		pressE()
 		task.wait(0.5)
 	
-		-- 3. ТЕЛЕПОРТ К ГРОВЕРУ
 		if not teleportToGrower() then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К ГРОВЕРУ!")
 			isWorking = false
@@ -8063,12 +8056,10 @@ local script = G2L["fa"];
 		end
 		task.wait(0.2)
 	
-		-- 4. ПОЛОЖИТЬ В ГРОВЕР
 		holdE()
 		task.wait(1)
 		print("📥 ЯЩИК ПОЛОЖЕН")
 	
-		-- 5. ЖДАТЬ РОСТА
 		local waitTime = 0
 		local maxWait = 3600
 		print("⏳ ОЖИДАНИЕ РОСТА ДО " .. (_G.SelectedCrate and _G.SelectedCrate.level or "???") .. "...")
@@ -8083,13 +8074,24 @@ local script = G2L["fa"];
 			if hasReachedSelectedLevel() then break end
 		end
 	
-		-- 6. ЗАБРАТЬ ЯЩИК
 		pressE()
 		task.wait(0.5)
 		print("✅ ЯЩИК ЗАБРАН")
 	
 		isWorking = false
 		print("🔄 ЦИКЛ ЗАВЕРШЕН!")
+	end
+	
+	-- ====== БЕСКОНЕЧНЫЙ ЦИКЛ (НОВЫЙ ПОДХОД) ======
+	local function startFarmingLoop()
+		if not isFarming then return end
+	
+		task.spawn(function()
+			while isFarming do
+				doOneCycle()
+				task.wait(1)
+			end
+		end)
 	end
 	
 	-- ====== ЗАПУСК ======
@@ -8105,16 +8107,7 @@ local script = G2L["fa"];
 		setLabelText(startBtn, "ВКЛ", Color3.fromRGB(0, 255, 0))
 		print("🚀 ФАРМ ЗАПУЩЕН! УРОВЕНЬ:", _G.SelectedCrate.level)
 	
-		if farmLoop then farmLoop:Disconnect() farmLoop = nil end
-		farmLoop = RunService.Heartbeat:Connect(function()
-			if not isFarming then
-				if farmLoop then farmLoop:Disconnect() farmLoop = nil end
-				return
-			end
-			if not isWorking then
-				task.spawn(farmLoopFunction)
-			end
-		end)
+		startFarmingLoop()
 	end
 	
 	-- ====== ОСТАНОВКА ======
@@ -8123,7 +8116,6 @@ local script = G2L["fa"];
 		isWorking = false
 		setLabelText(startBtn, "ВЫКЛ", Color3.fromRGB(255, 0, 0))
 		print("⏹️ ФАРМ ОСТАНОВЛЕН!")
-		if farmLoop then farmLoop:Disconnect() farmLoop = nil end
 	end
 	
 	-- ====== КНОПКА ======
