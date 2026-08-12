@@ -7751,7 +7751,7 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_AutoFarm (ФИКС pressE)
+	-- UYC_AutoFarm (ФИКС ТЕЛЕПОРТА К ГРОВЕРУ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7896,16 +7896,14 @@ local script = G2L["fa"];
 		return plot.Machines:FindFirstChild("Duplicator")
 	end
 	
-	-- ====== НАЖАТИЕ E (НОВАЯ ВЕРСИЯ) ======
+	-- ====== НАЖАТИЕ E ======
 	local function pressE()
 		pcall(function()
-			-- ВАРИАНТ 1: VirtualInputManager
 			if VirtualInputManager then
 				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
 				task.wait(0.05)
 				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
 			else
-				-- ВАРИАНТ 2: UserInputService
 				UserInputService:SetKeyDown(Enum.KeyCode.E)
 				task.wait(0.05)
 				UserInputService:SetKeyUp(Enum.KeyCode.E)
@@ -7952,7 +7950,7 @@ local script = G2L["fa"];
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
 		hrp.CFrame = CFrame.new(targetPos)
-		task.wait(0.3) -- ДАЁМ ВРЕМЯ НА ОБРАБОТКУ
+		task.wait(0.3)
 		return true
 	end
 	
@@ -7983,7 +7981,7 @@ local script = G2L["fa"];
 		return nil
 	end
 	
-	-- ====== ТЕЛЕПОРТ К ГРОВЕРУ ======
+	-- ====== ТЕЛЕПОРТ К ГРОВЕРУ (ИЩЕМ PART ВНУТРИ ПАПКИ) ======
 	local function teleportToGrower()
 		local char = player.Character
 		if not char then return false end
@@ -7996,24 +7994,31 @@ local script = G2L["fa"];
 			return false
 		end
 	
-		local part = grower:FindFirstChild("CrateInsertParts")
-		if not part then
-			part = grower:FindFirstChild("VisualParts")
+		-- 1. ИЩЕМ CrateInsertParts
+		local insertParts = grower:FindFirstChild("CrateInsertParts")
+		local targetPart = nil
+	
+		if insertParts then
+			-- ИЩЕМ PART ВНУТРИ CrateInsertParts
+			for _, child in pairs(insertParts:GetChildren()) do
+				if child:IsA("BasePart") then
+					targetPart = child
+					break
+				end
+			end
 		end
-		if not part then
-			part = grower:FindFirstChildWhichIsA("BasePart")
+	
+		-- 2. ЕСЛИ НЕ НАШЛИ — ИЩЕМ ЛЮБУЮ БАЗОВУЮ ЧАСТЬ В ГРОВЕРЕ
+		if not targetPart then
+			targetPart = grower:FindFirstChildWhichIsA("BasePart")
 		end
-		if not part then
+	
+		if not targetPart then
 			warn("❌ НЕ НАЙДЕНА ЧАСТЬ ДЛЯ ТЕЛЕПОРТА К ГРОВЕРУ!")
 			return false
 		end
 	
-		if part:IsA("Model") then
-			local sub = part:FindFirstChildWhichIsA("BasePart")
-			if sub then part = sub end
-		end
-	
-		local targetPos = part.Position + Vector3.new(0, 2, 0)
+		local targetPos = targetPart.Position + Vector3.new(0, 2, 0)
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
 		hrp.CFrame = CFrame.new(targetPos)
@@ -8072,30 +8077,25 @@ local script = G2L["fa"];
 	
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
-		-- 1. ТЕЛЕПОРТ К КЛОНУ
 		if not teleportToClone() then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К КЛОНУ!")
 			isWorking = false
 			return
 		end
 	
-		-- 2. НАЖАТЬ E (ЗАБРАТЬ КЛОН)
 		pressE()
 		task.wait(0.5)
 	
-		-- 3. ТЕЛЕПОРТ К ГРОВЕРУ
 		if not teleportToGrower() then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К ГРОВЕРУ!")
 			isWorking = false
 			return
 		end
 	
-		-- 4. УДЕРЖИВАТЬ E (ПОЛОЖИТЬ В ГРОВЕР)
 		holdE()
 		task.wait(1)
 		print("📥 ЯЩИК ПОЛОЖЕН")
 	
-		-- 5. ЖДАТЬ РОСТА
 		local waitTime = 0
 		local maxWait = 3600
 		print("⏳ ОЖИДАНИЕ РОСТА ДО " .. (_G.SelectedCrate and _G.SelectedCrate.level or "???") .. "...")
@@ -8110,7 +8110,6 @@ local script = G2L["fa"];
 			if hasReachedSelectedLevel() then break end
 		end
 	
-		-- 6. НАЖАТЬ E (ЗАБРАТЬ ГОТОВЫЙ ЯЩИК)
 		pressE()
 		task.wait(0.5)
 		print("✅ ЯЩИК ЗАБРАН")
