@@ -7751,7 +7751,7 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_AutoFarm (ФИКС ТЕЛЕПОРТА К ГРОВЕРУ)
+	-- UYC_AutoFarm (ФИКС СБОРА ЧЕРЕЗ PICKUP)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7896,35 +7896,48 @@ local script = G2L["fa"];
 		return plot.Machines:FindFirstChild("Duplicator")
 	end
 	
-	-- ====== НАЖАТИЕ E ======
-	local function pressE()
-		pcall(function()
-			if VirtualInputManager then
-				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-				task.wait(0.05)
-				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-			else
-				UserInputService:SetKeyDown(Enum.KeyCode.E)
-				task.wait(0.05)
-				UserInputService:SetKeyUp(Enum.KeyCode.E)
-			end
-			print("✅ pressE() ВЫПОЛНЕН")
-		end)
-	end
+	-- ====== НАЖАТИЕ НА КНОПКУ PICKUP ======
+	local function clickPickup()
+		-- ИЩЕМ КНОПКУ PICKUP В GUI
+		local playerGui = player:FindFirstChild("PlayerGui")
+		if not playerGui then return false end
 	
-	local function holdE()
-		pcall(function()
-			if VirtualInputManager then
-				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-				task.wait(0.5)
-				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-			else
-				UserInputService:SetKeyDown(Enum.KeyCode.E)
-				task.wait(0.5)
-				UserInputService:SetKeyUp(Enum.KeyCode.E)
+		-- ПРОБУЕМ НАЙТИ КНОПКУ С ТЕКСТОМ "Pickup"
+		for _, gui in pairs(playerGui:GetDescendants()) do
+			if gui:IsA("TextButton") or gui:IsA("ImageButton") then
+				if gui.Text and string.find(gui.Text, "Pickup") then
+					-- НАЖИМАЕМ НА КНОПКУ
+					pcall(function()
+						gui:SendInput("MouseButton1Click")
+						print("🔥 НАЖАТА КНОПКА PICKUP!")
+					end)
+					return true
+				end
 			end
-			print("✅ holdE() ВЫПОЛНЕН")
+		end
+	
+		-- ЕСЛИ НЕ НАШЛИ — ПЫТАЕМСЯ НАЖАТЬ ЧЕРЕЗ МЫШЬ
+		pcall(function()
+			local mouse = player:GetMouse()
+			if mouse then
+				-- ИЩЕМ КНОПКУ НА ЭКРАНЕ
+				for _, gui in pairs(playerGui:GetDescendants()) do
+					if gui:IsA("TextButton") or gui:IsA("ImageButton") then
+						if gui.Text and string.find(gui.Text, "Pickup") then
+							local pos = gui.AbsolutePosition
+							local size = gui.AbsoluteSize
+							local x = pos.X + size.X / 2
+							local y = pos.Y + size.Y / 2
+							mouse:ClickAt(x, y)
+							print("🔥 КЛИК МЫШЬЮ ПО PICKUP!")
+							return true
+						end
+					end
+				end
+			end
 		end)
+	
+		return false
 	end
 	
 	-- ====== ТЕЛЕПОРТ К КЛОНУ ======
@@ -7950,7 +7963,7 @@ local script = G2L["fa"];
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
 		hrp.CFrame = CFrame.new(targetPos)
-		task.wait(0.3)
+		task.wait(0.5)
 		return true
 	end
 	
@@ -7981,7 +7994,7 @@ local script = G2L["fa"];
 		return nil
 	end
 	
-	-- ====== ТЕЛЕПОРТ К ГРОВЕРУ (ИЩЕМ PART ВНУТРИ ПАПКИ) ======
+	-- ====== ТЕЛЕПОРТ К ГРОВЕРУ ======
 	local function teleportToGrower()
 		local char = player.Character
 		if not char then return false end
@@ -7994,12 +8007,10 @@ local script = G2L["fa"];
 			return false
 		end
 	
-		-- 1. ИЩЕМ CrateInsertParts
 		local insertParts = grower:FindFirstChild("CrateInsertParts")
 		local targetPart = nil
 	
 		if insertParts then
-			-- ИЩЕМ PART ВНУТРИ CrateInsertParts
 			for _, child in pairs(insertParts:GetChildren()) do
 				if child:IsA("BasePart") then
 					targetPart = child
@@ -8008,7 +8019,6 @@ local script = G2L["fa"];
 			end
 		end
 	
-		-- 2. ЕСЛИ НЕ НАШЛИ — ИЩЕМ ЛЮБУЮ БАЗОВУЮ ЧАСТЬ В ГРОВЕРЕ
 		if not targetPart then
 			targetPart = grower:FindFirstChildWhichIsA("BasePart")
 		end
@@ -8024,6 +8034,35 @@ local script = G2L["fa"];
 		hrp.CFrame = CFrame.new(targetPos)
 		task.wait(0.3)
 		return true
+	end
+	
+	-- ====== НАЖАТИЯ E (ДЛЯ ГРОВЕРА) ======
+	local function pressE()
+		pcall(function()
+			if VirtualInputManager then
+				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+				task.wait(0.05)
+				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+			else
+				UserInputService:SetKeyDown(Enum.KeyCode.E)
+				task.wait(0.05)
+				UserInputService:SetKeyUp(Enum.KeyCode.E)
+			end
+		end)
+	end
+	
+	local function holdE()
+		pcall(function()
+			if VirtualInputManager then
+				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+				task.wait(0.5)
+				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+			else
+				UserInputService:SetKeyDown(Enum.KeyCode.E)
+				task.wait(0.5)
+				UserInputService:SetKeyUp(Enum.KeyCode.E)
+			end
+		end)
 	end
 	
 	-- ====== УРОВЕНЬ КЕЙСА В ГРОВЕРЕ ======
@@ -8077,25 +8116,34 @@ local script = G2L["fa"];
 	
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
+		-- 1. ТЕЛЕПОРТ К КЛОНУ
 		if not teleportToClone() then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К КЛОНУ!")
 			isWorking = false
 			return
 		end
 	
-		pressE()
+		-- 2. НАЖАТЬ НА PICKUP (ВМЕСТО E)
+		if not clickPickup() then
+			-- ЕСЛИ НЕ НАШЛИ PICKUP — ПЫТАЕМСЯ ЧЕРЕЗ E
+			print("⚠️ КНОПКА PICKUP НЕ НАЙДЕНА, ПЫТАЕМСЯ ЧЕРЕЗ E")
+			pressE()
+		end
 		task.wait(0.5)
 	
+		-- 3. ТЕЛЕПОРТ К ГРОВЕРУ
 		if not teleportToGrower() then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К ГРОВЕРУ!")
 			isWorking = false
 			return
 		end
 	
+		-- 4. ПОЛОЖИТЬ В ГРОВЕР
 		holdE()
 		task.wait(1)
 		print("📥 ЯЩИК ПОЛОЖЕН")
 	
+		-- 5. ЖДАТЬ РОСТА
 		local waitTime = 0
 		local maxWait = 3600
 		print("⏳ ОЖИДАНИЕ РОСТА ДО " .. (_G.SelectedCrate and _G.SelectedCrate.level or "???") .. "...")
@@ -8110,6 +8158,7 @@ local script = G2L["fa"];
 			if hasReachedSelectedLevel() then break end
 		end
 	
+		-- 6. ЗАБРАТЬ ИЗ ГРОВЕРА
 		pressE()
 		task.wait(0.5)
 		print("✅ ЯЩИК ЗАБРАН")
