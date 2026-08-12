@@ -7751,7 +7751,7 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_AutoFarm (ФИКС ПОИСКА КЛОНА)
+	-- UYC_AutoFarm (ФИКС ТЕЛЕПОРТА К ГРОВЕРУ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7895,13 +7895,49 @@ local script = G2L["fa"];
 		return plot.Machines:FindFirstChild("Duplicator")
 	end
 	
-	local function getCratesFolder()
-		local dup = getDuplicator()
-		if not dup then return nil end
-		return dup:FindFirstChild("CratesFolder")
+	-- ====== ТЕЛЕПОРТ К ГРОВЕРУ (ИЩЕМ ЛЮБУЮ ЧАСТЬ) ======
+	local function teleportToGrower()
+		local char = player.Character
+		if not char then return false end
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return false end
+	
+		local grower = getGrower()
+		if not grower then
+			warn("❌ НЕТ ГРОВЕРА!")
+			return false
+		end
+	
+		-- ИЩЕМ ЛЮБУЮ БАЗОВУЮ ЧАСТЬ В ГРОВЕРЕ ИЛИ ЕГО ДЕТЯХ
+		local part = grower:FindFirstChild("CrateInsertParts") or grower:FindFirstChild("VisualParts")
+		if not part then
+			part = grower:FindFirstChildWhichIsA("BasePart")
+		end
+		if not part then
+			warn("❌ НЕ НАЙДЕНА ЧАСТЬ ДЛЯ ТЕЛЕПОРТА К ГРОВЕРУ!")
+			return false
+		end
+	
+		-- ЕСЛИ ЭТО МОДЕЛЬ, ИЩЕМ ВНУТРИ НЕЁ ЧАСТЬ
+		if part:IsA("Model") then
+			local subPart = part:FindFirstChildWhichIsA("BasePart")
+			if subPart then
+				part = subPart
+			else
+				warn("❌ В МОДЕЛИ ГРОВЕРА НЕТ BasePart!")
+				return false
+			end
+		end
+	
+		local targetPos = part.Position + Vector3.new(0, 3, 0)
+		hrp.Velocity = Vector3.zero
+		hrp.RotVelocity = Vector3.zero
+		hrp.CFrame = CFrame.new(targetPos)
+		task.wait(0.1)
+		return true
 	end
 	
-	-- ====== ТЕЛЕПОРТ ======
+	-- ====== ТЕЛЕПОРТ К КЛОНУ ======
 	local function teleportToClone()
 		local char = player.Character
 		if not char then return false end
@@ -7928,41 +7964,17 @@ local script = G2L["fa"];
 		return true
 	end
 	
-	local function teleportToGrower()
-		local char = player.Character
-		if not char then return false end
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return false end
-	
-		local grower = getGrower()
-		if not grower then
-			warn("❌ НЕТ ГРОВЕРА!")
-			return false
-		end
-	
-		local part = grower:FindFirstChildWhichIsA("BasePart")
-		if not part then
-			warn("❌ НЕТ BasePart В ГРОВЕРЕ!")
-			return false
-		end
-	
-		local targetPos = part.Position + Vector3.new(0, 3, 0)
-		hrp.Velocity = Vector3.zero
-		hrp.RotVelocity = Vector3.zero
-		hrp.CFrame = CFrame.new(targetPos)
-		task.wait(0.1)
-		return true
-	end
-	
-	-- ====== НОВЫЙ ПОИСК КЛОНА ======
+	-- ====== ПОИСК КЛОНА ======
 	local function findClone()
-		local cratesFolder = getCratesFolder()
+		local dup = getDuplicator()
+		if not dup then return nil end
+	
+		local cratesFolder = dup:FindFirstChild("CratesFolder")
 		if not cratesFolder then
 			warn("❌ CratesFolder НЕ НАЙДЕН!")
 			return nil
 		end
 	
-		-- СОБИРАЕМ ВСЕ ОБЪЕКТЫ В ПАПКЕ
 		local items = {}
 		for _, child in pairs(cratesFolder:GetChildren()) do
 			if child:IsA("Model") or child:IsA("Part") or child:IsA("Tool") then
@@ -7971,10 +7983,8 @@ local script = G2L["fa"];
 		end
 	
 		if #items >= 2 then
-			-- ВОЗВРАЩАЕМ ВТОРОЙ (ЭТО КЛОН)
 			return items[2]
 		elseif #items == 1 then
-			-- ЕСЛИ ТОЛЬКО 1 — ВОЗВРАЩАЕМ ЕГО (МОЖЕТ БЫТЬ КЛОН)
 			return items[1]
 		end
 	
@@ -7998,23 +8008,23 @@ local script = G2L["fa"];
 		end)
 	end
 	
-	-- ====== УРОВЕНЬ КЕЙСА ======
-	local function getCurrentCrateLevel()
-		local growerCrates = getGrowerCratesFolder()
-		if not growerCrates then return nil end
+	-- ====== УРОВЕНЬ КЕЙСА В ГРОВЕРЕ ======
+	local function getGrowerCratesFolder()
+		local grower = getGrower()
+		if not grower then return nil end
+		return grower:FindFirstChild("CratesFolder")
+	end
 	
-		for _, child in pairs(growerCrates:GetChildren()) do
+	local function getCurrentCrateLevel()
+		local crates = getGrowerCratesFolder()
+		if not crates then return nil end
+	
+		for _, child in pairs(crates:GetChildren()) do
 			if child:IsA("Model") or child:IsA("Part") or child:IsA("Tool") then
 				return child.Name
 			end
 		end
 		return nil
-	end
-	
-	local function getGrowerCratesFolder()
-		local grower = getGrower()
-		if not grower then return nil end
-		return grower:FindFirstChild("CratesFolder")
 	end
 	
 	local CRATE_NAMES = {
