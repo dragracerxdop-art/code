@@ -7751,7 +7751,7 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_AutoFarm (СПИСОК СКРЫТ)
+	-- UYC_AutoFarm (ФИНАЛ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7767,10 +7767,10 @@ local script = G2L["fa"];
 	if not startBtn then warn("❌ UYC_StartFarm НЕ НАЙДЕН!") return end
 	if not scrollFrame then warn("❌ UYC_CrateList НЕ НАЙДЕН!") return end
 	
-	-- ====== СПИСОК СКРЫТ ПО УМОЛЧАНИЮ ======
+	-- ====== СПИСОК СКРЫТ ======
 	scrollFrame.Visible = false
 	
-	-- ====== СОЗДАЁМ TextLabel ВНУТРИ КНОПОК ======
+	-- ====== LABEL ======
 	local function ensureLabel(btn, defaultText, defaultColor)
 		local label = btn:FindFirstChild("ButtonText")
 		if not label then
@@ -7902,7 +7902,7 @@ local script = G2L["fa"];
 		return grower:FindFirstChild("CratesFolder")
 	end
 	
-	-- ====== ТЕЛЕПОРТ К КЛОНУ (ВПРАВО) ======
+	-- ====== ТЕЛЕПОРТ ВПРАВО (К КЛОНУ) ======
 	local function teleportToClone()
 		local char = player.Character
 		if not char then return false end
@@ -7921,7 +7921,8 @@ local script = G2L["fa"];
 			return false
 		end
 	
-		local targetPos = part.Position + Vector3.new(6, 3, 0)
+		-- ТЕЛЕПОРТ ВПРАВО (+6 ПО X)
+		local targetPos = part.Position + Vector3.new(-6, 3, 0)
 	
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
@@ -8027,14 +8028,14 @@ local script = G2L["fa"];
 		return currentIndex >= selectedIndex
 	end
 	
-	-- ====== ОСНОВНОЙ ЦИКЛ ======
+	-- ====== ОСНОВНОЙ ЦИКЛ (ТОЛЬКО 1 РАЗ) ======
 	local function farmLoopFunction()
 		if isWorking then return end
 		isWorking = true
 	
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
-		-- 1. ТЕЛЕПОРТ К КЛОНУ
+		-- 1. ТЕЛЕПОРТ К КЛОНУ (ВПРАВО)
 		if not teleportToClone() then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К КЛОНУ!")
 			isWorking = false
@@ -8091,7 +8092,7 @@ local script = G2L["fa"];
 		print("🔄 ЦИКЛ ЗАВЕРШЕН!")
 	end
 	
-	-- ====== ЗАПУСК/ОСТАНОВКА ======
+	-- ====== ЗАПУСК ======
 	local function startFarming()
 		if isFarming then return end
 		if not _G.SelectedCrate then
@@ -8099,9 +8100,7 @@ local script = G2L["fa"];
 			return
 		end
 	
-		-- СКРЫВАЕМ СПИСОК ПРИ ЗАПУСКЕ
 		scrollFrame.Visible = false
-	
 		isFarming = true
 		setLabelText(startBtn, "ВКЛ", Color3.fromRGB(0, 255, 0))
 		print("🚀 ФАРМ ЗАПУЩЕН! УРОВЕНЬ:", _G.SelectedCrate.level)
@@ -8112,10 +8111,13 @@ local script = G2L["fa"];
 				if farmLoop then farmLoop:Disconnect() farmLoop = nil end
 				return
 			end
-			if not isWorking then task.spawn(farmLoopFunction) end
+			if not isWorking then
+				task.spawn(farmLoopFunction)
+			end
 		end)
 	end
 	
+	-- ====== ОСТАНОВКА ======
 	local function stopFarming()
 		isFarming = false
 		isWorking = false
@@ -8124,8 +8126,13 @@ local script = G2L["fa"];
 		if farmLoop then farmLoop:Disconnect() farmLoop = nil end
 	end
 	
+	-- ====== КНОПКА ======
 	startBtn.MouseButton1Click:Connect(function()
-		if isFarming then stopFarming() else startFarming() end
+		if isFarming then
+			stopFarming()
+		else
+			startFarming()
+		end
 	end)
 	
 	print("✅ UYC_AutoFarm ЗАГРУЖЕНА!")
