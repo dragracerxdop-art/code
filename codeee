@@ -7751,7 +7751,7 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_AutoFarm (ФИНАЛ)
+	-- UYC_AutoFarm (ФИКС ЗАЖАТИЯ МЫШИ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7896,12 +7896,11 @@ local script = G2L["fa"];
 		return plot.Machines:FindFirstChild("Duplicator")
 	end
 	
-	-- ====== НАЖАТИЕ НА КНОПКУ PICKUP (БЕЗ ОШИБОК) ======
+	-- ====== НАЖАТИЕ НА КНОПКУ PICKUP ======
 	local function clickPickup()
 		local playerGui = player:FindFirstChild("PlayerGui")
 		if not playerGui then return false end
 	
-		-- 1. ИЩЕМ КНОПКУ С ИМЕНЕМ "Pickup" ИЛИ "PickUp"
 		for _, gui in pairs(playerGui:GetDescendants()) do
 			if gui:IsA("TextButton") or gui:IsA("ImageButton") then
 				if gui.Name == "Pickup" or gui.Name == "PickUp" then
@@ -7914,7 +7913,6 @@ local script = G2L["fa"];
 			end
 		end
 	
-		-- 2. ИЩЕМ ТЕКСТ "Pickup" ТОЛЬКО В TextLabel
 		for _, gui in pairs(playerGui:GetDescendants()) do
 			if gui:IsA("TextLabel") then
 				if gui.Text and string.find(gui.Text, "Pickup") then
@@ -7930,7 +7928,6 @@ local script = G2L["fa"];
 			end
 		end
 	
-		-- 3. ИЩЕМ ТЕКСТ "Pickup" В TextButton
 		for _, gui in pairs(playerGui:GetDescendants()) do
 			if gui:IsA("TextButton") then
 				if gui.Text and string.find(gui.Text, "Pickup") then
@@ -7944,6 +7941,68 @@ local script = G2L["fa"];
 		end
 	
 		print("⚠️ КНОПКА PICKUP НЕ НАЙДЕНА!")
+		return false
+	end
+	
+	-- ====== ПОЛОЖИТЬ КЕЙС В ГРОВЕР (ЗАЖАТИЕ МЫШИ) ======
+	local function putInGrower()
+		local char = player.Character
+		if not char then return false end
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return false end
+	
+		local grower = getGrower()
+		if not grower then
+			warn("❌ НЕТ ГРОВЕРА!")
+			return false
+		end
+	
+		-- ИЩЕМ ЧАСТЬ ДЛЯ КЛИКА
+		local targetPart = grower:FindFirstChild("CrateInsertParts")
+		if targetPart then
+			for _, child in pairs(targetPart:GetChildren()) do
+				if child:IsA("BasePart") then
+					targetPart = child
+					break
+				end
+			end
+		end
+		if not targetPart then
+			targetPart = grower:FindFirstChildWhichIsA("BasePart")
+		end
+		if not targetPart then
+			warn("❌ НЕ НАЙДЕНА ЧАСТЬ ДЛЯ КЛИКА!")
+			return false
+		end
+	
+		-- ПЫТАЕМСЯ ЧЕРЕЗ UserInputService
+		pcall(function()
+			-- НАВОДИМ КУРСОР
+			local cam = workspace.CurrentCamera
+			local screenPos = cam:WorldToScreenPoint(targetPart.Position)
+			if screenPos.Z > 0 then
+				local mouse = player:GetMouse()
+				if mouse then
+					mouse.Move(screenPos.X, screenPos.Y)
+					task.wait(0.1)
+					mouse.Button1Down()
+					task.wait(0.5)
+					mouse.Button1Up()
+					print("🔥 ЗАЖАТИЕ МЫШИ ВЫПОЛНЕНО!")
+					return true
+				end
+			end
+		end)
+	
+		-- ЗАПАСНОЙ ВАРИАНТ
+		pcall(function()
+			UserInputService:SetMouseButtonDown(Enum.UserInputType.MouseButton1)
+			task.wait(0.5)
+			UserInputService:SetMouseButtonUp(Enum.UserInputType.MouseButton1)
+			print("🔥 ЗАЖАТИЕ МЫШИ (UserInputService) ВЫПОЛНЕНО!")
+			return true
+		end)
+	
 		return false
 	end
 	
@@ -8043,7 +8102,7 @@ local script = G2L["fa"];
 		return true
 	end
 	
-	-- ====== НАЖАТИЯ E (ДЛЯ ГРОВЕРА) ======
+	-- ====== НАЖАТИЯ E (ДЛЯ ЗАБОРА ИЗ ГРОВЕРА) ======
 	local function pressE()
 		pcall(function()
 			if VirtualInputManager then
@@ -8053,20 +8112,6 @@ local script = G2L["fa"];
 			else
 				UserInputService:SetKeyDown(Enum.KeyCode.E)
 				task.wait(0.05)
-				UserInputService:SetKeyUp(Enum.KeyCode.E)
-			end
-		end)
-	end
-	
-	local function holdE()
-		pcall(function()
-			if VirtualInputManager then
-				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-				task.wait(0.5)
-				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-			else
-				UserInputService:SetKeyDown(Enum.KeyCode.E)
-				task.wait(0.5)
 				UserInputService:SetKeyUp(Enum.KeyCode.E)
 			end
 		end)
@@ -8141,7 +8186,8 @@ local script = G2L["fa"];
 			return
 		end
 	
-		holdE()
+		-- ВМЕСТО holdE() ИСПОЛЬЗУЕМ putInGrower()
+		putInGrower()
 		task.wait(0.5)
 		print("📥 ЯЩИК ПОЛОЖЕН")
 	
