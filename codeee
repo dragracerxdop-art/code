@@ -7873,7 +7873,7 @@ task.spawn(C_f1);
 local function C_fb()
 local script = G2L["fb"];
 	-- ==========================================
-	-- UYC_StartFarm (ФИКС ТЕЛЕПОРТОВ)
+	-- UYC_StartFarm (ТОЧНЫЕ ТЕЛЕПОРТЫ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7972,103 +7972,37 @@ local script = G2L["fb"];
 		end)
 	end
 	
-	-- ====== ТЕЛЕПОРТ К МЕСТУ ПОЯВЛЕНИЯ КЛОНА ======
-	local function teleportToCloneSpawn()
+	-- ====== ТЕЛЕПОРТ ======
+	local function teleportTo(pos)
 		local char = player.Character
 		if not char then return false end
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
 	
-		local dup = getDuplicator()
-		if not dup then
-			print("❌ НЕТ ДУПЛИКАТОРА!")
-			return false
-		end
-	
-		-- ИЩЕМ CrateSpawnParts (где появляется клон)
-		local spawnParts = dup:FindFirstChild("CrateSpawnParts")
-		if not spawnParts then
-			print("❌ НЕТ CrateSpawnParts!")
-			return false
-		end
-	
-		-- ИЩЕМ PART ВНУТРИ CrateSpawnParts
-		local targetPart = nil
-		for _, child in pairs(spawnParts:GetChildren()) do
-			if child:IsA("BasePart") then
-				targetPart = child
-				break
-			end
-		end
-	
-		if not targetPart then
-			print("❌ НЕТ PART В CrateSpawnParts!")
-			return false
-		end
-	
-		local targetPos = targetPart.Position + Vector3.new(0, 2, 0)
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
-		hrp.CFrame = CFrame.new(targetPos)
+		hrp.CFrame = CFrame.new(pos + Vector3.new(0, 2, 0))
 		task.wait(0.2)
 		return true
 	end
 	
-	-- ====== ТЕЛЕПОРТ К МЕСТУ ВСТАВКИ В ГРОВЕР ======
-	local function teleportToGrowerInsert()
-		local char = player.Character
-		if not char then return false end
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return false end
-	
-		local grower = getGrower()
-		if not grower then
-			print("❌ НЕТ ГРОВЕРА!")
-			return false
-		end
-	
-		-- ИЩЕМ CrateInsertParts (куда вставляется кейс)
-		local insertParts = grower:FindFirstChild("CrateInsertParts")
-		if not insertParts then
-			print("❌ НЕТ CrateInsertParts!")
-			return false
-		end
-	
-		-- ИЩЕМ PART ВНУТРИ CrateInsertParts
-		local targetPart = nil
-		for _, child in pairs(insertParts:GetChildren()) do
-			if child:IsA("BasePart") then
-				targetPart = child
-				break
-			end
-		end
-	
-		if not targetPart then
-			print("❌ НЕТ PART В CrateInsertParts!")
-			return false
-		end
-	
-		local targetPos = targetPart.Position + Vector3.new(0, 2, 0)
-		hrp.Velocity = Vector3.zero
-		hrp.RotVelocity = Vector3.zero
-		hrp.CFrame = CFrame.new(targetPos)
-		task.wait(0.2)
-		return true
-	end
+	-- ====== ТОЧКИ ТЕЛЕПОРТА ======
+	local DUP_POS = Vector3.new(4221.40625, 501.5998, 1248.5114)
+	local GROWER_POS = Vector3.new(4111.7895, 505.2827, 1256.9416)
 	
 	-- ====== ОДИН ЦИКЛ ======
 	local function doOneCycle()
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
-		-- 1. ТЕЛЕПОРТ К МЕСТУ ПОЯВЛЕНИЯ КЛОНА
-		if teleportToCloneSpawn() then
+		-- 1. ТЕЛЕПОРТ К ДУПЛИКАТОРУ
+		if teleportTo(DUP_POS) then
 			print("🔄 ЗАБИРАЮ КЛОН...")
 			pressE()
 			task.wait(0.3)
 		end
 	
-		-- 2. ТЕЛЕПОРТ К МЕСТУ ВСТАВКИ В ГРОВЕР
-		if not teleportToGrowerInsert() then
+		-- 2. ТЕЛЕПОРТ К ГРОВЕРУ
+		if not teleportTo(GROWER_POS) then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К ГРОВЕРУ!")
 			return
 		end
