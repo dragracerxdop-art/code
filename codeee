@@ -7751,7 +7751,7 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_AutoFarm (ФИКС ЗАЖАТИЯ МЫШИ)
+	-- UYC_AutoFarm (УМНАЯ ВЕРСИЯ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7896,6 +7896,56 @@ local script = G2L["fa"];
 		return plot.Machines:FindFirstChild("Duplicator")
 	end
 	
+	-- ====== ПРОВЕРКА: ЕСТЬ ЛИ КЕЙС В РУКАХ ======
+	local function hasCrateInHand()
+		local char = player.Character
+		if not char then return false end
+	
+		-- ПРОВЕРЯЕМ ТЕКУЩИЙ ИНСТРУМЕНТ
+		local currentTool = char:FindFirstChildOfClass("Tool")
+		if currentTool then
+			-- ПРОВЕРЯЕМ, ЯВЛЯЕТСЯ ЛИ ОН КЕЙСОМ
+			if string.find(currentTool.Name:lower(), "crate") or 
+				string.find(currentTool.Name:lower(), "box") or
+				string.find(currentTool.Name:lower(), "case") then
+				return true
+			end
+		end
+	
+		-- ПРОВЕРЯЕМ БЭКПЭК
+		local backpack = player:FindFirstChild("Backpack")
+		if backpack then
+			for _, tool in pairs(backpack:GetChildren()) do
+				if tool:IsA("Tool") then
+					if string.find(tool.Name:lower(), "crate") or 
+						string.find(tool.Name:lower(), "box") or
+						string.find(tool.Name:lower(), "case") then
+						return true
+					end
+				end
+			end
+		end
+	
+		return false
+	end
+	
+	-- ====== ПРОВЕРКА: ЕСТЬ ЛИ КЕЙС В ГРОВЕРЕ ======
+	local function hasCrateInGrower()
+		local grower = getGrower()
+		if not grower then return false end
+	
+		local cratesFolder = grower:FindFirstChild("CratesFolder")
+		if cratesFolder then
+			for _, child in pairs(cratesFolder:GetChildren()) do
+				if child:IsA("Model") or child:IsA("Part") or child:IsA("Tool") then
+					return true
+				end
+			end
+		end
+	
+		return false
+	end
+	
 	-- ====== НАЖАТИЕ НА КНОПКУ PICKUP ======
 	local function clickPickup()
 		local playerGui = player:FindFirstChild("PlayerGui")
@@ -7944,8 +7994,37 @@ local script = G2L["fa"];
 		return false
 	end
 	
-	-- ====== ПОЛОЖИТЬ КЕЙС В ГРОВЕР (ЗАЖАТИЕ МЫШИ) ======
+	-- ====== ПОЛОЖИТЬ КЕЙС В ГРОВЕР (С ПРОВЕРКОЙ) ======
 	local function putInGrower()
+		-- ПРОВЕРЯЕМ, ЕСТЬ ЛИ КЕЙС В РУКАХ
+		if not hasCrateInHand() then
+			print("⚠️ НЕТ КЕЙСА В РУКАХ! ПЫТАЕМСЯ ВЗЯТЬ...")
+			-- ПЫТАЕМСЯ ВЗЯТЬ КЕЙС ИЗ ИНВЕНТАРЯ
+			local backpack = player:FindFirstChild("Backpack")
+			if backpack then
+				for _, tool in pairs(backpack:GetChildren()) do
+					if tool:IsA("Tool") then
+						if string.find(tool.Name:lower(), "crate") or 
+							string.find(tool.Name:lower(), "box") or
+							string.find(tool.Name:lower(), "case") then
+							tool.Parent = player.Character
+							print("✅ КЕЙС ВЗЯТ ИЗ БЭКПЭКА!")
+							break
+						end
+					end
+				end
+			end
+			task.wait(0.3)
+		end
+	
+		-- ЕСЛИ ВСЁ ЕЩЁ НЕТ КЕЙСА — ВЫХОДИМ
+		if not hasCrateInHand() then
+			print("❌ НЕТ КЕЙСА! НЕЧЕГО КЛАСТЬ!")
+			return false
+		end
+	
+		print("✅ КЕЙС В РУКАХ! КЛАДЁМ...")
+	
 		local char = player.Character
 		if not char then return false end
 		local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -7957,7 +8036,6 @@ local script = G2L["fa"];
 			return false
 		end
 	
-		-- ИЩЕМ ЧАСТЬ ДЛЯ КЛИКА
 		local targetPart = grower:FindFirstChild("CrateInsertParts")
 		if targetPart then
 			for _, child in pairs(targetPart:GetChildren()) do
@@ -7975,9 +8053,9 @@ local script = G2L["fa"];
 			return false
 		end
 	
-		-- ПЫТАЕМСЯ ЧЕРЕЗ UserInputService
+		-- ПЫТАЕМСЯ ПОЛОЖИТЬ
+		local success = false
 		pcall(function()
-			-- НАВОДИМ КУРСОР
 			local cam = workspace.CurrentCamera
 			local screenPos = cam:WorldToScreenPoint(targetPart.Position)
 			if screenPos.Z > 0 then
@@ -7989,21 +8067,31 @@ local script = G2L["fa"];
 					task.wait(0.5)
 					mouse.Button1Up()
 					print("🔥 ЗАЖАТИЕ МЫШИ ВЫПОЛНЕНО!")
-					return true
+					success = true
 				end
 			end
 		end)
 	
-		-- ЗАПАСНОЙ ВАРИАНТ
-		pcall(function()
-			UserInputService:SetMouseButtonDown(Enum.UserInputType.MouseButton1)
-			task.wait(0.5)
-			UserInputService:SetMouseButtonUp(Enum.UserInputType.MouseButton1)
-			print("🔥 ЗАЖАТИЕ МЫШИ (UserInputService) ВЫПОЛНЕНО!")
-			return true
-		end)
+		if not success then
+			pcall(function()
+				UserInputService:SetMouseButtonDown(Enum.UserInputType.MouseButton1)
+				task.wait(0.5)
+				UserInputService:SetMouseButtonUp(Enum.UserInputType.MouseButton1)
+				print("🔥 ЗАЖАТИЕ МЫШИ (UserInputService) ВЫПОЛНЕНО!")
+				success = true
+			end)
+		end
 	
-		return false
+		task.wait(0.5)
+	
+		-- ПРОВЕРЯЕМ, ПОЛОЖИЛОСЬ ЛИ
+		if hasCrateInGrower() then
+			print("✅ КЕЙС УСПЕШНО ПОЛОЖЕН В ГРОВЕР!")
+			return true
+		else
+			print("⚠️ КЕЙС НЕ ПОЛОЖИЛСЯ! ПРОБУЕМ СНОВА...")
+			return false
+		end
 	end
 	
 	-- ====== ТЕЛЕПОРТ К КЛОНУ ======
@@ -8102,7 +8190,7 @@ local script = G2L["fa"];
 		return true
 	end
 	
-	-- ====== НАЖАТИЯ E (ДЛЯ ЗАБОРА ИЗ ГРОВЕРА) ======
+	-- ====== НАЖАТИЯ E ======
 	local function pressE()
 		pcall(function()
 			if VirtualInputManager then
@@ -8168,29 +8256,95 @@ local script = G2L["fa"];
 	
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
-		if not teleportToClone() then
+		-- 1. ТЕЛЕПОРТ К КЛОНУ
+		local maxAttempts = 3
+		local attempts = 0
+		local success = false
+	
+		while attempts < maxAttempts and not success do
+			attempts = attempts + 1
+			if not teleportToClone() then
+				print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К КЛОНУ (ПОПЫТКА " .. attempts .. ")")
+				task.wait(0.5)
+			else
+				success = true
+			end
+		end
+	
+		if not success then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К КЛОНУ!")
 			isWorking = false
 			return
 		end
 	
-		if not clickPickup() then
-			print("⚠️ КНОПКА PICKUP НЕ НАЙДЕНА, ПЫТАЕМСЯ ЧЕРЕЗ E")
-			pressE()
+		-- 2. ВЗЯТЬ КЛОН
+		success = false
+		attempts = 0
+		while attempts < maxAttempts and not success do
+			attempts = attempts + 1
+			if clickPickup() then
+				success = true
+			else
+				print("⚠️ НЕ УДАЛОСЬ ВЗЯТЬ КЛОН (ПОПЫТКА " .. attempts .. ")")
+				pressE()
+				task.wait(0.3)
+				-- ПРОВЕРЯЕМ, ВЗЯЛСЯ ЛИ КЕЙС
+				if hasCrateInHand() then
+					success = true
+				end
+			end
 		end
+	
+		if not success then
+			print("❌ НЕ УДАЛОСЬ ВЗЯТЬ КЛОН!")
+			isWorking = false
+			return
+		end
+	
+		print("✅ КЕЙС ВЗЯТ!")
 		task.wait(0.3)
 	
-		if not teleportToGrower() then
+		-- 3. ТЕЛЕПОРТ К ГРОВЕРУ
+		success = false
+		attempts = 0
+		while attempts < maxAttempts and not success do
+			attempts = attempts + 1
+			if teleportToGrower() then
+				success = true
+			else
+				print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К ГРОВЕРУ (ПОПЫТКА " .. attempts .. ")")
+				task.wait(0.5)
+			end
+		end
+	
+		if not success then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К ГРОВЕРУ!")
 			isWorking = false
 			return
 		end
 	
-		-- ВМЕСТО holdE() ИСПОЛЬЗУЕМ putInGrower()
-		putInGrower()
-		task.wait(0.5)
-		print("📥 ЯЩИК ПОЛОЖЕН")
+		-- 4. ПОЛОЖИТЬ КЕЙС (С ПОВТОРАМИ)
+		success = false
+		attempts = 0
+		while attempts < maxAttempts and not success do
+			attempts = attempts + 1
+			if putInGrower() then
+				success = true
+			else
+				print("⚠️ НЕ УДАЛОСЬ ПОЛОЖИТЬ КЕЙС (ПОПЫТКА " .. attempts .. ")")
+				task.wait(0.5)
+			end
+		end
 	
+		if not success then
+			print("❌ НЕ УДАЛОСЬ ПОЛОЖИТЬ КЕЙС В ГРОВЕР!")
+			isWorking = false
+			return
+		end
+	
+		print("📥 ЯЩИК ПОЛОЖЕН В ГРОВЕР")
+	
+		-- 5. ЖДАТЬ РОСТА
 		local waitTime = 0
 		local maxWait = 3600
 		print("⏳ ОЖИДАНИЕ РОСТА ДО " .. (_G.SelectedCrate and _G.SelectedCrate.level or "???") .. "...")
@@ -8205,9 +8359,23 @@ local script = G2L["fa"];
 			if hasReachedSelectedLevel() then break end
 		end
 	
+		-- 6. ЗАБРАТЬ ИЗ ГРОВЕРА
 		pressE()
-		task.wait(0.3)
-		print("✅ ЯЩИК ЗАБРАН")
+		task.wait(0.5)
+	
+		-- ПРОВЕРЯЕМ, ЗАБРАЛСЯ ЛИ
+		if hasCrateInHand() then
+			print("✅ ЯЩИК ЗАБРАН ИЗ ГРОВЕРА!")
+		else
+			print("⚠️ ЯЩИК НЕ ЗАБРАЛСЯ, ПРОБУЕМ ЕЩЁ...")
+			pressE()
+			task.wait(0.5)
+			if hasCrateInHand() then
+				print("✅ ЯЩИК ЗАБРАН ИЗ ГРОВЕРА!")
+			else
+				print("❌ НЕ УДАЛОСЬ ЗАБРАТЬ ЯЩИК!")
+			end
+		end
 	
 		isWorking = false
 		print("🔄 ЦИКЛ ЗАВЕРШЕН!")
@@ -8257,7 +8425,7 @@ local script = G2L["fa"];
 		end
 	end)
 	
-	print("✅ UYC_AutoFarm ЗАГРУЖЕНА!")
+	print("✅ UYC_AutoFarm (УМНАЯ ВЕРСИЯ) ЗАГРУЖЕНА!")
 end;
 task.spawn(C_fa);
 -- StarterGui.Folder.PurpHub.MainFrame.LeftFrame.SwitchTabs
