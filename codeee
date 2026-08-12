@@ -7751,17 +7751,16 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_StartFarm (ЧЁТКАЯ ЦЕПОЧКА)
+	-- UYC_StartFarm (БЕЗ ПРОВЕРОК)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
 	local UserInputService = game:GetService("UserInputService")
 	local VirtualInputManager = game:GetService("VirtualInputManager")
 	
-	-- ====== ПОИСК КНОПОК ======
+	-- ====== ПОИСК КНОПКИ ======
 	local rightFrame = script.Parent
 	local startBtn = rightFrame:FindFirstChild("UYC_StartFarm")
-	
 	if not startBtn then warn("❌ UYC_StartFarm НЕ НАЙДЕН!") return end
 	
 	-- ====== LABEL ======
@@ -7826,7 +7825,6 @@ local script = G2L["fa"];
 	local function hasCrateInGrower()
 		local grower = getGrower()
 		if not grower then return false end
-	
 		local cratesFolder = grower:FindFirstChild("CratesFolder")
 		if cratesFolder then
 			for _, child in pairs(cratesFolder:GetChildren()) do
@@ -7838,14 +7836,12 @@ local script = G2L["fa"];
 		return false
 	end
 	
-	-- ====== ПОЛУЧИТЬ УРОВЕНЬ КЕЙСА В ГРОВЕРЕ ======
+	-- ====== УРОВЕНЬ КЕЙСА ======
 	local function getCurrentCrateLevel()
 		local grower = getGrower()
 		if not grower then return nil end
-	
 		local cratesFolder = grower:FindFirstChild("CratesFolder")
 		if not cratesFolder then return nil end
-	
 		for _, child in pairs(cratesFolder:GetChildren()) do
 			if child:IsA("Model") or child:IsA("Part") or child:IsA("Tool") then
 				return child.Name
@@ -7890,7 +7886,6 @@ local script = G2L["fa"];
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
 	
-		-- ИЩЕМ ЧАСТЬ ДЛЯ ТЕЛЕПОРТА
 		local targetPart = obj:FindFirstChildWhichIsA("BasePart")
 		if not targetPart then
 			for _, child in pairs(obj:GetChildren()) do
@@ -7913,36 +7908,33 @@ local script = G2L["fa"];
 		return true
 	end
 	
-	-- ====== ВЗЯТЬ КЛОН ======
+	-- ====== ВЗЯТЬ КЛОН (БЕЗ ПРОВЕРКИ) ======
 	local function takeClone()
 		local dup = getDuplicator()
-		if not dup then return false end
+		if not dup then
+			print("❌ НЕТ ДУПЛИКАТОРА!")
+			return false
+		end
 	
-		-- ТЕЛЕПОРТ К ДУПЛИКАТОРУ
 		if not teleportToObject(dup) then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К ДУПЛИКАТОРУ!")
 			return false
 		end
 	
-		-- ЗАБРАТЬ КЛОН
+		print("🔄 ЗАБИРАЮ КЛОН...")
 		pressE()
-		task.wait(0.5)
-	
-		if hasCrateInHand() then
-			print("✅ КЛОН ВЗЯТ!")
-			return true
-		else
-			print("❌ НЕ УДАЛОСЬ ВЗЯТЬ КЛОН!")
-			return false
-		end
+		task.wait(0.3)
+		return true  -- ВСЕГДА ВОЗВРАЩАЕМ TRUE, ЧТОБЫ НЕ ЗАЦИКЛИВАЛОСЬ
 	end
 	
-	-- ====== ПОЛОЖИТЬ КЕЙС В ГРОВЕР ======
+	-- ====== ПОЛОЖИТЬ В ГРОВЕР ======
 	local function placeCrateInGrower()
 		local grower = getGrower()
-		if not grower then return false end
+		if not grower then
+			print("❌ НЕТ ГРОВЕРА!")
+			return false
+		end
 	
-		-- ТЕЛЕПОРТ К ГРОВЕРУ
 		if not teleportToObject(grower) then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К ГРОВЕРУ!")
 			return false
@@ -7950,50 +7942,33 @@ local script = G2L["fa"];
 	
 		-- ЕСЛИ В ГРОВЕРЕ УЖЕ ЕСТЬ КЕЙС — ЖДЁМ
 		if hasCrateInGrower() then
-			print("⏳ В ГРОВЕРЕ УЖЕ ЕСТЬ КЕЙС, ЖДУ РОСТА...")
+			print("⏳ В ГРОВЕРЕ УЖЕ ЕСТЬ КЕЙС, ЖДУ...")
 			return true
-		end
-	
-		-- ЕСЛИ КЕЙСА В ГРОВЕРЕ НЕТ — КЛАДЁМ
-		if not hasCrateInHand() then
-			print("⚠️ НЕТ КЕЙСА В РУКАХ!")
-			return false
 		end
 	
 		print("📥 КЛАДУ КЕЙС В ГРОВЕР...")
 		holdE()
 		task.wait(0.5)
-	
-		-- ПРОВЕРЯЕМ, ПОЛОЖИЛСЯ ЛИ
-		if hasCrateInGrower() then
-			print("✅ КЕЙС УСПЕШНО ПОЛОЖЕН!")
-			return true
-		else
-			print("❌ НЕ УДАЛОСЬ ПОЛОЖИТЬ КЕЙС!")
-			return false
-		end
+		return true  -- ВСЕГДА ВОЗВРАЩАЕМ TRUE
 	end
 	
-	-- ====== ЗАБРАТЬ КЕЙС ИЗ ГРОВЕРА ======
+	-- ====== ЗАБРАТЬ ИЗ ГРОВЕРА ======
 	local function takeFromGrower()
 		local grower = getGrower()
-		if not grower then return false end
+		if not grower then
+			print("❌ НЕТ ГРОВЕРА!")
+			return false
+		end
 	
 		if not teleportToObject(grower) then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К ГРОВЕРУ!")
 			return false
 		end
 	
+		print("🔄 ЗАБИРАЮ ИЗ ГРОВЕРА...")
 		pressE()
-		task.wait(0.5)
-	
-		if hasCrateInHand() then
-			print("✅ КЕЙС ЗАБРАН ИЗ ГРОВЕРА!")
-			return true
-		else
-			print("❌ НЕ УДАЛОСЬ ЗАБРАТЬ КЕЙС!")
-			return false
-		end
+		task.wait(0.3)
+		return true
 	end
 	
 	-- ====== ОЖИДАНИЕ РОСТА ======
@@ -8010,7 +7985,6 @@ local script = G2L["fa"];
 			local current = getCurrentCrateLevel()
 			if current then print("📊 ТЕКУЩИЙ УРОВЕНЬ:", current) end
 	
-			-- ПРОВЕРЯЕМ, ДОСТИГ ЛИ УРОВЕНЬ
 			if current and _G.SelectedCrate then
 				if current == _G.SelectedCrate.name then
 					print("✅ ДОСТИГНУТ УРОВЕНЬ:", _G.SelectedCrate.level)
@@ -8022,41 +7996,30 @@ local script = G2L["fa"];
 		return false
 	end
 	
-	-- ====== ОСНОВНОЙ ЦИКЛ ======
+	-- ====== ОДИН ЦИКЛ ======
 	local function doOneCycle()
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
 		-- 1. ВЗЯТЬ КЛОН
-		if not takeClone() then
-			print("❌ НЕ УДАЛОСЬ ВЗЯТЬ КЛОН!")
-			return
-		end
+		takeClone()
 	
 		-- 2. ПОЛОЖИТЬ В ГРОВЕР
-		if not placeCrateInGrower() then
-			print("❌ НЕ УДАЛОСЬ ПОЛОЖИТЬ КЕЙС В ГРОВЕР!")
-			return
-		end
+		placeCrateInGrower()
 	
 		-- 3. ЖДАТЬ РОСТА
-		if not waitForGrowth() then
-			print("❌ НЕ ДОЖДАЛСЯ РОСТА!")
-			return
-		end
+		waitForGrowth()
 	
 		-- 4. ЗАБРАТЬ ИЗ ГРОВЕРА
-		if not takeFromGrower() then
-			print("❌ НЕ УДАЛОСЬ ЗАБРАТЬ КЕЙС ИЗ ГРОВЕРА!")
-			return
-		end
+		takeFromGrower()
 	
 		print("🔄 ЦИКЛ ЗАВЕРШЕН!")
 	end
 	
 	-- ====== БЕСКОНЕЧНЫЙ ЦИКЛ ======
+	local isFarming = false
+	
 	local function startFarmingLoop()
 		if not isFarming then return end
-	
 		task.spawn(function()
 			while isFarming do
 				doOneCycle()
@@ -8066,8 +8029,6 @@ local script = G2L["fa"];
 	end
 	
 	-- ====== ЗАПУСК ======
-	local isFarming = false
-	
 	local function startFarming()
 		if isFarming then return end
 		if not _G.SelectedCrate then
@@ -8078,7 +8039,6 @@ local script = G2L["fa"];
 		isFarming = true
 		setLabelText(startBtn, "ВКЛ", Color3.fromRGB(0, 255, 0))
 		print("🚀 ФАРМ ЗАПУЩЕН! УРОВЕНЬ:", _G.SelectedCrate.level)
-	
 		startFarmingLoop()
 	end
 	
