@@ -7761,63 +7761,60 @@ local script = G2L["f1"];
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	
+	-- НАХОДИМ LABEL ВНУТРИ КНОПКИ
+	local textLabel = button:FindFirstChild("ButtonText")
+	if not textLabel then
+		warn("❌ ButtonText НЕ НАЙДЕН! СОЗДАЙ TextLabel ВНУТРИ КНОПКИ")
+		return
+	end
+	
 	-- ТАБЛИЦА КЕЙСОВ
 	local CRATE_TABLE = {
-		{name = "Summer", level = "1x"},
-		{name = "Forest", level = "1.5x"},
-		{name = "Bee", level = "2x"},
-		{name = "Beach", level = "3x"},
-		{name = "YinYang", level = "4x"},
-		{name = "Rare", level = "5.5x"},
-		{name = "Divine", level = "7.5x"},
-		{name = "Golden", level = "10x"},
-		{name = "Starlight", level = "20x"},
-		{name = "Aqua", level = "25x"},
-		{name = "Ice", level = "40x"},
-		{name = "Obsidian", level = "60x"},
-		{name = "Galaxy", level = "100x"},
-		{name = "Neon", level = "150x"},
-		{name = "Rainbow", level = "200x"},
-		{name = "Hacker", level = "300x"},
-		{name = "Midnight", level = "500x"},
-		{name = "Sunburst", level = "750x"},
-		{name = "Magical", level = "1000x"},
-		{name = "Beehive", level = "1250x"},
-		{name = "Lucky Star", level = "1500x"},
-		{name = "Futuristic", level = "1750x"},
-		{name = "Nuclear", level = "2000x"},
-		{name = "Atlantis", level = "2250x"},
-		{name = "Evil", level = "2500x"},
-		{name = "Pixel", level = "2750x"},
-		{name = "Lucky Clover", level = "3000x"},
-		{name = "Chocolate", level = "3250x"},
-		{name = "Honeycomb", level = "3500x"},
-		{name = "Robot", level = "3750x"},
-		{name = "Treasure", level = "4000x"},
-		{name = "Purple Gem", level = "4250x"},
+		{name = "Summer", level = "1x"}, {name = "Forest", level = "1.5x"},
+		{name = "Bee", level = "2x"}, {name = "Beach", level = "3x"},
+		{name = "YinYang", level = "4x"}, {name = "Rare", level = "5.5x"},
+		{name = "Divine", level = "7.5x"}, {name = "Golden", level = "10x"},
+		{name = "Starlight", level = "20x"}, {name = "Aqua", level = "25x"},
+		{name = "Ice", level = "40x"}, {name = "Obsidian", level = "60x"},
+		{name = "Galaxy", level = "100x"}, {name = "Neon", level = "150x"},
+		{name = "Rainbow", level = "200x"}, {name = "Hacker", level = "300x"},
+		{name = "Midnight", level = "500x"}, {name = "Sunburst", level = "750x"},
+		{name = "Magical", level = "1000x"}, {name = "Beehive", level = "1250x"},
+		{name = "Lucky Star", level = "1500x"}, {name = "Futuristic", level = "1750x"},
+		{name = "Nuclear", level = "2000x"}, {name = "Atlantis", level = "2250x"},
+		{name = "Evil", level = "2500x"}, {name = "Pixel", level = "2750x"},
+		{name = "Lucky Clover", level = "3000x"}, {name = "Chocolate", level = "3250x"},
+		{name = "Honeycomb", level = "3500x"}, {name = "Robot", level = "3750x"},
+		{name = "Treasure", level = "4000x"}, {name = "Purple Gem", level = "4250x"},
 		{name = "Alchemy", level = "4500x"},
 	}
 	
-	-- ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ ВЫБРАННОГО КЕЙСА
 	_G.SelectedCrate = nil
 	
-	-- НАХОДИМ SCROLLINGFRAME
+	-- НАХОДИМ SCROLLINGFRAME И ШАБЛОН
 	local scrollFrame = button.Parent:FindFirstChild("UYC_CrateList")
 	if not scrollFrame then
 		warn("❌ UYC_CrateList НЕ НАЙДЕН!")
 		return
 	end
 	
-	-- НАХОДИМ ШАБЛОН
 	local template = scrollFrame:FindFirstChild("Template")
 	if not template then
 		warn("❌ Template НЕ НАЙДЕН!")
 		return
 	end
 	
+	-- ПО УМОЛЧАНИЮ СКРЫВАЕМ СПИСОК
+	scrollFrame.Visible = false
+	
+	-- ПЕРЕМЕННАЯ ДЛЯ ОТСЛЕЖИВАНИЯ СОЗДАН ЛИ СПИСОК
+	local listCreated = false
+	
 	-- СОЗДАНИЕ СПИСКА
 	local function createCrateList()
-		-- ОЧИЩАЕМ
+		if listCreated then return end -- НЕ СОЗДАЁМ ПОВТОРНО
+	
+		-- ОЧИЩАЕМ (КРОМЕ ШАБЛОНА)
 		for _, child in pairs(scrollFrame:GetChildren()) do
 			if child ~= template then
 				child:Destroy()
@@ -7833,30 +7830,47 @@ local script = G2L["f1"];
 			btn.Visible = true
 			btn.Position = UDim2.new(0, 0, 0, (i - 1) * 32)
 			btn.Size = UDim2.new(1, 0, 0, 30)
-			btn.Text = crate.name .. " (" .. crate.level .. ")"
+	
+			local lbl = btn:FindFirstChild("ButtonText")
+			if lbl then
+				lbl.Text = crate.name .. " (" .. crate.level .. ")"
+			end
+	
 			btn.Parent = scrollFrame
 	
 			btn.MouseButton1Click:Connect(function()
 				_G.SelectedCrate = crate
 				print("📌 ВЫБРАН:", crate.name, crate.level)
-				button.Text = crate.name .. " (" .. crate.level .. ")"
+				if textLabel then
+					textLabel.Text = crate.name .. " (" .. crate.level .. ")"
+				end
 				scrollFrame.Visible = false
 			end)
 		end
 	
 		local count = #CRATE_TABLE
 		scrollFrame.CanvasSize = UDim2.new(0, 0, 0, count * 32 + 10)
+		listCreated = true
 	end
 	
 	-- ОТКРЫТИЕ/ЗАКРЫТИЕ СПИСКА
 	local function toggleList()
-		scrollFrame.Visible = not scrollFrame.Visible
 		if scrollFrame.Visible then
+			scrollFrame.Visible = false
+			return
+		end
+	
+		-- ЕСЛИ СПИСОК ЕЩЁ НЕ СОЗДАН — СОЗДАЁМ
+		if not listCreated then
 			createCrateList()
 		end
+	
+		scrollFrame.Visible = true
 	end
 	
 	button.MouseButton1Click:Connect(toggleList)
+	
+	print("✅ UYC_SelectCrate ЗАГРУЖЕНА!")
 end;
 task.spawn(C_f1);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC_StartFarm.LocalScript
