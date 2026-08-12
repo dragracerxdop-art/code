@@ -7896,7 +7896,7 @@ local script = G2L["fa"];
 		return plot.Machines:FindFirstChild("Duplicator")
 	end
 	
-	-- ====== ПРОВЕРКА: КЕЙС В РУКАХ ======
+	-- ====== ПРОВЕРКА: ЕСТЬ ЛИ КЕЙС В РУКАХ ======
 	local function hasCrateInHand()
 		local char = player.Character
 		if not char then return false end
@@ -7909,7 +7909,27 @@ local script = G2L["fa"];
 		return false
 	end
 	
-	-- ====== ВЫКИНУТЬ КЕЙС ИЗ РУК ======
+	-- ====== ВЗЯТЬ КЛОН (БЕЗ ПОИСКА КНОПКИ) ======
+	local function takeClone()
+		-- ПРОСТО НАЖИМАЕМ E
+		pcall(function()
+			if VirtualInputManager then
+				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+				task.wait(0.1)
+				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+			else
+				UserInputService:SetKeyDown(Enum.KeyCode.E)
+				task.wait(0.1)
+				UserInputService:SetKeyUp(Enum.KeyCode.E)
+			end
+		end)
+		task.wait(0.5)
+	
+		-- ПРОВЕРЯЕМ, ВЗЯЛСЯ ЛИ
+		return hasCrateInHand()
+	end
+	
+	-- ====== ВЫКИНУТЬ КЕЙС ======
 	local function dropCrate()
 		local char = player.Character
 		if not char then return end
@@ -7921,50 +7941,7 @@ local script = G2L["fa"];
 		end
 	end
 	
-	-- ====== НАЖАТИЕ НА КНОПКУ PICKUP ======
-	local function clickPickup()
-		local playerGui = player:FindFirstChild("PlayerGui")
-		if not playerGui then return false end
-	
-		for _, gui in pairs(playerGui:GetDescendants()) do
-			if gui:IsA("TextButton") or gui:IsA("ImageButton") then
-				if gui.Name == "Pickup" or gui.Name == "PickUp" then
-					pcall(function()
-						gui:SendInput("MouseButton1Click")
-						print("🔥 PICKUP (ПО ИМЕНИ)!")
-					end)
-					return true
-				end
-			end
-		end
-	
-		for _, gui in pairs(playerGui:GetDescendants()) do
-			if gui:IsA("TextLabel") and gui.Text and string.find(gui.Text, "Pickup") then
-				local parent = gui.Parent
-				if parent and (parent:IsA("TextButton") or parent:IsA("ImageButton")) then
-					pcall(function()
-						parent:SendInput("MouseButton1Click")
-						print("🔥 PICKUP (ЧЕРЕЗ LABEL)!")
-					end)
-					return true
-				end
-			end
-		end
-	
-		for _, gui in pairs(playerGui:GetDescendants()) do
-			if gui:IsA("TextButton") and gui.Text and string.find(gui.Text, "Pickup") then
-				pcall(function()
-					gui:SendInput("MouseButton1Click")
-					print("🔥 PICKUP (TextButton)!")
-				end)
-				return true
-			end
-		end
-	
-		return false
-	end
-	
-	-- ====== ПОЛОЖИТЬ В ГРОВЕР (С БРОСКОМ ЕСЛИ НЕ ПОЛУЧИЛОСЬ) ======
+	-- ====== ПОЛОЖИТЬ КЕЙС В ГРОВЕР ======
 	local function putInGrower()
 		if not hasCrateInHand() then
 			print("⚠️ НЕТ КЕЙСА В РУКАХ!")
@@ -7994,7 +7971,6 @@ local script = G2L["fa"];
 			return false
 		end
 	
-		local success = false
 		pcall(function()
 			local cam = workspace.CurrentCamera
 			local screenPos = cam:WorldToScreenPoint(targetPart.Position)
@@ -8007,24 +7983,12 @@ local script = G2L["fa"];
 					task.wait(0.5)
 					mouse.Button1Up()
 					print("🔥 ЗАЖАТИЕ МЫШИ!")
-					success = true
 				end
 			end
 		end)
 	
-		if not success then
-			pcall(function()
-				UserInputService:SetMouseButtonDown(Enum.UserInputType.MouseButton1)
-				task.wait(0.5)
-				UserInputService:SetMouseButtonUp(Enum.UserInputType.MouseButton1)
-				print("🔥 ЗАЖАТИЕ МЫШИ (UserInputService)!")
-				success = true
-			end)
-		end
-	
 		task.wait(0.5)
 	
-		-- ЕСЛИ КЕЙС ВСЁ ЕЩЁ В РУКАХ — ВЫКИДЫВАЕМ, ЧТОБЫ НЕ ЗАЦИКЛИЛОСЬ
 		if hasCrateInHand() then
 			print("⚠️ КЕЙС НЕ ПОЛОЖИЛСЯ! ВЫКИДЫВАЮ...")
 			dropCrate()
@@ -8035,7 +7999,7 @@ local script = G2L["fa"];
 		return true
 	end
 	
-	-- ====== ТЕЛЕПОРТ К КЛОНУ ======
+	-- ====== ТЕЛЕПОРТ ======
 	local function teleportToClone()
 		local char = player.Character
 		if not char then return false end
@@ -8043,16 +8007,10 @@ local script = G2L["fa"];
 		if not hrp then return false end
 	
 		local dup = getDuplicator()
-		if not dup then
-			warn("❌ НЕТ ДУПЛИКАТОРА!")
-			return false
-		end
+		if not dup then return false end
 	
 		local part = dup:FindFirstChild("Part")
-		if not part then
-			warn("❌ НЕТ PART В ДУПЛИКАТОРЕ!")
-			return false
-		end
+		if not part then return false end
 	
 		local targetPos = part.Position + Vector3.new(-6, 1, 0)
 		hrp.Velocity = Vector3.zero
@@ -8062,34 +8020,6 @@ local script = G2L["fa"];
 		return true
 	end
 	
-	-- ====== ПОИСК КЛОНА ======
-	local function findClone()
-		local dup = getDuplicator()
-		if not dup then return nil end
-	
-		local cratesFolder = dup:FindFirstChild("CratesFolder")
-		if not cratesFolder then
-			warn("❌ CratesFolder НЕ НАЙДЕН!")
-			return nil
-		end
-	
-		local items = {}
-		for _, child in pairs(cratesFolder:GetChildren()) do
-			if child:IsA("Model") or child:IsA("Part") or child:IsA("Tool") then
-				table.insert(items, child)
-			end
-		end
-	
-		if #items >= 2 then
-			return items[2]
-		elseif #items == 1 then
-			return items[1]
-		end
-	
-		return nil
-	end
-	
-	-- ====== ТЕЛЕПОРТ К ГРОВЕРУ ======
 	local function teleportToGrower()
 		local char = player.Character
 		if not char then return false end
@@ -8097,10 +8027,7 @@ local script = G2L["fa"];
 		if not hrp then return false end
 	
 		local grower = getGrower()
-		if not grower then
-			warn("❌ НЕТ ГРОВЕРА!")
-			return false
-		end
+		if not grower then return false end
 	
 		local insertParts = grower:FindFirstChild("CrateInsertParts")
 		local targetPart = nil
@@ -8118,10 +8045,7 @@ local script = G2L["fa"];
 			targetPart = grower:FindFirstChildWhichIsA("BasePart")
 		end
 	
-		if not targetPart then
-			warn("❌ НЕ НАЙДЕНА ЧАСТЬ ДЛЯ ТЕЛЕПОРТА К ГРОВЕРУ!")
-			return false
-		end
+		if not targetPart then return false end
 	
 		local targetPos = targetPart.Position + Vector3.new(0, 2, 0)
 		hrp.Velocity = Vector3.zero
@@ -8204,18 +8128,26 @@ local script = G2L["fa"];
 			return
 		end
 	
-		-- 2. ВЗЯТЬ КЛОН
-		if not clickPickup() then
-			print("⚠️ PICKUP НЕ НАЙДЕН, ПЫТАЕМСЯ ЧЕРЕЗ E")
-			pressE()
-		end
-		task.wait(0.3)
+		-- 2. ВЗЯТЬ КЛОН (ПРОСТО НАЖАТЬ E)
+		local attempts = 0
+		local maxAttempts = 3
+		local success = false
 	
-		if not hasCrateInHand() then
-			print("❌ КЕЙС НЕ ВЗЯТ!")
+		while attempts < maxAttempts and not success do
+			attempts = attempts + 1
+			print("🔄 ПОПЫТКА ВЗЯТЬ КЛОН (" .. attempts .. "/" .. maxAttempts .. ")")
+			success = takeClone()
+			if not success then
+				task.wait(0.5)
+			end
+		end
+	
+		if not success then
+			print("❌ НЕ УДАЛОСЬ ВЗЯТЬ КЛОН ЗА " .. maxAttempts .. " ПОПЫТОК!")
 			isWorking = false
 			return
 		end
+	
 		print("✅ КЕЙС ВЗЯТ!")
 	
 		-- 3. ТЕЛЕПОРТ К ГРОВЕРУ
@@ -8226,15 +8158,22 @@ local script = G2L["fa"];
 		end
 	
 		-- 4. ПОЛОЖИТЬ В ГРОВЕР
-		if not putInGrower() then
-			print("⚠️ КЕЙС НЕ ПОЛОЖИЛСЯ, ПРОБУЕМ ЕЩЁ...")
-			task.wait(0.5)
-			-- ПРОБУЕМ ЕЩЁ РАЗ
-			if not putInGrower() then
-				print("❌ НЕ УДАЛОСЬ ПОЛОЖИТЬ КЕЙС!")
-				isWorking = false
-				return
+		attempts = 0
+		success = false
+	
+		while attempts < maxAttempts and not success do
+			attempts = attempts + 1
+			print("🔄 ПОПЫТКА ПОЛОЖИТЬ КЕЙС (" .. attempts .. "/" .. maxAttempts .. ")")
+			success = putInGrower()
+			if not success then
+				task.wait(0.5)
 			end
+		end
+	
+		if not success then
+			print("❌ НЕ УДАЛОСЬ ПОЛОЖИТЬ КЕЙС ЗА " .. maxAttempts .. " ПОПЫТОК!")
+			isWorking = false
+			return
 		end
 	
 		print("📥 ЯЩИК ПОЛОЖЕН В ГРОВЕР")
