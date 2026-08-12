@@ -7801,20 +7801,22 @@ local script = G2L["f1"];
 	-- ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ ВЫБРАННОГО КЕЙСА
 	_G.SelectedCrate = nil
 	
+	-- НАХОДИМ SCROLLINGFRAME
+	local scrollFrame = button.Parent:FindFirstChild("UYC_CrateList")
+	if not scrollFrame then
+		warn("❌ UYC_CrateList НЕ НАЙДЕН!")
+		return
+	end
+	
+	-- НАХОДИМ ШАБЛОН
+	local template = scrollFrame:FindFirstChild("Template")
+	if not template then
+		warn("❌ Template НЕ НАЙДЕН!")
+		return
+	end
+	
 	-- СОЗДАНИЕ СПИСКА
 	local function createCrateList()
-		local scrollFrame = player.PlayerGui:FindFirstChild("UYC_CrateList")
-		if not scrollFrame then
-			warn("❌ UYC_CrateList НЕ НАЙДЕН!")
-			return
-		end
-	
-		local template = scrollFrame:FindFirstChild("Template")
-		if not template then
-			warn("❌ Template НЕ НАЙДЕН!")
-			return
-		end
-	
 		-- ОЧИЩАЕМ
 		for _, child in pairs(scrollFrame:GetChildren()) do
 			if child ~= template then
@@ -7837,11 +7839,7 @@ local script = G2L["f1"];
 			btn.MouseButton1Click:Connect(function()
 				_G.SelectedCrate = crate
 				print("📌 ВЫБРАН:", crate.name, crate.level)
-	
-				-- МЕНЯЕМ ТЕКСТ НА КНОПКЕ
 				button.Text = crate.name .. " (" .. crate.level .. ")"
-	
-				-- СКРЫВАЕМ СПИСОК
 				scrollFrame.Visible = false
 			end)
 		end
@@ -7852,9 +7850,6 @@ local script = G2L["f1"];
 	
 	-- ОТКРЫТИЕ/ЗАКРЫТИЕ СПИСКА
 	local function toggleList()
-		local scrollFrame = player.PlayerGui:FindFirstChild("UYC_CrateList")
-		if not scrollFrame then return end
-	
 		scrollFrame.Visible = not scrollFrame.Visible
 		if scrollFrame.Visible then
 			createCrateList()
@@ -7980,7 +7975,6 @@ local script = G2L["fb"];
 		if not current then return false end
 		if not _G.SelectedCrate then return false end
 	
-		-- ИЩЕМ ИНДЕКС ТЕКУЩЕГО И ВЫБРАННОГО
 		local currentIndex = 0
 		local selectedIndex = 0
 	
