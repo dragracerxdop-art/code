@@ -7750,7 +7750,7 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_AutoFarm (ImageButton + СКРЫТЫЙ TextLabel)
+	-- UYC_AutoFarm (ФИКС ДУПЛИКАТОРА)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7766,7 +7766,7 @@ local script = G2L["fa"];
 	if not startBtn then warn("❌ UYC_StartFarm НЕ НАЙДЕН!") return end
 	if not scrollFrame then warn("❌ UYC_CrateList НЕ НАЙДЕН!") return end
 	
-	-- ====== СОЗДАЁМ TextLabel ВНУТРИ КНОПОК (ЕСЛИ ИХ НЕТ) ======
+	-- ====== СОЗДАЁМ TextLabel ВНУТРИ КНОПОК ======
 	local function ensureLabel(btn, defaultText, defaultColor)
 		local label = btn:FindFirstChild("ButtonText")
 		if not label then
@@ -7787,7 +7787,6 @@ local script = G2L["fa"];
 	local selectLabel = ensureLabel(selectBtn, "ВЫБЕРИ КЕЙС", Color3.fromRGB(255, 200, 100))
 	local startLabel = ensureLabel(startBtn, "ВЫКЛ", Color3.fromRGB(255, 0, 0))
 	
-	-- ====== ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ ТЕКСТА ======
 	local function setLabelText(btn, text, color)
 		local label = btn:FindFirstChild("ButtonText")
 		if label then
@@ -7819,8 +7818,6 @@ local script = G2L["fa"];
 	
 	_G.SelectedCrate = nil
 	local listCreated = false
-	
-	-- ====== СПИСОК СКРЫТ ======
 	scrollFrame.Visible = false
 	
 	-- ====== СОЗДАНИЕ СПИСКА ======
@@ -7902,6 +7899,7 @@ local script = G2L["fa"];
 		return grower:FindFirstChild("CratesFolder")
 	end
 	
+	-- ====== ТЕЛЕПОРТ ======
 	local function teleportToObject(obj)
 		local char = player.Character
 		if not char then return false end
@@ -7918,40 +7916,37 @@ local script = G2L["fa"];
 		return true
 	end
 	
-	local function teleportToClone()
-		local duplicator = getDuplicator()
-		if not duplicator then return false end
-	
-		local children = {}
-		for _, child in pairs(duplicator:GetChildren()) do
-			if child:IsA("Tool") or child:IsA("Model") or child:IsA("Part") then
-				table.insert(children, child)
-			end
-		end
-	
-		if #children >= 2 then
-			return teleportToObject(children[2])
-		end
-		return false
-	end
-	
-	local function takeCloneFromDuplicator()
+	-- ====== ПОИСК КЛОНА (НОВАЯ ВЕРСИЯ) ======
+	local function findClone()
 		local duplicator = getDuplicator()
 		if not duplicator then return nil end
 	
-		local children = {}
+		local objects = {}
 		for _, child in pairs(duplicator:GetChildren()) do
-			if child:IsA("Tool") or child:IsA("Model") or child:IsA("Part") then
-				table.insert(children, child)
+			-- ИСКЛЮЧАЕМ ИЗВЕСТНЫЕ МОДЕЛИ
+			if child.Name ~= "VisualParts" and child.Name ~= "UpgraderInProgressBoard" then
+				if child:IsA("Part") or child:IsA("Model") or child:IsA("Tool") then
+					table.insert(objects, child)
+				end
 			end
 		end
 	
-		if #children >= 2 then
-			return children[2]
+		-- КЛОН — ЭТО ВТОРОЙ ОБЪЕКТ В СПИСКЕ
+		if #objects >= 2 then
+			return objects[2]
 		end
 		return nil
 	end
 	
+	-- ====== ВЗЯТЬ КЛОН ======
+	local function takeClone()
+		local clone = findClone()
+		if not clone then return nil end
+		print("📦 КЛОН НАЙДЕН:", clone.Name)
+		return clone
+	end
+	
+	-- ====== НАЖАТИЯ E ======
 	local function pressE()
 		pcall(function()
 			UserInputService:SetKeyDown(Enum.KeyCode.E)
@@ -7968,6 +7963,7 @@ local script = G2L["fa"];
 		end)
 	end
 	
+	-- ====== УРОВЕНЬ КЕЙСА ======
 	local function getCurrentCrateLevel()
 		local cratesFolder = getCratesFolder()
 		if not cratesFolder then return nil end
@@ -8012,38 +8008,43 @@ local script = G2L["fa"];
 	
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
-		if not teleportToClone() then
-			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К КЛОНУ!")
+		-- 1. ТЕЛЕПОРТ К ДУПЛИКАТОРУ
+		local duplicator = getDuplicator()
+		if not duplicator then
+			print("❌ НЕТ ДУПЛИКАТОРА!")
 			isWorking = false
 			return
 		end
+		teleportToObject(duplicator)
 		task.wait(0.2)
 	
-		local clone = takeCloneFromDuplicator()
+		-- 2. ВЗЯТЬ КЛОН
+		local clone = takeClone()
 		if not clone then
 			print("⏳ НЕТ КЛОНА!")
 			isWorking = false
 			return
 		end
 	
-		print("📦 КЛОН НАЙДЕН:", clone.Name)
 		pressE()
 		task.wait(0.5)
 	
+		-- 3. ТЕЛЕПОРТ К ГРОВЕРУ
 		local grower = getGrower()
 		if not grower then
 			print("❌ НЕТ ГРОВЕРА!")
 			isWorking = false
 			return
 		end
-	
 		teleportToObject(grower)
 		task.wait(0.2)
 	
+		-- 4. ПОЛОЖИТЬ В ГРОВЕР
 		holdE()
 		task.wait(1)
 		print("📥 ЯЩИК ПОЛОЖЕН")
 	
+		-- 5. ЖДАТЬ РОСТА
 		local waitTime = 0
 		local maxWait = 3600
 		print("⏳ ОЖИДАНИЕ РОСТА ДО " .. (_G.SelectedCrate and _G.SelectedCrate.level or "???") .. "...")
@@ -8058,6 +8059,7 @@ local script = G2L["fa"];
 			if hasReachedSelectedLevel() then break end
 		end
 	
+		-- 6. ЗАБРАТЬ ЯЩИК
 		pressE()
 		task.wait(0.5)
 		print("✅ ЯЩИК ЗАБРАН")
@@ -8066,7 +8068,7 @@ local script = G2L["fa"];
 		print("🔄 ЦИКЛ ЗАВЕРШЕН!")
 	end
 	
-	-- ====== ЗАПУСК ======
+	-- ====== ЗАПУСК/ОСТАНОВКА ======
 	local function startFarming()
 		if isFarming then return end
 		if not _G.SelectedCrate then
@@ -8088,23 +8090,16 @@ local script = G2L["fa"];
 		end)
 	end
 	
-	-- ====== ОСТАНОВКА ======
 	local function stopFarming()
 		isFarming = false
 		isWorking = false
 		setLabelText(startBtn, "ВЫКЛ", Color3.fromRGB(255, 0, 0))
 		print("⏹️ ФАРМ ОСТАНОВЛЕН!")
-	
 		if farmLoop then farmLoop:Disconnect() farmLoop = nil end
 	end
 	
-	-- ====== КНОПКА СТАРТА ======
 	startBtn.MouseButton1Click:Connect(function()
-		if isFarming then
-			stopFarming()
-		else
-			startFarming()
-		end
+		if isFarming then stopFarming() else startFarming() end
 	end)
 	
 	print("✅ UYC_AutoFarm ЗАГРУЖЕНА!")
