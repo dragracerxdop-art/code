@@ -1818,6 +1818,7 @@ G2L["f0"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
 
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.UYC_CrateList
 G2L["f1"] = Instance.new("ScrollingFrame", G2L["d"]);
+G2L["f1"]["Visible"] = false;
 G2L["f1"]["Active"] = true;
 G2L["f1"]["BorderSizePixel"] = 0;
 G2L["f1"]["Name"] = [[UYC_CrateList]];
@@ -7750,7 +7751,7 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_AutoFarm (ФИКС ДУПЛИКАТОРА)
+	-- UYC_AutoFarm (ФИКС ТЕЛЕПОРТА)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7899,16 +7900,44 @@ local script = G2L["fa"];
 		return grower:FindFirstChild("CratesFolder")
 	end
 	
-	-- ====== ТЕЛЕПОРТ ======
+	-- ====== ТЕЛЕПОРТ (ФИКС) ======
+	local function getPosition(obj)
+		-- ЕСЛИ У ОБЪЕКТА ЕСТЬ СВОЙСТВО Position
+		if obj:IsA("BasePart") then
+			return obj.Position
+		end
+	
+		-- ЕСЛИ ЭТО МОДЕЛЬ — ИЩЕМ ПЕРВЫЙ BasePart
+		if obj:IsA("Model") then
+			for _, child in pairs(obj:GetChildren()) do
+				if child:IsA("BasePart") then
+					return child.Position
+				end
+			end
+		end
+	
+		-- ЕСЛИ ВНУТРИ ЕСТЬ Part — БЕРЁМ ЕГО
+		local part = obj:FindFirstChildWhichIsA("BasePart")
+		if part then
+			return part.Position
+		end
+	
+		return nil
+	end
+	
 	local function teleportToObject(obj)
 		local char = player.Character
 		if not char then return false end
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
 	
-		local pos = obj:FindFirstChild("Position") or obj
-		local targetPos = pos.Position + Vector3.new(0, 3, 0)
+		local pos = getPosition(obj)
+		if not pos then
+			warn("❌ НЕ НАЙДЕНА ПОЗИЦИЯ ДЛЯ:", obj.Name)
+			return false
+		end
 	
+		local targetPos = pos + Vector3.new(0, 3, 0)
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
 		hrp.CFrame = CFrame.new(targetPos)
@@ -7916,14 +7945,13 @@ local script = G2L["fa"];
 		return true
 	end
 	
-	-- ====== ПОИСК КЛОНА (НОВАЯ ВЕРСИЯ) ======
+	-- ====== ПОИСК КЛОНА ======
 	local function findClone()
 		local duplicator = getDuplicator()
 		if not duplicator then return nil end
 	
 		local objects = {}
 		for _, child in pairs(duplicator:GetChildren()) do
-			-- ИСКЛЮЧАЕМ ИЗВЕСТНЫЕ МОДЕЛИ
 			if child.Name ~= "VisualParts" and child.Name ~= "UpgraderInProgressBoard" then
 				if child:IsA("Part") or child:IsA("Model") or child:IsA("Tool") then
 					table.insert(objects, child)
@@ -7931,14 +7959,12 @@ local script = G2L["fa"];
 			end
 		end
 	
-		-- КЛОН — ЭТО ВТОРОЙ ОБЪЕКТ В СПИСКЕ
 		if #objects >= 2 then
 			return objects[2]
 		end
 		return nil
 	end
 	
-	-- ====== ВЗЯТЬ КЛОН ======
 	local function takeClone()
 		local clone = findClone()
 		if not clone then return nil end
@@ -8008,17 +8034,20 @@ local script = G2L["fa"];
 	
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
-		-- 1. ТЕЛЕПОРТ К ДУПЛИКАТОРУ
 		local duplicator = getDuplicator()
 		if not duplicator then
 			print("❌ НЕТ ДУПЛИКАТОРА!")
 			isWorking = false
 			return
 		end
-		teleportToObject(duplicator)
+	
+		if not teleportToObject(duplicator) then
+			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К ДУПЛИКАТОРУ!")
+			isWorking = false
+			return
+		end
 		task.wait(0.2)
 	
-		-- 2. ВЗЯТЬ КЛОН
 		local clone = takeClone()
 		if not clone then
 			print("⏳ НЕТ КЛОНА!")
@@ -8029,22 +8058,24 @@ local script = G2L["fa"];
 		pressE()
 		task.wait(0.5)
 	
-		-- 3. ТЕЛЕПОРТ К ГРОВЕРУ
 		local grower = getGrower()
 		if not grower then
 			print("❌ НЕТ ГРОВЕРА!")
 			isWorking = false
 			return
 		end
-		teleportToObject(grower)
+	
+		if not teleportToObject(grower) then
+			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К ГРОВЕРУ!")
+			isWorking = false
+			return
+		end
 		task.wait(0.2)
 	
-		-- 4. ПОЛОЖИТЬ В ГРОВЕР
 		holdE()
 		task.wait(1)
 		print("📥 ЯЩИК ПОЛОЖЕН")
 	
-		-- 5. ЖДАТЬ РОСТА
 		local waitTime = 0
 		local maxWait = 3600
 		print("⏳ ОЖИДАНИЕ РОСТА ДО " .. (_G.SelectedCrate and _G.SelectedCrate.level or "???") .. "...")
@@ -8059,7 +8090,6 @@ local script = G2L["fa"];
 			if hasReachedSelectedLevel() then break end
 		end
 	
-		-- 6. ЗАБРАТЬ ЯЩИК
 		pressE()
 		task.wait(0.5)
 		print("✅ ЯЩИК ЗАБРАН")
