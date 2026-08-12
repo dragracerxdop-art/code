@@ -7751,7 +7751,7 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_AutoFarm (РАБОЧИЙ ЦИКЛ 1 РАЗ)
+	-- UYC_AutoFarm (ФИКС ПОИСКА КЛОНА)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7896,9 +7896,9 @@ local script = G2L["fa"];
 	end
 	
 	local function getCratesFolder()
-		local grower = getGrower()
-		if not grower then return nil end
-		return grower:FindFirstChild("CratesFolder")
+		local dup = getDuplicator()
+		if not dup then return nil end
+		return dup:FindFirstChild("CratesFolder")
 	end
 	
 	-- ====== ТЕЛЕПОРТ ======
@@ -7954,18 +7954,30 @@ local script = G2L["fa"];
 		return true
 	end
 	
-	-- ====== ПОИСК КЛОНА ======
+	-- ====== НОВЫЙ ПОИСК КЛОНА ======
 	local function findClone()
-		local duplicator = getDuplicator()
-		if not duplicator then return nil end
+		local cratesFolder = getCratesFolder()
+		if not cratesFolder then
+			warn("❌ CratesFolder НЕ НАЙДЕН!")
+			return nil
+		end
 	
-		for _, child in pairs(duplicator:GetChildren()) do
-			if child.Name ~= "VisualParts" and child.Name ~= "UpgraderInProgressBoard" and child.Name ~= "Part" then
-				if child:IsA("Part") or child:IsA("Model") or child:IsA("Tool") then
-					return child
-				end
+		-- СОБИРАЕМ ВСЕ ОБЪЕКТЫ В ПАПКЕ
+		local items = {}
+		for _, child in pairs(cratesFolder:GetChildren()) do
+			if child:IsA("Model") or child:IsA("Part") or child:IsA("Tool") then
+				table.insert(items, child)
 			end
 		end
+	
+		if #items >= 2 then
+			-- ВОЗВРАЩАЕМ ВТОРОЙ (ЭТО КЛОН)
+			return items[2]
+		elseif #items == 1 then
+			-- ЕСЛИ ТОЛЬКО 1 — ВОЗВРАЩАЕМ ЕГО (МОЖЕТ БЫТЬ КЛОН)
+			return items[1]
+		end
+	
 		return nil
 	end
 	
@@ -7988,15 +8000,21 @@ local script = G2L["fa"];
 	
 	-- ====== УРОВЕНЬ КЕЙСА ======
 	local function getCurrentCrateLevel()
-		local cratesFolder = getCratesFolder()
-		if not cratesFolder then return nil end
+		local growerCrates = getGrowerCratesFolder()
+		if not growerCrates then return nil end
 	
-		for _, child in pairs(cratesFolder:GetChildren()) do
-			if child:IsA("Tool") or child:IsA("Model") or child:IsA("Part") then
+		for _, child in pairs(growerCrates:GetChildren()) do
+			if child:IsA("Model") or child:IsA("Part") or child:IsA("Tool") then
 				return child.Name
 			end
 		end
 		return nil
+	end
+	
+	local function getGrowerCratesFolder()
+		local grower = getGrower()
+		if not grower then return nil end
+		return grower:FindFirstChild("CratesFolder")
 	end
 	
 	local CRATE_NAMES = {
@@ -8024,7 +8042,7 @@ local script = G2L["fa"];
 		return currentIndex >= selectedIndex
 	end
 	
-	-- ====== ОДИН ЦИКЛ ФАРМА ======
+	-- ====== ОДИН ЦИКЛ ======
 	local function doOneCycle()
 		if isWorking then return end
 		isWorking = true
@@ -8082,7 +8100,7 @@ local script = G2L["fa"];
 		print("🔄 ЦИКЛ ЗАВЕРШЕН!")
 	end
 	
-	-- ====== БЕСКОНЕЧНЫЙ ЦИКЛ (НОВЫЙ ПОДХОД) ======
+	-- ====== БЕСКОНЕЧНЫЙ ЦИКЛ ======
 	local function startFarmingLoop()
 		if not isFarming then return end
 	
@@ -8118,7 +8136,6 @@ local script = G2L["fa"];
 		print("⏹️ ФАРМ ОСТАНОВЛЕН!")
 	end
 	
-	-- ====== КНОПКА ======
 	startBtn.MouseButton1Click:Connect(function()
 		if isFarming then
 			stopFarming()
