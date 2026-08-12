@@ -7751,7 +7751,7 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_AutoFarm (ФИКС СБОРА ЧЕРЕЗ PICKUP)
+	-- UYC_AutoFarm (ФИНАЛ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7896,47 +7896,54 @@ local script = G2L["fa"];
 		return plot.Machines:FindFirstChild("Duplicator")
 	end
 	
-	-- ====== НАЖАТИЕ НА КНОПКУ PICKUP ======
+	-- ====== НАЖАТИЕ НА КНОПКУ PICKUP (БЕЗ ОШИБОК) ======
 	local function clickPickup()
-		-- ИЩЕМ КНОПКУ PICKUP В GUI
 		local playerGui = player:FindFirstChild("PlayerGui")
 		if not playerGui then return false end
 	
-		-- ПРОБУЕМ НАЙТИ КНОПКУ С ТЕКСТОМ "Pickup"
+		-- 1. ИЩЕМ КНОПКУ С ИМЕНЕМ "Pickup" ИЛИ "PickUp"
 		for _, gui in pairs(playerGui:GetDescendants()) do
 			if gui:IsA("TextButton") or gui:IsA("ImageButton") then
-				if gui.Text and string.find(gui.Text, "Pickup") then
-					-- НАЖИМАЕМ НА КНОПКУ
+				if gui.Name == "Pickup" or gui.Name == "PickUp" then
 					pcall(function()
 						gui:SendInput("MouseButton1Click")
-						print("🔥 НАЖАТА КНОПКА PICKUP!")
+						print("🔥 НАЖАТА КНОПКА PICKUP (ПО ИМЕНИ)!")
 					end)
 					return true
 				end
 			end
 		end
 	
-		-- ЕСЛИ НЕ НАШЛИ — ПЫТАЕМСЯ НАЖАТЬ ЧЕРЕЗ МЫШЬ
-		pcall(function()
-			local mouse = player:GetMouse()
-			if mouse then
-				-- ИЩЕМ КНОПКУ НА ЭКРАНЕ
-				for _, gui in pairs(playerGui:GetDescendants()) do
-					if gui:IsA("TextButton") or gui:IsA("ImageButton") then
-						if gui.Text and string.find(gui.Text, "Pickup") then
-							local pos = gui.AbsolutePosition
-							local size = gui.AbsoluteSize
-							local x = pos.X + size.X / 2
-							local y = pos.Y + size.Y / 2
-							mouse:ClickAt(x, y)
-							print("🔥 КЛИК МЫШЬЮ ПО PICKUP!")
-							return true
-						end
+		-- 2. ИЩЕМ ТЕКСТ "Pickup" ТОЛЬКО В TextLabel
+		for _, gui in pairs(playerGui:GetDescendants()) do
+			if gui:IsA("TextLabel") then
+				if gui.Text and string.find(gui.Text, "Pickup") then
+					local parent = gui.Parent
+					if parent and (parent:IsA("TextButton") or parent:IsA("ImageButton")) then
+						pcall(function()
+							parent:SendInput("MouseButton1Click")
+							print("🔥 НАЖАТА КНОПКА PICKUP (ЧЕРЕЗ LABEL)!")
+						end)
+						return true
 					end
 				end
 			end
-		end)
+		end
 	
+		-- 3. ИЩЕМ ТЕКСТ "Pickup" В TextButton
+		for _, gui in pairs(playerGui:GetDescendants()) do
+			if gui:IsA("TextButton") then
+				if gui.Text and string.find(gui.Text, "Pickup") then
+					pcall(function()
+						gui:SendInput("MouseButton1Click")
+						print("🔥 НАЖАТА КНОПКА PICKUP (TextButton)!")
+					end)
+					return true
+				end
+			end
+		end
+	
+		print("⚠️ КНОПКА PICKUP НЕ НАЙДЕНА!")
 		return false
 	end
 	
@@ -7963,7 +7970,7 @@ local script = G2L["fa"];
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
 		hrp.CFrame = CFrame.new(targetPos)
-		task.wait(0.5)
+		task.wait(0.2)
 		return true
 	end
 	
@@ -8032,7 +8039,7 @@ local script = G2L["fa"];
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
 		hrp.CFrame = CFrame.new(targetPos)
-		task.wait(0.3)
+		task.wait(0.2)
 		return true
 	end
 	
@@ -8116,34 +8123,28 @@ local script = G2L["fa"];
 	
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
-		-- 1. ТЕЛЕПОРТ К КЛОНУ
 		if not teleportToClone() then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К КЛОНУ!")
 			isWorking = false
 			return
 		end
 	
-		-- 2. НАЖАТЬ НА PICKUP (ВМЕСТО E)
 		if not clickPickup() then
-			-- ЕСЛИ НЕ НАШЛИ PICKUP — ПЫТАЕМСЯ ЧЕРЕЗ E
 			print("⚠️ КНОПКА PICKUP НЕ НАЙДЕНА, ПЫТАЕМСЯ ЧЕРЕЗ E")
 			pressE()
 		end
-		task.wait(0.5)
+		task.wait(0.3)
 	
-		-- 3. ТЕЛЕПОРТ К ГРОВЕРУ
 		if not teleportToGrower() then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К ГРОВЕРУ!")
 			isWorking = false
 			return
 		end
 	
-		-- 4. ПОЛОЖИТЬ В ГРОВЕР
 		holdE()
-		task.wait(1)
+		task.wait(0.5)
 		print("📥 ЯЩИК ПОЛОЖЕН")
 	
-		-- 5. ЖДАТЬ РОСТА
 		local waitTime = 0
 		local maxWait = 3600
 		print("⏳ ОЖИДАНИЕ РОСТА ДО " .. (_G.SelectedCrate and _G.SelectedCrate.level or "???") .. "...")
@@ -8158,9 +8159,8 @@ local script = G2L["fa"];
 			if hasReachedSelectedLevel() then break end
 		end
 	
-		-- 6. ЗАБРАТЬ ИЗ ГРОВЕРА
 		pressE()
-		task.wait(0.5)
+		task.wait(0.3)
 		print("✅ ЯЩИК ЗАБРАН")
 	
 		isWorking = false
