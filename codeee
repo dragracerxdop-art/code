@@ -7751,7 +7751,7 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_AutoFarm (ФИКС ТЕЛЕПОРТА + 1 РАЗ)
+	-- UYC_AutoFarm (СПИСОК СКРЫТ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7766,6 +7766,9 @@ local script = G2L["fa"];
 	if not selectBtn then warn("❌ UYC_SelectCrate НЕ НАЙДЕН!") return end
 	if not startBtn then warn("❌ UYC_StartFarm НЕ НАЙДЕН!") return end
 	if not scrollFrame then warn("❌ UYC_CrateList НЕ НАЙДЕН!") return end
+	
+	-- ====== СПИСОК СКРЫТ ПО УМОЛЧАНИЮ ======
+	scrollFrame.Visible = false
 	
 	-- ====== СОЗДАЁМ TextLabel ВНУТРИ КНОПОК ======
 	local function ensureLabel(btn, defaultText, defaultColor)
@@ -7819,7 +7822,6 @@ local script = G2L["fa"];
 	
 	_G.SelectedCrate = nil
 	local listCreated = false
-	scrollFrame.Visible = false
 	
 	-- ====== СОЗДАНИЕ СПИСКА ======
 	local function createCrateList()
@@ -7919,7 +7921,6 @@ local script = G2L["fa"];
 			return false
 		end
 	
-		-- ТЕЛЕПОРТ ВПРАВО (КЛОН) — +6 ПО X
 		local targetPos = part.Position + Vector3.new(6, 3, 0)
 	
 		hrp.Velocity = Vector3.zero
@@ -8033,7 +8034,7 @@ local script = G2L["fa"];
 	
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
-		-- 1. ТЕЛЕПОРТ К КЛОНУ (ВПРАВО)
+		-- 1. ТЕЛЕПОРТ К КЛОНУ
 		if not teleportToClone() then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К КЛОНУ!")
 			isWorking = false
@@ -8097,6 +8098,9 @@ local script = G2L["fa"];
 			print("❌ ВЫБЕРИ УРОВЕНЬ КЕЙСА!")
 			return
 		end
+	
+		-- СКРЫВАЕМ СПИСОК ПРИ ЗАПУСКЕ
+		scrollFrame.Visible = false
 	
 		isFarming = true
 		setLabelText(startBtn, "ВКЛ", Color3.fromRGB(0, 255, 0))
