@@ -7751,7 +7751,7 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_AutoFarm (ФИКС ТЕЛЕПОРТА + СМЕЩЕНИЕ)
+	-- UYC_AutoFarm (ФИКС ТЕЛЕПОРТА + 1 РАЗ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7900,27 +7900,27 @@ local script = G2L["fa"];
 		return grower:FindFirstChild("CratesFolder")
 	end
 	
-	-- ====== ТЕЛЕПОРТ (С ФИКСОМ) ======
-	local function getDuplicatorPart()
-		local dup = getDuplicator()
-		if not dup then return nil end
-		return dup:FindFirstChild("Part")  -- ТОТ САМЫЙ Part ИЗ ЛОГА
-	end
-	
-	local function teleportToDuplicatorClone()
+	-- ====== ТЕЛЕПОРТ К КЛОНУ (ВПРАВО) ======
+	local function teleportToClone()
 		local char = player.Character
 		if not char then return false end
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
 	
-		local part = getDuplicatorPart()
-		if not part then
-			warn("❌ НЕ НАЙДЕН Part В ДУПЛИКАТОРЕ!")
+		local dup = getDuplicator()
+		if not dup then
+			warn("❌ НЕТ ДУПЛИКАТОРА!")
 			return false
 		end
 	
-		-- ТЕЛЕПОРТ ПРАВЕЕ (КЛОН) — +8 ПО X
-		local targetPos = part.Position + Vector3.new(8, 3, 0)
+		local part = dup:FindFirstChild("Part")
+		if not part then
+			warn("❌ НЕТ PART В ДУПЛИКАТОРЕ!")
+			return false
+		end
+	
+		-- ТЕЛЕПОРТ ВПРАВО (КЛОН) — +6 ПО X
+		local targetPos = part.Position + Vector3.new(6, 3, 0)
 	
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
@@ -7929,6 +7929,7 @@ local script = G2L["fa"];
 		return true
 	end
 	
+	-- ====== ТЕЛЕПОРТ К ГРОВЕРУ ======
 	local function teleportToGrower()
 		local char = player.Character
 		if not char then return false end
@@ -7960,27 +7961,14 @@ local script = G2L["fa"];
 		local duplicator = getDuplicator()
 		if not duplicator then return nil end
 	
-		local objects = {}
 		for _, child in pairs(duplicator:GetChildren()) do
 			if child.Name ~= "VisualParts" and child.Name ~= "UpgraderInProgressBoard" and child.Name ~= "Part" then
 				if child:IsA("Part") or child:IsA("Model") or child:IsA("Tool") then
-					table.insert(objects, child)
+					return child
 				end
 			end
 		end
-	
-		-- КЛОН — ПЕРВЫЙ ОБЪЕКТ, КОТОРЫЙ НЕ ЯВЛЯЕТСЯ ИЗВЕСТНЫМ
-		if #objects >= 1 then
-			return objects[1]
-		end
 		return nil
-	end
-	
-	local function takeClone()
-		local clone = findClone()
-		if not clone then return nil end
-		print("📦 КЛОН НАЙДЕН:", clone.Name)
-		return clone
 	end
 	
 	-- ====== НАЖАТИЯ E ======
@@ -8045,8 +8033,8 @@ local script = G2L["fa"];
 	
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
-		-- 1. ТЕЛЕПОРТ К КЛОНУ (СПРАВА)
-		if not teleportToDuplicatorClone() then
+		-- 1. ТЕЛЕПОРТ К КЛОНУ (ВПРАВО)
+		if not teleportToClone() then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К КЛОНУ!")
 			isWorking = false
 			return
@@ -8054,7 +8042,7 @@ local script = G2L["fa"];
 		task.wait(0.2)
 	
 		-- 2. ВЗЯТЬ КЛОН
-		local clone = takeClone()
+		local clone = findClone()
 		if not clone then
 			print("⏳ НЕТ КЛОНА!")
 			isWorking = false
