@@ -7751,7 +7751,7 @@ task.spawn(C_ed);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- UYC_AutoFarm (ФИКС ТЕЛЕПОРТА)
+	-- UYC_AutoFarm (ФИКС ТЕЛЕПОРТА + СМЕЩЕНИЕ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7900,44 +7900,54 @@ local script = G2L["fa"];
 		return grower:FindFirstChild("CratesFolder")
 	end
 	
-	-- ====== ТЕЛЕПОРТ (ФИКС) ======
-	local function getPosition(obj)
-		-- ЕСЛИ У ОБЪЕКТА ЕСТЬ СВОЙСТВО Position
-		if obj:IsA("BasePart") then
-			return obj.Position
-		end
-	
-		-- ЕСЛИ ЭТО МОДЕЛЬ — ИЩЕМ ПЕРВЫЙ BasePart
-		if obj:IsA("Model") then
-			for _, child in pairs(obj:GetChildren()) do
-				if child:IsA("BasePart") then
-					return child.Position
-				end
-			end
-		end
-	
-		-- ЕСЛИ ВНУТРИ ЕСТЬ Part — БЕРЁМ ЕГО
-		local part = obj:FindFirstChildWhichIsA("BasePart")
-		if part then
-			return part.Position
-		end
-	
-		return nil
+	-- ====== ТЕЛЕПОРТ (С ФИКСОМ) ======
+	local function getDuplicatorPart()
+		local dup = getDuplicator()
+		if not dup then return nil end
+		return dup:FindFirstChild("Part")  -- ТОТ САМЫЙ Part ИЗ ЛОГА
 	end
 	
-	local function teleportToObject(obj)
+	local function teleportToDuplicatorClone()
 		local char = player.Character
 		if not char then return false end
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return false end
 	
-		local pos = getPosition(obj)
-		if not pos then
-			warn("❌ НЕ НАЙДЕНА ПОЗИЦИЯ ДЛЯ:", obj.Name)
+		local part = getDuplicatorPart()
+		if not part then
+			warn("❌ НЕ НАЙДЕН Part В ДУПЛИКАТОРЕ!")
 			return false
 		end
 	
-		local targetPos = pos + Vector3.new(0, 3, 0)
+		-- ТЕЛЕПОРТ ПРАВЕЕ (КЛОН) — +8 ПО X
+		local targetPos = part.Position + Vector3.new(8, 3, 0)
+	
+		hrp.Velocity = Vector3.zero
+		hrp.RotVelocity = Vector3.zero
+		hrp.CFrame = CFrame.new(targetPos)
+		task.wait(0.1)
+		return true
+	end
+	
+	local function teleportToGrower()
+		local char = player.Character
+		if not char then return false end
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return false end
+	
+		local grower = getGrower()
+		if not grower then
+			warn("❌ НЕТ ГРОВЕРА!")
+			return false
+		end
+	
+		local part = grower:FindFirstChildWhichIsA("BasePart")
+		if not part then
+			warn("❌ НЕТ BasePart В ГРОВЕРЕ!")
+			return false
+		end
+	
+		local targetPos = part.Position + Vector3.new(0, 3, 0)
 		hrp.Velocity = Vector3.zero
 		hrp.RotVelocity = Vector3.zero
 		hrp.CFrame = CFrame.new(targetPos)
@@ -7952,15 +7962,16 @@ local script = G2L["fa"];
 	
 		local objects = {}
 		for _, child in pairs(duplicator:GetChildren()) do
-			if child.Name ~= "VisualParts" and child.Name ~= "UpgraderInProgressBoard" then
+			if child.Name ~= "VisualParts" and child.Name ~= "UpgraderInProgressBoard" and child.Name ~= "Part" then
 				if child:IsA("Part") or child:IsA("Model") or child:IsA("Tool") then
 					table.insert(objects, child)
 				end
 			end
 		end
 	
-		if #objects >= 2 then
-			return objects[2]
+		-- КЛОН — ПЕРВЫЙ ОБЪЕКТ, КОТОРЫЙ НЕ ЯВЛЯЕТСЯ ИЗВЕСТНЫМ
+		if #objects >= 1 then
+			return objects[1]
 		end
 		return nil
 	end
@@ -8034,20 +8045,15 @@ local script = G2L["fa"];
 	
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
-		local duplicator = getDuplicator()
-		if not duplicator then
-			print("❌ НЕТ ДУПЛИКАТОРА!")
-			isWorking = false
-			return
-		end
-	
-		if not teleportToObject(duplicator) then
-			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К ДУПЛИКАТОРУ!")
+		-- 1. ТЕЛЕПОРТ К КЛОНУ (СПРАВА)
+		if not teleportToDuplicatorClone() then
+			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К КЛОНУ!")
 			isWorking = false
 			return
 		end
 		task.wait(0.2)
 	
+		-- 2. ВЗЯТЬ КЛОН
 		local clone = takeClone()
 		if not clone then
 			print("⏳ НЕТ КЛОНА!")
@@ -8055,27 +8061,24 @@ local script = G2L["fa"];
 			return
 		end
 	
+		print("📦 КЛОН НАЙДЕН:", clone.Name)
 		pressE()
 		task.wait(0.5)
 	
-		local grower = getGrower()
-		if not grower then
-			print("❌ НЕТ ГРОВЕРА!")
-			isWorking = false
-			return
-		end
-	
-		if not teleportToObject(grower) then
+		-- 3. ТЕЛЕПОРТ К ГРОВЕРУ
+		if not teleportToGrower() then
 			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К ГРОВЕРУ!")
 			isWorking = false
 			return
 		end
 		task.wait(0.2)
 	
+		-- 4. ПОЛОЖИТЬ В ГРОВЕР
 		holdE()
 		task.wait(1)
 		print("📥 ЯЩИК ПОЛОЖЕН")
 	
+		-- 5. ЖДАТЬ РОСТА
 		local waitTime = 0
 		local maxWait = 3600
 		print("⏳ ОЖИДАНИЕ РОСТА ДО " .. (_G.SelectedCrate and _G.SelectedCrate.level or "???") .. "...")
@@ -8090,6 +8093,7 @@ local script = G2L["fa"];
 			if hasReachedSelectedLevel() then break end
 		end
 	
+		-- 6. ЗАБРАТЬ ЯЩИК
 		pressE()
 		task.wait(0.5)
 		print("✅ ЯЩИК ЗАБРАН")
