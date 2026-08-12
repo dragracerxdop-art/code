@@ -7873,7 +7873,7 @@ task.spawn(C_f1);
 local function C_fb()
 local script = G2L["fb"];
 	-- ==========================================
-	-- UYC_StartFarm (ТОЧНЫЕ ТЕЛЕПОРТЫ)
+	-- UYC_StartFarm (ФИКС КЛАДКИ В ГРОВЕР)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7912,6 +7912,37 @@ local script = G2L["fb"];
 		local plot = getPlot()
 		if not plot then return nil end
 		return plot.Machines:FindFirstChild("Duplicator")
+	end
+	
+	-- ====== ПРОВЕРКА: КЕЙС В РУКАХ ======
+	local function hasCrateInHand()
+		local char = player.Character
+		if not char then return false end
+		local tool = char:FindFirstChildOfClass("Tool")
+		if tool then
+			if string.find(tool.Name:lower(), "crate") or string.find(tool.Name:lower(), "box") then
+				return true
+			end
+		end
+		return false
+	end
+	
+	-- ====== ВЗЯТЬ КЕЙС ИЗ ИНВЕНТАРЯ ======
+	local function takeCrateFromBackpack()
+		local backpack = player:FindFirstChild("Backpack")
+		if not backpack then return false end
+	
+		for _, tool in pairs(backpack:GetChildren()) do
+			if tool:IsA("Tool") then
+				if string.find(tool.Name:lower(), "crate") or string.find(tool.Name:lower(), "box") then
+					tool.Parent = player.Character
+					print("✅ КЕЙС ВЗЯТ ИЗ ИНВЕНТАРЯ!")
+					task.wait(0.2)
+					return true
+				end
+			end
+		end
+		return false
 	end
 	
 	-- ====== ПРОВЕРКА: КЕЙС В ГРОВЕРЕ ======
@@ -7995,29 +8026,53 @@ local script = G2L["fb"];
 		print("🔄 НАЧАЛО ЦИКЛА...")
 	
 		-- 1. ТЕЛЕПОРТ К ДУПЛИКАТОРУ
-		if teleportTo(DUP_POS) then
-			print("🔄 ЗАБИРАЮ КЛОН...")
+		teleportTo(DUP_POS)
+		task.wait(0.2)
+	
+		-- 2. ЗАБРАТЬ КЛОН
+		print("🔄 ЗАБИРАЮ КЛОН...")
+		pressE()
+		task.wait(0.3)
+	
+		-- ЕСЛИ НЕ ВЗЯЛСЯ — ПРОБУЕМ ЕЩЁ
+		if not hasCrateInHand() then
+			print("⚠️ КЕЙС НЕ ВЗЯЛСЯ, ПРОБУЮ ЕЩЁ...")
 			pressE()
 			task.wait(0.3)
 		end
 	
-		-- 2. ТЕЛЕПОРТ К ГРОВЕРУ
-		if not teleportTo(GROWER_POS) then
-			print("❌ НЕ УДАЛОСЬ ТЕЛЕПОРТНУТЬСЯ К ГРОВЕРУ!")
+		if not hasCrateInHand() then
+			print("❌ НЕ УДАЛОСЬ ВЗЯТЬ КЕЙС!")
 			return
 		end
 	
-		-- 3. ЕСЛИ В ГРОВЕРЕ УЖЕ ЕСТЬ КЕЙС — ЖДЁМ
+		print("✅ КЕЙС ВЗЯТ!")
+		task.wait(0.2)
+	
+		-- 3. ТЕЛЕПОРТ К ГРОВЕРУ
+		teleportTo(GROWER_POS)
+		task.wait(0.2)
+	
+		-- 4. ЕСЛИ В ГРОВЕРЕ УЖЕ ЕСТЬ КЕЙС — ЖДЁМ
 		if hasCrateInGrower() then
 			print("⏳ В ГРОВЕРЕ УЖЕ ЕСТЬ КЕЙС, ЖДУ...")
 		else
-			-- 4. КЛАДЁМ КЕЙС
+			-- 5. ПРОВЕРЯЕМ, ЕСТЬ ЛИ КЕЙС В РУКАХ
+			if not hasCrateInHand() then
+				print("⚠️ НЕТ КЕЙСА В РУКАХ! ПЫТАЮСЬ ВЗЯТЬ ИЗ ИНВЕНТАРЯ...")
+				if not takeCrateFromBackpack() then
+					print("❌ НЕТ КЕЙСА НИ В РУКАХ, НИ В ИНВЕНТАРЕ!")
+					return
+				end
+			end
+	
+			-- 6. КЛАДЁМ КЕЙС
 			print("📥 КЛАДУ КЕЙС В ГРОВЕР...")
 			holdE()
 			task.wait(0.5)
 		end
 	
-		-- 5. ЖДЁМ РОСТА
+		-- 7. ЖДЁМ РОСТА
 		local maxWait = 3600
 		local waitTime = 0
 		print("⏳ ОЖИДАНИЕ РОСТА ДО " .. (_G.SelectedCrate and _G.SelectedCrate.level or "???") .. "...")
@@ -8037,7 +8092,7 @@ local script = G2L["fb"];
 			end
 		end
 	
-		-- 6. ЗАБИРАЕМ ИЗ ГРОВЕРА
+		-- 8. ЗАБИРАЕМ ИЗ ГРОВЕРА
 		print("🔄 ЗАБИРАЮ ИЗ ГРОВЕРА...")
 		pressE()
 		task.wait(0.3)
