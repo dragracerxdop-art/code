@@ -8018,7 +8018,7 @@ task.spawn(C_fa);
 local function C_10d()
 local script = G2L["10d"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ИСПРАВЛЕННЫЙ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -8077,20 +8077,14 @@ local script = G2L["10d"];
 				if child:IsA("ImageButton") and child.Name == "TELEPORT_ToggleList" then
 					child.Visible = true
 				end
-				if child:IsA("TextButton") and child.Name == "TELEPORT_ADD" then
-					child.Visible = true
-				end
-				if child:IsA("TextButton") and child.Name == "TELEPORT_REMOVE" then
+				if child:IsA("TextButton") and (child.Name == "TELEPORT_ADD" or child.Name == "TELEPORT_REMOVE") then
 					child.Visible = true
 				end
 				if child:IsA("TextBox") and child.Name == "TELEPORT_NAME" then
 					child.Visible = true
 				end
-				if child:IsA("ScrollingFrame") and child.Name == "TELEPORT_SCROLL" then
+				if child:IsA("ScrollingFrame") and (child.Name == "TELEPORT_SCROLL" or child.Name == "PlayerList") then
 					child.Visible = true
-				end
-				if child:IsA("ScrollingFrame") and child.Name == "PlayerList" then
-					child.Visible = false
 				end
 			end
 			if toggleListBtn then
@@ -8101,13 +8095,10 @@ local script = G2L["10d"];
 			-- ===== ESP =====
 		elseif tabName == "ESP" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("ImageButton") and (
-					child.Name == "ESP_Box" or
-						child.Name == "ESP_Box_Color" or
-						child.Name == "ESP_Name" or
-						child.Name == "ESP_AimToggle"
-					) then
-					child.Visible = true
+				if child:IsA("ImageButton") then
+					if child.Name == "ESP_Box" or child.Name == "ESP_Box_Color" or child.Name == "ESP_Name" or child.Name == "ESP_AimToggle" then
+						child.Visible = true
+					end
 				end
 			end
 			print("✅ ESP")
@@ -8115,14 +8106,9 @@ local script = G2L["10d"];
 			-- ===== SPECTATE =====
 		elseif tabName == "SPECTATE" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("ImageButton") and (
-					child.Name == "SPECTATE_OpenList" or
-						child.Name == "SPECTATE_Start"
-					) then
+				if child:IsA("ImageButton") and (child.Name == "SPECTATE_OpenList" or child.Name == "SPECTATE_Start") then
 					child.Visible = true
 				end
-			end
-			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("TextBox") and string.find(child.Name, "SPECTATE_") then
 					child.Visible = true
 				end
@@ -8135,25 +8121,15 @@ local script = G2L["10d"];
 			-- ===== MISC =====
 		elseif tabName == "MISC" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("ImageButton") and (
-					child.Name == "MISC_OpenPlayerList" or
-						child.Name == "MISC_Fling" or
-						child.Name == "MISC_AntiFling" or
-						child.Name == "MISC_Hitbox" or
-						child.Name == "MISC_CTRL_DEL" or
-						child.Name == "MISC_CTRL_CLICK" or
-						child.Name == "MISC_WhiteList_Open" or
-						child.Name == "MISC_Fly" or
-						child.Name == "MISC_Rejoin" or
-						child.Name == "MISC_FullBright" or
-						child.Name == "MISC_Platform" or
-						child.Name == "MISC_Noclip" or
-						child.Name == "MISC_AntiAFK"
-					) then
-					child.Visible = true
+				if child:IsA("ImageButton") then
+					if child.Name == "MISC_OpenPlayerList" or child.Name == "MISC_Fling" or child.Name == "MISC_AntiFling" or
+						child.Name == "MISC_Hitbox" or child.Name == "MISC_CTRL_DEL" or child.Name == "MISC_CTRL_CLICK" or
+						child.Name == "MISC_WhiteList_Open" or child.Name == "MISC_Fly" or child.Name == "MISC_Rejoin" or
+						child.Name == "MISC_FullBright" or child.Name == "MISC_Platform" or child.Name == "MISC_Noclip" or
+						child.Name == "MISC_AntiAFK" then
+						child.Visible = true
+					end
 				end
-			end
-			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("TextBox") and (child.Name == "MISC_HitboxValue" or child.Name == "MISC_FlySpeed") then
 					child.Visible = true
 				end
@@ -8163,31 +8139,15 @@ local script = G2L["10d"];
 			-- ===== MM2 =====
 		elseif tabName == "MM2" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if (child:IsA("ImageButton") or child:IsA("TextButton")) and (
-					child.Name == "MM2_RolesToggle" or
-						child.Name == "MM2_CheckRoles" or
-						child.Name == "MM2_ESP" or
-						child.Name == "MM2_GunESP" or
-						child.Name == "MM2_PickUpGun" or
-						child.Name == "MM2_AutoFarm" or
-						child.Name == "MM2_KillAll" or
-						child.Name == "MM2_KillMurderer"
-					) then
-					child.Visible = true
+				if (child:IsA("ImageButton") or child:IsA("TextButton")) then
+					if child.Name == "MM2_RolesToggle" or child.Name == "MM2_CheckRoles" or child.Name == "MM2_ESP" or
+						child.Name == "MM2_GunESP" or child.Name == "MM2_PickUpGun" or child.Name == "MM2_AutoFarm" or
+						child.Name == "MM2_KillAll" or child.Name == "MM2_KillMurderer" then
+						child.Visible = true
+					end
 				end
-			end
-			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("TextLabel") and (
-					child.Name == "MM2_Murder" or
-						child.Name == "MM2_Sheriff" or
-						child.Name == "MM2_Hero"
-					) then
+				if child:IsA("TextLabel") and (child.Name == "MM2_Murder" or child.Name == "MM2_Sheriff" or child.Name == "MM2_Hero") then
 					child.Visible = true
-				end
-			end
-			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("Frame") and child.Name == "MM2_Roles" then
-					child.Visible = false
 				end
 			end
 			print("✅ MM2")
@@ -8195,10 +8155,7 @@ local script = G2L["10d"];
 			-- ===== DA HOOD =====
 		elseif tabName == "Da Hood" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("ImageButton") and (
-					child.Name == "DaHood_AutoFarm" or
-						child.Name == "DaHood_RapidFire"
-					) then
+				if child:IsA("ImageButton") and (child.Name == "DaHood_AutoFarm" or child.Name == "DaHood_RapidFire") then
 					child.Visible = true
 				end
 			end
@@ -8207,19 +8164,13 @@ local script = G2L["10d"];
 			-- ===== TROLL =====
 		elseif tabName == "Troll" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("ImageButton") and (
-					child.Name == "TROLL_Dropkick" or
-						child.Name == "TROLL_TennaKick" or
-						child.Name == "TROLL_MMAKick" or
-						child.Name == "TROLL_Slap" or
-						child.Name == "TROLL_Slap2" or
-						child.Name == "TROLL_Push" or
-						child.Name == "TROLL_Push2" or
-						child.Name == "TROLL_Invisible" or
-						child.Name == "TROLL_Back" or
-						child.Name == "TROLL_Funnn"
-					) then
-					child.Visible = true
+				if child:IsA("ImageButton") then
+					if child.Name == "TROLL_Dropkick" or child.Name == "TROLL_TennaKick" or child.Name == "TROLL_MMAKick" or
+						child.Name == "TROLL_Slap" or child.Name == "TROLL_Slap2" or child.Name == "TROLL_Push" or
+						child.Name == "TROLL_Push2" or child.Name == "TROLL_Invisible" or child.Name == "TROLL_Back" or
+						child.Name == "TROLL_Funnn" then
+						child.Visible = true
+					end
 				end
 			end
 			print("✅ TROLL")
@@ -8236,17 +8187,10 @@ local script = G2L["10d"];
 			-- ===== ZO WIP =====
 		elseif tabName == "Zo Wip" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("ImageButton") and (
-					child.Name == "HB_Toggle" or
-						child.Name == "HB_Visible" or
-						child.Name == "FOV_Toggle"
-					) then
+				if child:IsA("ImageButton") and (child.Name == "HB_Toggle" or child.Name == "HB_Visible" or child.Name == "FOV_Toggle") then
 					child.Visible = true
 				end
-				if child:IsA("TextBox") and (
-					child.Name == "HB_Size" or
-						child.Name == "FOV_Value"
-					) then
+				if child:IsA("TextBox") and (child.Name == "HB_Size" or child.Name == "FOV_Value") then
 					child.Visible = true
 				end
 			end
@@ -8264,17 +8208,12 @@ local script = G2L["10d"];
 			-- ===== UYC =====
 		elseif tabName == "UYC" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("ImageButton") and (
-					child.Name == "UYC_SelectCrate" or
-						child.Name == "UYC_StartFarm"
-					) then
+				if child:IsA("ImageButton") and (child.Name == "UYC_SelectCrate" or child.Name == "UYC_StartFarm") then
 					child.Visible = true
 				end
 				if child:IsA("ScrollingFrame") and child.Name == "UYC_CrateList" then
 					child.Visible = true
 				end
-			end
-			for _, child in pairs(rightFrame:GetChildren()) do
 				if child:IsA("TextLabel") and string.find(child.Name, "UYC_") then
 					child.Visible = true
 				end
@@ -8287,12 +8226,10 @@ local script = G2L["10d"];
 			-- ===== SETTINGS =====
 		elseif tabName == "Settings" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("ImageButton") and (
-					child.Name == "Settings_BindHide" or
-						child.Name == "Settings_AimBind" or
-						child.Name == "Settings_TestNotify"
-					) then
-					child.Visible = true
+				if child:IsA("ImageButton") then
+					if child.Name == "Settings_BindHide" or child.Name == "Settings_AimBind" or child.Name == "Settings_TestNotify" then
+						child.Visible = true
+					end
 				end
 				if child:IsA("TextLabel") and string.find(child.Name, "Settings_") then
 					child.Visible = true
