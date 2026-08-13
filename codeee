@@ -7808,7 +7808,7 @@ task.spawn(C_f1);
 local function C_f5()
 local script = G2L["f5"];
 	-- ==========================================
-	-- ESP_AimToggle (ВКЛ/ВЫКЛ АИМА)
+	-- ESP_AimToggle (ВКЛ/ВЫКЛ АИМА + FOV КРУГ)
 	-- ==========================================
 	local button = script.Parent
 	local player = game.Players.LocalPlayer
@@ -7817,6 +7817,16 @@ local script = G2L["f5"];
 	
 	local isEnabled = false
 	local aimConnection = nil
+	local fov = 150
+	
+	-- FOV КРУГ
+	local FOVring = Drawing.new("Circle")
+	FOVring.Visible = false
+	FOVring.Thickness = 1.5
+	FOVring.Radius = fov
+	FOVring.Transparency = 1
+	FOVring.Color = Color3.fromRGB(255, 128, 128)
+	FOVring.Position = workspace.CurrentCamera.ViewportSize / 2
 	
 	-- ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ СИНХРОНИЗАЦИИ
 	_G.AimEnabled = false
@@ -7842,12 +7852,22 @@ local script = G2L["f5"];
 			label.Text = "АИМ: ВКЛ"
 			label.TextColor3 = Color3.fromRGB(0, 255, 0)
 			button.ImageColor3 = Color3.fromRGB(50, 200, 50)
+			FOVring.Visible = true
 		else
 			label.Text = "АИМ: ВЫКЛ"
 			label.TextColor3 = Color3.fromRGB(255, 0, 0)
 			button.ImageColor3 = Color3.fromRGB(200, 50, 50)
+			FOVring.Visible = false
 		end
 		_G.AimEnabled = isEnabled
+	end
+	
+	-- ОБНОВЛЕНИЕ ПОЗИЦИИ КРУГА
+	local function updateFOV()
+		local cam = workspace.CurrentCamera
+		if cam then
+			FOVring.Position = cam.ViewportSize / 2
+		end
 	end
 	
 	-- ПОИСК БЛИЖАЙШЕГО
@@ -7877,16 +7897,24 @@ local script = G2L["f5"];
 			local cam = workspace.CurrentCamera
 			if not cam then return end
 	
+			FOVring.Position = cam.ViewportSize / 2
+	
 			if not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then return end
 	
 			local target = getClosest(cam.CFrame)
 			if not target then return end
 	
 			local headPos = target.Character.Head.Position
-			cam.CFrame = cam.CFrame:Lerp(
-				CFrame.new(cam.CFrame.Position, headPos),
-				0.5
-			)
+			local screenPos = cam:WorldToScreenPoint(headPos)
+			local screenVec = Vector2.new(screenPos.X, screenPos.Y)
+			local center = cam.ViewportSize / 2
+	
+			if (screenVec - center).Magnitude < fov then
+				cam.CFrame = cam.CFrame:Lerp(
+					CFrame.new(cam.CFrame.Position, headPos),
+					0.5
+				)
+			end
 		end)
 	end
 	
@@ -7898,7 +7926,7 @@ local script = G2L["f5"];
 		end
 	end
 	
-	-- ФУНКЦИЯ ТОГГЛА (ДЛЯ ВЫЗОВА ИЗ КНОПКИ И ИЗ БИНДА)
+	-- ТОГГЛ
 	function _G.ToggleAim()
 		isEnabled = not isEnabled
 		updateUI()
@@ -7915,7 +7943,11 @@ local script = G2L["f5"];
 	-- КЛИК ПО КНОПКЕ
 	button.MouseButton1Click:Connect(_G.ToggleAim)
 	
+	-- ОБНОВЛЕНИЕ КРУГА ПРИ ИЗМЕНЕНИИ КАМЕРЫ
+	workspace:WaitForChild("CurrentCamera").GetPropertyChangedSignal("ViewportSize"):Connect(updateFOV)
+	
 	updateUI()
+	print("✅ ESP_AimToggle ЗАГРУЖЕН")
 end;
 task.spawn(C_f5);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.Settings_BindHide.LocalScript
