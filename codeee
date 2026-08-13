@@ -7925,7 +7925,7 @@ task.spawn(C_f9);
 local function C_fa()
 local script = G2L["fa"];
 	-- ==========================================
-	-- AIMBOT (В RightFrame)
+	-- AIMBOT (ФИКС)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7935,9 +7935,9 @@ local script = G2L["fa"];
 	local fov = 150
 	local smoothing = 0.5
 	
-	-- FOV КРУГ
+	-- FOV КРУГ (СКРЫТ ПО УМОЛЧАНИЮ)
 	local FOVring = Drawing.new("Circle")
-	FOVring.Visible = true
+	FOVring.Visible = false
 	FOVring.Thickness = 1.5
 	FOVring.Radius = fov
 	FOVring.Transparency = 1
@@ -7978,12 +7978,14 @@ local script = G2L["fa"];
 		-- ОБНОВЛЯЕМ FOV
 		FOVring.Position = cam.ViewportSize / 2
 	
-		-- ПРОВЕРКА: ВКЛЮЧЕН ЛИ АИМ?
+		-- ПОКАЗЫВАЕМ FOV ТОЛЬКО ЕСЛИ АИМ ВКЛЮЧЁН
+		FOVring.Visible = _G.AimEnabled or false
+	
+		-- ЕСЛИ АИМ ВЫКЛЮЧЕН — ВЫХОДИМ
 		if not _G.AimEnabled then return end
 	
-		-- ПРОВЕРКА: ЗАЖАТА ЛИ КЛАВИША?
-		local key = _G.AimKey or Enum.KeyCode.E
-		if not UserInputService:IsKeyDown(key) then return end
+		-- ПРОВЕРКА: ЗАЖАТА ЛИ ПРАВАЯ КНОПКА МЫШИ?
+		if not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then return end
 	
 		local target = getClosest(cam.CFrame)
 		if not target then return end
