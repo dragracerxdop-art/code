@@ -8018,7 +8018,7 @@ task.spawn(C_fa);
 local function C_10d()
 local script = G2L["10d"];
 	-- ==========================================
-	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (С Settings)
+	-- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ПОЛНАЯ ВЕРСИЯ)
 	-- ==========================================
 	local leftFrame = script.Parent
 	local main = leftFrame.Parent
@@ -8104,7 +8104,8 @@ local script = G2L["10d"];
 				if child:IsA("ImageButton") and (
 					child.Name == "ESP_Box" or
 						child.Name == "ESP_Box_Color" or
-						child.Name == "ESP_Name"
+						child.Name == "ESP_Name" or
+						child.Name == "ESP_AimToggle"
 					) then
 					child.Visible = true
 				end
@@ -8283,10 +8284,14 @@ local script = G2L["10d"];
 			end
 			print("✅ UYC")
 	
-			-- ===== SETTINGS (НОВАЯ ВКЛАДКА) =====
+			-- ===== SETTINGS =====
 		elseif tabName == "Settings" then
 			for _, child in pairs(rightFrame:GetChildren()) do
-				if child:IsA("ImageButton") and child.Name == "Settings_BindHide" then
+				if child:IsA("ImageButton") and (
+					child.Name == "Settings_BindHide" or
+						child.Name == "Settings_AimBind" or
+						child.Name == "Settings_TestNotify"
+					) then
 					child.Visible = true
 				end
 				if child:IsA("TextLabel") and string.find(child.Name, "Settings_") then
