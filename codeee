@@ -7735,89 +7735,18 @@ task.spawn(C_ed);
 local function C_f1()
 local script = G2L["f1"];
 	-- ==========================================
-	-- Settings_AimBind (НАЗНАЧЕНИЕ БИНДА ДЛЯ АИМА)
+	-- AIMBOT (БИНД L + ПРАВАЯ КНОПКА МЫШИ)
 	-- ==========================================
-	local button = script.Parent
-	local UserInputService = game:GetService("UserInputService")
-	
-	local isListening = false
-	local toggleKey = Enum.KeyCode.E
-	_G.AimToggleKey = toggleKey
-	
-	-- ИНДИКАТОР
-	local label = button:FindFirstChild("ButtonText")
-	if not label then
-		label = Instance.new("TextLabel")
-		label.Name = "ButtonText"
-		label.Size = UDim2.new(1, 0, 1, 0)
-		label.BackgroundTransparency = 1
-		label.Text = "БИНД: E"
-		label.TextColor3 = Color3.fromRGB(255, 200, 100)
-		label.TextSize = 14
-		label.Font = Enum.Font.SourceSansBold
-		label.ZIndex = 2
-		label.Parent = button
-	end
-	
-	local function updateLabel()
-		if toggleKey then
-			label.Text = "БИНД: " .. toggleKey.Name
-			label.TextColor3 = Color3.fromRGB(0, 255, 0)
-		else
-			label.Text = "БИНД: НЕ НАЗНАЧЕН"
-			label.TextColor3 = Color3.fromRGB(255, 200, 100)
-		end
-	end
-	
-	-- НАЗНАЧЕНИЕ БИНДА
-	button.MouseButton1Click:Connect(function()
-		if isListening then return end
-		isListening = true
-		label.Text = "НАЖМИ КЛАВИШУ..."
-		label.TextColor3 = Color3.fromRGB(255, 255, 0)
-	
-		local connection
-		connection = UserInputService.InputBegan:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.Keyboard then
-				toggleKey = input.KeyCode
-				_G.AimToggleKey = toggleKey
-				isListening = false
-				updateLabel()
-				connection:Disconnect()
-				print("🔑 БИНД ДЛЯ АИМА:", toggleKey.Name)
-			end
-		end)
-	end)
-	
-	updateLabel()
-	
-	-- ОБРАБОТКА НАЖАТИЯ КЛАВИШИ
-	UserInputService.InputBegan:Connect(function(input, gameProcessed)
-		if gameProcessed then return end
-		if toggleKey and input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == toggleKey then
-			if _G.ToggleAim then
-				_G.ToggleAim()
-			end
-		end
-	end)
-	
-	print("✅ Settings_AimBind ЗАГРУЖЕН")
-end;
-task.spawn(C_f1);
--- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ESP_AimToggle.LocalScript
-local function C_f5()
-local script = G2L["f5"];
-	-- ==========================================
-	-- ESP_AimToggle (ВКЛ/ВЫКЛ АИМА + FOV КРУГ)
-	-- ==========================================
-	local button = script.Parent
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
 	local UserInputService = game:GetService("UserInputService")
 	
 	local isEnabled = false
-	local aimConnection = nil
+	local loop = nil
+	local teamCheck = false
 	local fov = 150
+	local smoothing = 1
+	local toggleKey = Enum.KeyCode.L -- БИНД ПО УМОЛЧАНИЮ L
 	
 	-- FOV КРУГ
 	local FOVring = Drawing.new("Circle")
@@ -7828,10 +7757,118 @@ local script = G2L["f5"];
 	FOVring.Color = Color3.fromRGB(255, 128, 128)
 	FOVring.Position = workspace.CurrentCamera.ViewportSize / 2
 	
-	-- ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ СИНХРОНИЗАЦИИ
-	_G.AimEnabled = false
+	-- ПОИСК БЛИЖАЙШЕГО
+	local function getClosest(cframe)
+		local ray = Ray.new(cframe.Position, cframe.LookVector).Unit
+		local target = nil
+		local mag = math.huge
 	
-	-- ИНДИКАТОР
+		for _, v in pairs(game.Players:GetPlayers()) do
+			if v.Character and v.Character:FindFirstChild("Head") and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v ~= player and (v.Team ~= player.Team or (not teamCheck)) then
+				local magBuf = (v.Character.Head.Position - ray:ClosestPoint(v.Character.Head.Position)).Magnitude
+				if magBuf < mag then
+					mag = magBuf
+					target = v
+				end
+			end
+		end
+	
+		return target
+	end
+	
+	-- ЗАПУСК АИМА
+	local function startAim()
+		if loop then return end
+	
+		loop = RunService.RenderStepped:Connect(function()
+			local cam = workspace.CurrentCamera
+			local zz = cam.ViewportSize / 2
+			FOVring.Position = zz
+	
+			if not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then return end
+	
+			local curTar = getClosest(cam.CFrame)
+			if not curTar then return end
+	
+			local ssHeadPoint = cam:WorldToScreenPoint(curTar.Character.Head.Position)
+			ssHeadPoint = Vector2.new(ssHeadPoint.X, ssHeadPoint.Y)
+	
+			if (ssHeadPoint - zz).Magnitude < fov then
+				cam.CFrame = cam.CFrame:Lerp(
+					CFrame.new(cam.CFrame.Position, curTar.Character.Head.Position),
+					smoothing
+				)
+			end
+		end)
+	end
+	
+	-- ОСТАНОВКА АИМА
+	local function stopAim()
+		if loop then
+			loop:Disconnect()
+			loop = nil
+		end
+		FOVring.Visible = false
+	end
+	
+	-- ТОГГЛ АИМА
+	local function toggleAim()
+		isEnabled = not isEnabled
+	
+		if isEnabled then
+			startAim()
+			FOVring.Visible = true
+			print("🎯 АИМ ВКЛЮЧЁН (L)")
+		else
+			stopAim()
+			FOVring.Visible = false
+			print("🎯 АИМ ВЫКЛЮЧЁН (L)")
+		end
+	end
+	
+	-- ОБРАБОТКА НАЖАТИЯ L
+	UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		if gameProcessed then return end
+		if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == toggleKey then
+			toggleAim()
+		end
+	end)
+	
+	-- ОБНОВЛЕНИЕ ПОЗИЦИИ КРУГА
+	workspace:WaitForChild("CurrentCamera").GetPropertyChangedSignal("ViewportSize"):Connect(function()
+		FOVring.Position = workspace.CurrentCamera.ViewportSize / 2
+	end)
+	
+	print("✅ AIMBOT ЗАГРУЖЕН (БИНД L)")
+end;
+task.spawn(C_f1);
+-- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ESP_AimToggle.LocalScript
+local function C_f5()
+local script = G2L["f5"];
+	-- ==========================================
+	-- AIMBOT (ДЛЯ КНОПКИ + БИНД)
+	-- ==========================================
+	local button = script.Parent
+	local player = game.Players.LocalPlayer
+	local RunService = game:GetService("RunService")
+	local UserInputService = game:GetService("UserInputService")
+	
+	local isEnabled = false
+	local loop = nil
+	local teamCheck = false
+	local fov = 150
+	local smoothing = 1
+	
+	-- FOV КРУГ
+	local FOVring = Drawing.new("Circle")
+	FOVring.Visible = false
+	FOVring.Thickness = 1.5
+	FOVring.Radius = fov
+	FOVring.Transparency = 1
+	FOVring.Color = Color3.fromRGB(255, 128, 128)
+	FOVring.Position = workspace.CurrentCamera.ViewportSize / 2
+	
+	-- ИНДИКАТОР НА КНОПКЕ
 	local label = button:FindFirstChild("ButtonText")
 	if not label then
 		label = Instance.new("TextLabel")
@@ -7846,30 +7883,6 @@ local script = G2L["f5"];
 		label.Parent = button
 	end
 	
-	-- ОБНОВЛЕНИЕ UI
-	local function updateUI()
-		if isEnabled then
-			label.Text = "АИМ: ВКЛ"
-			label.TextColor3 = Color3.fromRGB(0, 255, 0)
-			button.ImageColor3 = Color3.fromRGB(50, 200, 50)
-			FOVring.Visible = true
-		else
-			label.Text = "АИМ: ВЫКЛ"
-			label.TextColor3 = Color3.fromRGB(255, 0, 0)
-			button.ImageColor3 = Color3.fromRGB(200, 50, 50)
-			FOVring.Visible = false
-		end
-		_G.AimEnabled = isEnabled
-	end
-	
-	-- ОБНОВЛЕНИЕ ПОЗИЦИИ КРУГА
-	local function updateFOV()
-		local cam = workspace.CurrentCamera
-		if cam then
-			FOVring.Position = cam.ViewportSize / 2
-		end
-	end
-	
 	-- ПОИСК БЛИЖАЙШЕГО
 	local function getClosest(cframe)
 		local ray = Ray.new(cframe.Position, cframe.LookVector).Unit
@@ -7877,7 +7890,7 @@ local script = G2L["f5"];
 		local mag = math.huge
 	
 		for _, v in pairs(game.Players:GetPlayers()) do
-			if v.Character and v.Character:FindFirstChild("Head") and v.Character:FindFirstChild("Humanoid") and v ~= player and (v.Team ~= player.Team) then
+			if v.Character and v.Character:FindFirstChild("Head") and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v ~= player and (v.Team ~= player.Team or (not teamCheck)) then
 				local magBuf = (v.Character.Head.Position - ray:ClosestPoint(v.Character.Head.Position)).Magnitude
 				if magBuf < mag then
 					mag = magBuf
@@ -7891,28 +7904,25 @@ local script = G2L["f5"];
 	
 	-- ЗАПУСК АИМА
 	local function startAim()
-		if aimConnection then return end
+		if loop then return end
 	
-		aimConnection = RunService.RenderStepped:Connect(function()
+		loop = RunService.RenderStepped:Connect(function()
 			local cam = workspace.CurrentCamera
-			if not cam then return end
-	
-			FOVring.Position = cam.ViewportSize / 2
+			local zz = cam.ViewportSize / 2
+			FOVring.Position = zz
 	
 			if not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then return end
 	
-			local target = getClosest(cam.CFrame)
-			if not target then return end
+			local curTar = getClosest(cam.CFrame)
+			if not curTar then return end
 	
-			local headPos = target.Character.Head.Position
-			local screenPos = cam:WorldToScreenPoint(headPos)
-			local screenVec = Vector2.new(screenPos.X, screenPos.Y)
-			local center = cam.ViewportSize / 2
+			local ssHeadPoint = cam:WorldToScreenPoint(curTar.Character.Head.Position)
+			ssHeadPoint = Vector2.new(ssHeadPoint.X, ssHeadPoint.Y)
 	
-			if (screenVec - center).Magnitude < fov then
+			if (ssHeadPoint - zz).Magnitude < fov then
 				cam.CFrame = cam.CFrame:Lerp(
-					CFrame.new(cam.CFrame.Position, headPos),
-					0.5
+					CFrame.new(cam.CFrame.Position, curTar.Character.Head.Position),
+					smoothing
 				)
 			end
 		end)
@@ -7920,34 +7930,56 @@ local script = G2L["f5"];
 	
 	-- ОСТАНОВКА АИМА
 	local function stopAim()
-		if aimConnection then
-			aimConnection:Disconnect()
-			aimConnection = nil
+		if loop then
+			loop:Disconnect()
+			loop = nil
+		end
+		FOVring.Visible = false
+	end
+	
+	-- ОБНОВЛЕНИЕ UI
+	local function updateUI()
+		if isEnabled then
+			label.Text = "АИМ: ВКЛ"
+			label.TextColor3 = Color3.fromRGB(0, 255, 0)
+			button.ImageColor3 = Color3.fromRGB(50, 200, 50)
+			FOVring.Visible = true
+			startAim()
+		else
+			label.Text = "АИМ: ВЫКЛ"
+			label.TextColor3 = Color3.fromRGB(255, 0, 0)
+			button.ImageColor3 = Color3.fromRGB(200, 50, 50)
+			stopAim()
 		end
 	end
 	
-	-- ТОГГЛ
+	-- ТОГГЛ (ДЛЯ КНОПКИ И БИНДА)
 	function _G.ToggleAim()
 		isEnabled = not isEnabled
 		updateUI()
-	
-		if isEnabled then
-			startAim()
-			print("🎯 АИМ ВКЛЮЧЁН")
-		else
-			stopAim()
-			print("🎯 АИМ ВЫКЛЮЧЁН")
-		end
+		print("🎯 АИМ:", isEnabled and "ВКЛ" or "ВЫКЛ")
 	end
 	
 	-- КЛИК ПО КНОПКЕ
 	button.MouseButton1Click:Connect(_G.ToggleAim)
 	
-	-- ОБНОВЛЕНИЕ КРУГА ПРИ ИЗМЕНЕНИИ КАМЕРЫ
-	workspace:WaitForChild("CurrentCamera").GetPropertyChangedSignal("ViewportSize"):Connect(updateFOV)
+	-- БИНД ДЛЯ ВКЛ/ВЫКЛ (ПО УМОЛЧАНИЮ E)
+	_G.AimToggleKey = Enum.KeyCode.E
+	
+	UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		if gameProcessed then return end
+		if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == _G.AimToggleKey then
+			_G.ToggleAim()
+		end
+	end)
+	
+	-- ОБНОВЛЕНИЕ ПОЗИЦИИ КРУГА
+	workspace:WaitForChild("CurrentCamera").GetPropertyChangedSignal("ViewportSize"):Connect(function()
+		FOVring.Position = workspace.CurrentCamera.ViewportSize / 2
+	end)
 	
 	updateUI()
-	print("✅ ESP_AimToggle ЗАГРУЖЕН")
+	print("✅ AIMBOT ЗАГРУЖЕН")
 end;
 task.spawn(C_f5);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.Settings_BindHide.LocalScript
