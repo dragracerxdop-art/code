@@ -7735,7 +7735,7 @@ task.spawn(C_ed);
 local function C_f1()
 local script = G2L["f1"];
 	-- ==========================================
-	-- AIMBOT (БИНД L + ПРАВАЯ КНОПКА МЫШИ)
+	-- AIMBOT (БИНД K + ПРАВАЯ КНОПКА МЫШИ)
 	-- ==========================================
 	local player = game.Players.LocalPlayer
 	local RunService = game:GetService("RunService")
@@ -7746,7 +7746,9 @@ local script = G2L["f1"];
 	local teamCheck = false
 	local fov = 150
 	local smoothing = 1
-	local toggleKey = Enum.KeyCode.L -- БИНД ПО УМОЛЧАНИЮ L
+	
+	-- БИНД ПО УМОЛЧАНИЮ — K (МОЖНО ПОМЕНЯТЬ НА ЛЮБУЮ)
+	local toggleKey = Enum.KeyCode.K
 	
 	-- FOV КРУГ
 	local FOVring = Drawing.new("Circle")
@@ -7818,15 +7820,15 @@ local script = G2L["f1"];
 		if isEnabled then
 			startAim()
 			FOVring.Visible = true
-			print("🎯 АИМ ВКЛЮЧЁН (L)")
+			print("🎯 АИМ ВКЛЮЧЁН (K)")
 		else
 			stopAim()
 			FOVring.Visible = false
-			print("🎯 АИМ ВЫКЛЮЧЁН (L)")
+			print("🎯 АИМ ВЫКЛЮЧЁН (K)")
 		end
 	end
 	
-	-- ОБРАБОТКА НАЖАТИЯ L
+	-- ОБРАБОТКА НАЖАТИЯ K
 	UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		if gameProcessed then return end
 		if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == toggleKey then
@@ -7839,7 +7841,7 @@ local script = G2L["f1"];
 		FOVring.Position = workspace.CurrentCamera.ViewportSize / 2
 	end)
 	
-	print("✅ AIMBOT ЗАГРУЖЕН (БИНД L)")
+	print("✅ AIMBOT ЗАГРУЖЕН (БИНД K)")
 end;
 task.spawn(C_f1);
 -- StarterGui.Folder.PurpHub.MainFrame.RightFrame.ESP_AimToggle.LocalScript
